@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#020617" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
   <title>Klassen-Board</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,18 +19,12 @@
           }
         }
       }
-    };
+    }
   </script>
 
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: "Inter", system-ui, sans-serif;
+      font-family: Inter, system-ui, sans-serif;
     }
 
     .tab-content {
@@ -52,1174 +47,1557 @@
     }
 
     .glass {
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .fab-menu {
-      transform: scale(0.85) translateY(15px);
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.2s ease;
-    }
-
-    .fab-menu.open {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-      pointer-events: auto;
+      background: rgba(15, 23, 42, .82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .fab {
-      transition: transform 0.2s ease;
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.35),
+        0 0 0 1px rgba(255,255,255,.05);
     }
 
-    .fab.open {
-      transform: rotate(45deg);
+    .progress {
+      transition: width .5s linear;
     }
 
-    .modal {
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.2s ease;
+    .lesson-current {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 1px rgba(59,130,246,.25);
     }
 
-    .modal.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-card {
-      transform: translateY(20px) scale(0.97);
-      transition: 0.2s ease;
-    }
-
-    .modal.open .modal-card {
-      transform: translateY(0) scale(1);
+    .lesson-finished {
+      opacity: .45;
     }
   </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-24">
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-28">
 
-  <!-- HEADER -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+<!-- ========================================================= -->
+<!-- HEADER -->
+<!-- ========================================================= -->
+
+<header class="sticky top-0 z-40 glass border-b border-slate-800 px-4 py-3">
+
+  <div class="max-w-lg mx-auto flex items-center justify-between">
 
     <div>
-      <h1 id="classNameDisplay" class="text-lg font-bold">
+      <h1 id="classNameDisplay"
+          class="font-bold text-lg">
         Klassen-Board
       </h1>
 
-      <p id="dateDisplay" class="text-xs text-slate-400"></p>
+      <p id="dateDisplay"
+         class="text-xs text-slate-400">
+      </p>
     </div>
 
     <button
       onclick="toggleAdmin()"
       id="adminBtn"
-      class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-full transition"
-    >
+      class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-full text-xs transition">
       Einstellungen
     </button>
-  </header>
+
+  </div>
+
+</header>
 
 
-  <!-- MAIN -->
-  <main class="px-4 pt-4 max-w-lg mx-auto">
+<!-- ========================================================= -->
+<!-- MAIN -->
+<!-- ========================================================= -->
+
+<main class="max-w-lg mx-auto px-4 pt-4">
 
 
-    <!-- DASHBOARD -->
-    <section id="tab-dashboard" class="tab-content active space-y-4">
+<!-- ========================================================= -->
+<!-- DASHBOARD -->
+<!-- ========================================================= -->
 
-      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 shadow-lg">
+<section id="tab-dashboard"
+         class="tab-content active space-y-4">
 
-        <p class="text-blue-100 text-sm mb-1">
-          Willkommen zurück
+  <!-- Welcome -->
+
+  <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-5 shadow-xl">
+
+    <p class="text-blue-100 text-sm">
+      Willkommen zurück
+    </p>
+
+    <h2 id="greeting"
+        class="text-2xl font-bold mt-1">
+      Hey!
+    </h2>
+
+    <p id="todaySummary"
+       class="text-blue-100 text-sm mt-2">
+      Lade...
+    </p>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- LIVE LESSON -->
+  <!-- ======================================================= -->
+
+  <div id="liveCard"
+       class="bg-slate-900 rounded-2xl p-5 border border-slate-800">
+
+    <div class="flex justify-between items-center">
+
+      <div>
+        <p id="liveStatus"
+           class="text-xs text-slate-400">
+          Schulstatus
         </p>
 
-        <h2 id="greeting" class="text-2xl font-bold">
-          Hey!
-        </h2>
+        <h3 id="liveTitle"
+            class="text-xl font-bold mt-1">
+          Keine aktuelle Stunde
+        </h3>
 
-        <p id="todaySummary" class="text-blue-100 text-sm mt-2">
-          Lade...
+        <p id="liveDetails"
+           class="text-sm text-slate-400 mt-1">
+          -
+        </p>
+      </div>
+
+      <div class="text-right">
+
+        <p id="liveRemaining"
+           class="text-2xl font-bold text-blue-400">
+          --
+        </p>
+
+        <p class="text-xs text-slate-500">
+          verbleibend
         </p>
 
       </div>
 
+    </div>
 
-      <!-- QUICK STATS -->
-      <div class="grid grid-cols-2 gap-3">
 
-        <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
-          <p class="text-slate-400 text-xs">
-            Nächster Termin
-          </p>
+    <div class="mt-4 h-2 bg-slate-800 rounded-full overflow-hidden">
 
-          <p id="nextExam" class="font-semibold mt-1 text-sm">
-            Keine
-          </p>
-        </div>
-
-        <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
-          <p class="text-slate-400 text-xs">
-            Offene Hausaufgaben
-          </p>
-
-          <p id="openHomework" class="font-semibold mt-1 text-sm">
-            0
-          </p>
-        </div>
-
+      <div id="lessonProgress"
+           class="progress h-full bg-blue-500 rounded-full"
+           style="width:0%">
       </div>
 
+    </div>
 
-      <!-- HEUTE -->
-      <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
-
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold">
-            Heute
-          </h3>
-
-          <button
-            onclick="showTab('schedule')"
-            class="text-xs text-blue-400"
-          >
-            Alle →
-          </button>
-        </div>
-
-        <div
-          id="todaySchedule"
-          class="space-y-2 text-sm"
-        ></div>
-
-      </div>
+  </div>
 
 
-      <!-- ANKÜNDIGUNGEN -->
-      <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+  <!-- ======================================================= -->
+  <!-- NEXT LESSON -->
+  <!-- ======================================================= -->
 
-        <h3 class="font-semibold mb-3">
-          Ankündigungen
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+
+    <div class="flex justify-between items-center">
+
+      <div>
+
+        <p class="text-xs text-slate-500">
+          Als Nächstes
+        </p>
+
+        <h3 id="nextLesson"
+            class="font-semibold mt-1">
+          -
         </h3>
 
-        <div
-          id="announcementsList"
-          class="space-y-3 text-sm"
-        ></div>
+        <p id="nextLessonDetails"
+           class="text-xs text-slate-500 mt-1">
+        </p>
 
       </div>
 
-    </section>
+      <div class="text-right">
 
-
-
-    <!-- NOTEN -->
-    <section id="tab-grades" class="tab-content space-y-4">
-
-      <div class="flex items-center justify-between">
-
-        <h2 class="text-xl font-bold">
-          Noten
-        </h2>
-
-        <span
-          id="overallAverage"
-          class="text-sm text-slate-400"
-        >
-          Ø –
-        </span>
+        <p id="nextCountdown"
+           class="text-blue-400 font-bold">
+          --
+        </p>
 
       </div>
 
-      <div
-        id="gradesList"
-        class="space-y-3"
-      ></div>
+    </div>
 
-    </section>
+  </div>
 
 
+  <!-- ======================================================= -->
+  <!-- QUICK STATS -->
+  <!-- ======================================================= -->
 
-    <!-- HAUSAUFGABEN -->
-    <section id="tab-homework" class="tab-content space-y-4">
+  <div class="grid grid-cols-2 gap-3">
 
-      <div class="flex items-center justify-between">
+    <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
 
-        <h2 class="text-xl font-bold">
-          Hausaufgaben
-        </h2>
+      <p class="text-xs text-slate-400">
+        Offene Aufgaben
+      </p>
 
-        <button
-          onclick="toggleCompletedHomework()"
-          id="toggleHwBtn"
-          class="text-xs text-slate-400"
-        >
-          Erledigte anzeigen
-        </button>
+      <p id="openHomework"
+         class="text-2xl font-bold mt-1">
+        0
+      </p>
 
-      </div>
+    </div>
 
-      <div
-        id="homeworkList"
-        class="space-y-3"
-      ></div>
 
-    </section>
+    <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
 
+      <p class="text-xs text-slate-400">
+        Notendurchschnitt
+      </p>
 
+      <p id="dashboardAverage"
+         class="text-2xl font-bold mt-1">
+        -
+      </p>
 
-    <!-- STUNDENPLAN -->
-    <section id="tab-schedule" class="tab-content space-y-4">
+    </div>
 
-      <div class="flex items-center justify-between">
+  </div>
 
-        <h2 class="text-xl font-bold">
-          Stundenplan
-        </h2>
 
-        <span class="text-xs text-slate-500">
-          Unterricht & Pausen
-        </span>
+  <!-- ======================================================= -->
+  <!-- TODAY -->
+  <!-- ======================================================= -->
 
-      </div>
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
 
+    <div class="flex justify-between items-center mb-3">
 
-      <!-- TAGE -->
-      <div
-        id="daySelector"
-        class="flex gap-2 overflow-x-auto pb-2"
-      ></div>
-
-
-      <!-- STUNDEN -->
-      <div
-        id="scheduleList"
-        class="space-y-2"
-      ></div>
-
-    </section>
-
-
-
-    <!-- TERMINE -->
-    <section id="tab-events" class="tab-content space-y-4">
-
-      <h2 class="text-xl font-bold">
-        Termine
-      </h2>
-
-      <div
-        id="eventsList"
-        class="space-y-3"
-      ></div>
-
-    </section>
-
-
-
-    <!-- ABSENZEN -->
-    <section id="tab-absences" class="tab-content space-y-4">
-
-      <h2 class="text-xl font-bold">
-        Absenzen
-      </h2>
-
-      <div
-        id="absencesList"
-        class="space-y-3"
-      ></div>
-
-    </section>
-
-
-
-    <!-- EINSTELLUNGEN -->
-    <section id="tab-admin" class="tab-content space-y-6">
-
-      <h2 class="text-xl font-bold">
-        Einstellungen
-      </h2>
-
-
-      <!-- NAME -->
-      <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-3">
-
-        <div>
-          <h3 class="font-semibold text-sm text-slate-300">
-            Dein Name
-          </h3>
-
-          <p class="text-xs text-slate-500 mt-1">
-            Wird nur auf diesem Gerät gespeichert.
-          </p>
-        </div>
-
-        <input
-          id="inputUserName"
-          type="text"
-          maxlength="30"
-          placeholder="z. B. Finn"
-          class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
-        />
-
-        <button
-          onclick="saveUserName()"
-          class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm font-medium"
-        >
-          Namen speichern
-        </button>
-
-      </div>
-
-
-      <!-- KLASSE -->
-      <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-3">
-
-        <h3 class="font-semibold text-sm text-slate-300">
-          Klasse
-        </h3>
-
-        <input
-          id="inputClassName"
-          type="text"
-          placeholder="z. B. 9b"
-          maxlength="30"
-          class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
-        />
-
-        <button
-          onclick="saveClassName()"
-          class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm font-medium"
-        >
-          Klasse speichern
-        </button>
-
-      </div>
-
-
-      <!-- DATEN -->
-      <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-3">
-
-        <h3 class="font-semibold text-sm text-slate-300">
-          Daten
-        </h3>
-
-        <button
-          onclick="exportData()"
-          class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm"
-        >
-          Daten exportieren
-        </button>
-
-        <button
-          onclick="importData()"
-          class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm"
-        >
-          Daten importieren
-        </button>
-
-        <button
-          onclick="clearAllData()"
-          class="w-full bg-red-900/50 hover:bg-red-900 py-2 rounded-lg text-sm text-red-300"
-        >
-          Alle Daten löschen
-        </button>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-2 py-2 z-50">
-
-    <div class="max-w-lg mx-auto flex justify-around">
-
-      <button
-        onclick="showTab('dashboard')"
-        class="nav-btn active flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs transition"
-        data-tab="dashboard"
-      >
-        <span class="text-lg">⌂</span>
-        Home
-      </button>
-
-      <button
-        onclick="showTab('grades')"
-        class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs transition"
-        data-tab="grades"
-      >
-        <span class="text-lg">▤</span>
-        Noten
-      </button>
-
-      <button
-        onclick="showTab('homework')"
-        class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs transition"
-        data-tab="homework"
-      >
-        <span class="text-lg">✓</span>
-        Aufgaben
-      </button>
+      <h3 class="font-semibold">
+        Heute
+      </h3>
 
       <button
         onclick="showTab('schedule')"
-        class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs transition"
-        data-tab="schedule"
-      >
-        <span class="text-lg">▣</span>
-        Plan
-      </button>
-
-      <button
-        onclick="showTab('events')"
-        class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs transition"
-        data-tab="events"
-      >
-        <span class="text-lg">◷</span>
-        Termine
+        class="text-xs text-blue-400">
+        Stundenplan →
       </button>
 
     </div>
 
-  </nav>
+    <div id="todaySchedule"
+         class="space-y-2">
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- BAG -->
+  <!-- ======================================================= -->
+
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+
+    <div class="flex justify-between items-center mb-3">
+
+      <h3 class="font-semibold">
+        🎒 Schultasche
+      </h3>
+
+      <button
+        onclick="showTab('checklists')"
+        class="text-xs text-blue-400">
+        Checkliste →
+      </button>
+
+    </div>
+
+    <div id="bagPreview"
+         class="space-y-2">
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- ANNOUNCEMENTS -->
+  <!-- ======================================================= -->
+
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+
+    <h3 class="font-semibold mb-3">
+      Ankündigungen
+    </h3>
+
+    <div id="announcementsList"
+         class="space-y-3">
+    </div>
+
+  </div>
+
+</section>
 
 
 
-  <!-- FAB MENU -->
-  <div
-    id="fabMenu"
-    class="fab-menu fixed bottom-24 right-5 z-50 flex flex-col items-end gap-2"
-  >
+<!-- ========================================================= -->
+<!-- NOTEN -->
+<!-- ========================================================= -->
+
+<section id="tab-grades"
+         class="tab-content space-y-4">
+
+  <div class="flex justify-between items-center">
+
+    <h2 class="text-xl font-bold">
+      Noten
+    </h2>
+
+    <span id="overallAverage"
+          class="text-blue-400 font-semibold">
+      Ø –
+    </span>
+
+  </div>
+
+  <div id="gradesList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- HAUSAUFGABEN -->
+<!-- ========================================================= -->
+
+<section id="tab-homework"
+         class="tab-content space-y-4">
+
+  <div class="flex justify-between items-center">
+
+    <h2 class="text-xl font-bold">
+      Hausaufgaben
+    </h2>
 
     <button
-      onclick="openAddModal('grade')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
-      📝 Note
+      onclick="toggleCompletedHomework()"
+      id="toggleHwBtn"
+      class="text-xs text-slate-400">
+      Erledigte anzeigen
+    </button>
+
+  </div>
+
+  <div id="homeworkList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- STUNDENPLAN -->
+<!-- ========================================================= -->
+
+<section id="tab-schedule"
+         class="tab-content space-y-4">
+
+  <div class="flex justify-between items-center">
+
+    <h2 class="text-xl font-bold">
+      Stundenplan
+    </h2>
+
+    <button
+      onclick="showTab('today')"
+      class="text-xs text-blue-400">
+      Heute
+    </button>
+
+  </div>
+
+  <div id="daySelector"
+       class="flex gap-2 overflow-x-auto pb-2">
+  </div>
+
+  <div id="scheduleList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- TODAY / TIMER -->
+<!-- ========================================================= -->
+
+<section id="tab-today"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Mein Schultag
+  </h2>
+
+  <div id="fullDayTimeline"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- TERMINE -->
+<!-- ========================================================= -->
+
+<section id="tab-events"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Termine
+  </h2>
+
+  <div id="eventsList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- CHECKLISTEN -->
+<!-- ========================================================= -->
+
+<section id="tab-checklists"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Checklisten
+  </h2>
+
+
+  <!-- Schoolbag -->
+
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+
+    <div class="flex justify-between items-center mb-3">
+
+      <h3 class="font-semibold">
+        🎒 Schultasche
+      </h3>
+
+      <span id="bagCount"
+            class="text-xs text-slate-500">
+      </span>
+
+    </div>
+
+    <div id="bagList"
+         class="space-y-2">
+    </div>
+
+  </div>
+
+
+  <!-- General checklist -->
+
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+
+    <h3 class="font-semibold mb-3">
+      📋 Meine Checkliste
+    </h3>
+
+    <div id="checklistList"
+         class="space-y-2">
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- FÄCHER -->
+<!-- ========================================================= -->
+
+<section id="tab-subjects"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Fächer & Lehrer
+  </h2>
+
+  <div id="subjectsList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- NOTIZEN -->
+<!-- ========================================================= -->
+
+<section id="tab-notes"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Schnelle Notizen
+  </h2>
+
+  <div id="notesList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- VERTRETUNG -->
+<!-- ========================================================= -->
+
+<section id="tab-substitutions"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Vertretungsplan
+  </h2>
+
+  <div id="substitutionList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- ABSENZEN -->
+<!-- ========================================================= -->
+
+<section id="tab-absences"
+         class="tab-content space-y-4">
+
+  <h2 class="text-xl font-bold">
+    Absenzen
+  </h2>
+
+  <div id="absencesList"
+       class="space-y-3">
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- ADMIN -->
+<!-- ========================================================= -->
+
+<section id="tab-admin"
+         class="tab-content space-y-5">
+
+  <h2 class="text-xl font-bold">
+    Einstellungen
+  </h2>
+
+
+  <!-- PROFILE -->
+
+  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
+
+    <h3 class="font-semibold">
+      Profil
+    </h3>
+
+    <input
+      id="inputUserName"
+      type="text"
+      placeholder="Dein Name"
+      class="field">
+
+    <input
+      id="inputClassName"
+      type="text"
+      placeholder="Klasse, z.B. 9b"
+      class="field">
+
+    <button
+      onclick="saveProfile()"
+      class="primaryBtn">
+      Profil speichern
+    </button>
+
+  </div>
+
+
+  <!-- ADD GRADE -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Note hinzufügen
+    </h3>
+
+    <input id="gradeSubject"
+           class="field"
+           placeholder="Fach">
+
+    <div class="grid grid-cols-2 gap-2">
+
+      <input id="gradeValue"
+             class="field"
+             placeholder="Note">
+
+      <input id="gradeWeight"
+             class="field"
+             value="1"
+             placeholder="Gewichtung">
+
+    </div>
+
+    <input id="gradeDate"
+           type="date"
+           class="field">
+
+    <input id="gradeType"
+           class="field"
+           placeholder="Art, z.B. Klausur">
+
+    <button
+      onclick="addGrade()"
+      class="primaryBtn">
+      Note speichern
+    </button>
+
+  </div>
+
+
+  <!-- HOMEWORK -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Hausaufgabe
+    </h3>
+
+    <input id="hwSubject"
+           class="field"
+           placeholder="Fach">
+
+    <textarea id="hwTask"
+              class="field"
+              rows="3"
+              placeholder="Aufgabe"></textarea>
+
+    <input id="hwDue"
+           type="date"
+           class="field">
+
+    <button
+      onclick="addHomework()"
+      class="primaryBtn">
+      Hausaufgabe speichern
+    </button>
+
+  </div>
+
+
+  <!-- SCHEDULE -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Stunde hinzufügen
+    </h3>
+
+    <select id="schedDay"
+            class="field">
+      <option value="0">Montag</option>
+      <option value="1">Dienstag</option>
+      <option value="2">Mittwoch</option>
+      <option value="3">Donnerstag</option>
+      <option value="4">Freitag</option>
+    </select>
+
+    <div class="grid grid-cols-2 gap-2">
+
+      <input id="schedPeriod"
+             type="number"
+             min="1"
+             max="12"
+             class="field"
+             placeholder="Stunde">
+
+      <input id="schedSubject"
+             class="field"
+             placeholder="Fach">
+
+    </div>
+
+    <div class="grid grid-cols-2 gap-2">
+
+      <input id="schedFrom"
+             type="time"
+             class="field">
+
+      <input id="schedTo"
+             type="time"
+             class="field">
+
+    </div>
+
+    <input id="schedRoom"
+           class="field"
+           placeholder="Raum">
+
+    <button
+      onclick="addSchedule()"
+      class="primaryBtn">
+      Stunde speichern
+    </button>
+
+  </div>
+
+
+  <!-- BREAK -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Pause hinzufügen
+    </h3>
+
+    <select id="breakDay"
+            class="field">
+      <option value="0">Montag</option>
+      <option value="1">Dienstag</option>
+      <option value="2">Mittwoch</option>
+      <option value="3">Donnerstag</option>
+      <option value="4">Freitag</option>
+    </select>
+
+    <input id="breakName"
+           class="field"
+           placeholder="z.B. Große Pause">
+
+    <div class="grid grid-cols-2 gap-2">
+
+      <input id="breakFrom"
+             type="time"
+             class="field">
+
+      <input id="breakTo"
+             type="time"
+             class="field">
+
+    </div>
+
+    <button
+      onclick="addBreak()"
+      class="primaryBtn">
+      Pause speichern
+    </button>
+
+  </div>
+
+
+  <!-- EVENT -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Termin / Klausur
+    </h3>
+
+    <input id="eventTitle"
+           class="field"
+           placeholder="Titel">
+
+    <input id="eventDate"
+           type="date"
+           class="field">
+
+    <input id="eventTime"
+           type="time"
+           class="field">
+
+    <input id="eventType"
+           class="field"
+           placeholder="Typ, z.B. Klausur">
+
+    <button
+      onclick="addEvent()"
+      class="primaryBtn">
+      Termin speichern
+    </button>
+
+  </div>
+
+
+  <!-- SUBJECT -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Fach / Lehrer
+    </h3>
+
+    <input id="subjectName"
+           class="field"
+           placeholder="Fach">
+
+    <input id="subjectTeacher"
+           class="field"
+           placeholder="Lehrer">
+
+    <input id="subjectRoom"
+           class="field"
+           placeholder="Standardraum">
+
+    <button
+      onclick="addSubject()"
+      class="primaryBtn">
+      Fach speichern
+    </button>
+
+  </div>
+
+
+  <!-- NOTE -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Schnelle Notiz
+    </h3>
+
+    <input id="noteTitle"
+           class="field"
+           placeholder="Titel">
+
+    <textarea id="noteText"
+              class="field"
+              rows="3"
+              placeholder="Notiz"></textarea>
+
+    <button
+      onclick="addNote()"
+      class="primaryBtn">
+      Notiz speichern
+    </button>
+
+  </div>
+
+
+  <!-- BAG ITEM -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      🎒 Sache zur Tasche hinzufügen
+    </h3>
+
+    <input id="bagItem"
+           class="field"
+           placeholder="z.B. Mathebuch">
+
+    <button
+      onclick="addBagItem()"
+      class="primaryBtn">
+      Hinzufügen
+    </button>
+
+  </div>
+
+
+  <!-- CHECKLIST -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      📋 Checklisten-Punkt
+    </h3>
+
+    <input id="checkItem"
+           class="field"
+           placeholder="z.B. Hausaufgaben kontrollieren">
+
+    <button
+      onclick="addCheckItem()"
+      class="primaryBtn">
+      Hinzufügen
+    </button>
+
+  </div>
+
+
+  <!-- SUBSTITUTION -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      🔄 Vertretung
+    </h3>
+
+    <select id="subDay"
+            class="field">
+      <option value="0">Montag</option>
+      <option value="1">Dienstag</option>
+      <option value="2">Mittwoch</option>
+      <option value="3">Donnerstag</option>
+      <option value="4">Freitag</option>
+    </select>
+
+    <input id="subPeriod"
+           type="number"
+           class="field"
+           placeholder="Stunde">
+
+    <input id="subOld"
+           class="field"
+           placeholder="Entfällt / ursprüngliches Fach">
+
+    <input id="subNew"
+           class="field"
+           placeholder="Vertretung">
+
+    <input id="subRoom"
+           class="field"
+           placeholder="Raum">
+
+    <button
+      onclick="addSubstitution()"
+      class="primaryBtn">
+      Vertretung speichern
+    </button>
+
+  </div>
+
+
+  <!-- ANNOUNCEMENT -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      📢 Ankündigung
+    </h3>
+
+    <textarea id="annText"
+              class="field"
+              rows="3"
+              placeholder="Text"></textarea>
+
+    <button
+      onclick="addAnnouncement()"
+      class="primaryBtn">
+      Speichern
+    </button>
+
+  </div>
+
+
+  <!-- ABSENCE -->
+
+  <div class="adminBox">
+
+    <h3 class="adminTitle">
+      Absenz
+    </h3>
+
+    <input id="absName"
+           class="field"
+           placeholder="Name">
+
+    <input id="absDate"
+           type="date"
+           class="field">
+
+    <input id="absReason"
+           class="field"
+           placeholder="Grund">
+
+    <button
+      onclick="addAbsence()"
+      class="primaryBtn">
+      Absenz speichern
+    </button>
+
+  </div>
+
+
+  <!-- BACKUP -->
+
+  <div class="bg-red-950/40 border border-red-900 rounded-2xl p-4 space-y-3">
+
+    <h3 class="font-semibold text-red-400">
+      Daten
+    </h3>
+
+    <button
+      onclick="exportData()"
+      class="secondaryBtn">
+      Daten exportieren
     </button>
 
     <button
-      onclick="openAddModal('homework')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
-      📚 Hausaufgabe
+      onclick="importData()"
+      class="secondaryBtn">
+      Daten importieren
     </button>
 
     <button
-      onclick="openAddModal('schedule')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
-      🕐 Stundenplan
+      onclick="clearAllData()"
+      class="w-full bg-red-900/50 hover:bg-red-900 py-2 rounded-xl text-sm">
+      Alles löschen
     </button>
 
-    <button
-      onclick="openAddModal('break')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
-      ☕ Pause
+  </div>
+
+</section>
+
+</main>
+
+
+
+<!-- ========================================================= -->
+<!-- FAB -->
+<!-- ========================================================= -->
+
+<div class="fixed bottom-20 right-5 z-50">
+
+  <div id="fabMenu"
+       class="hidden flex-col items-end gap-2 mb-3">
+
+    <button onclick="openQuick('homework')"
+            class="quickBtn">
+      📝 Hausaufgabe
     </button>
 
-    <button
-      onclick="openAddModal('event')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
+    <button onclick="openQuick('note')"
+            class="quickBtn">
+      💬 Notiz
+    </button>
+
+    <button onclick="openQuick('event')"
+            class="quickBtn">
       📅 Termin
     </button>
 
-    <button
-      onclick="openAddModal('announcement')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
-      📢 Ankündigung
+    <button onclick="openQuick('grade')"
+            class="quickBtn">
+      📊 Note
     </button>
 
-    <button
-      onclick="openAddModal('absence')"
-      class="bg-slate-800 hover:bg-slate-700 shadow-lg px-4 py-2.5 rounded-full text-sm"
-    >
-      👤 Absenz
+    <button onclick="openQuick('schedule')"
+            class="quickBtn">
+      🕐 Stunde
+    </button>
+
+    <button onclick="openQuick('bag')"
+            class="quickBtn">
+      🎒 Tasche
     </button>
 
   </div>
 
 
-  <!-- PLUS BUTTON -->
   <button
-    id="fab"
     onclick="toggleFab()"
-    class="fab fixed right-5 bottom-24 z-[60] w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 shadow-xl shadow-blue-900/30 flex items-center justify-center text-3xl font-light"
-  >
+    id="fab"
+    class="fab w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-3xl transition">
     +
   </button>
 
-
-
-  <!-- ADD MODAL -->
-  <div
-    id="addModal"
-    class="modal fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
-    onclick="closeModalOutside(event)"
-  >
-
-    <div
-      class="modal-card w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-5 max-h-[90vh] overflow-y-auto"
-    >
-
-      <div class="flex items-center justify-between mb-5">
-
-        <h2
-          id="modalTitle"
-          class="text-xl font-bold"
-        >
-          Hinzufügen
-        </h2>
-
-        <button
-          onclick="closeAddModal()"
-          class="text-slate-400 hover:text-white text-xl"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <!-- GRADE FORM -->
-      <div id="form-grade" class="modal-form space-y-3 hidden">
-
-        <input
-          id="gradeSubject"
-          type="text"
-          placeholder="Fach"
-          class="input"
-        />
-
-        <input
-          id="gradeValue"
-          type="text"
-          placeholder="Note z. B. 2+"
-          class="input"
-        />
-
-        <div class="grid grid-cols-2 gap-2">
-
-          <input
-            id="gradeWeight"
-            type="number"
-            min="0.1"
-            step="0.1"
-            value="1"
-            placeholder="Gewichtung"
-            class="input"
-          />
-
-          <input
-            id="gradeDate"
-            type="date"
-            class="input"
-          />
-
-        </div>
-
-        <input
-          id="gradeType"
-          type="text"
-          placeholder="Art z. B. Klausur, mündlich"
-          class="input"
-        />
-
-        <button
-          onclick="addGrade()"
-          class="save-btn"
-        >
-          Note speichern
-        </button>
-
-      </div>
-
-
-
-      <!-- HOMEWORK FORM -->
-      <div id="form-homework" class="modal-form space-y-3 hidden">
-
-        <input
-          id="hwSubject"
-          type="text"
-          placeholder="Fach"
-          class="input"
-        />
-
-        <textarea
-          id="hwTask"
-          rows="3"
-          placeholder="Aufgabe"
-          class="input"
-        ></textarea>
-
-        <input
-          id="hwDue"
-          type="date"
-          class="input"
-        />
-
-        <button
-          onclick="addHomework()"
-          class="save-btn"
-        >
-          Hausaufgabe speichern
-        </button>
-
-      </div>
-
-
-
-      <!-- SCHEDULE FORM -->
-      <div id="form-schedule" class="modal-form space-y-3 hidden">
-
-        <select
-          id="schedDay"
-          class="input"
-        >
-          <option value="0">Montag</option>
-          <option value="1">Dienstag</option>
-          <option value="2">Mittwoch</option>
-          <option value="3">Donnerstag</option>
-          <option value="4">Freitag</option>
-        </select>
-
-        <input
-          id="schedPeriod"
-          type="number"
-          min="1"
-          max="15"
-          placeholder="Stunde, z. B. 1"
-          class="input"
-        />
-
-        <input
-          id="schedSubject"
-          type="text"
-          placeholder="Fach"
-          class="input"
-        />
-
-        <input
-          id="schedRoom"
-          type="text"
-          placeholder="Raum (optional)"
-          class="input"
-        />
-
-        <div>
-          <label class="text-xs text-slate-400">
-            Beginn
-          </label>
-
-          <input
-            id="schedFrom"
-            type="time"
-            class="input mt-1"
-          />
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-400">
-            Ende
-          </label>
-
-          <input
-            id="schedTo"
-            type="time"
-            class="input mt-1"
-          />
-        </div>
-
-        <button
-          onclick="addSchedule()"
-          class="save-btn"
-        >
-          Stunde speichern
-        </button>
-
-      </div>
-
-
-
-      <!-- BREAK FORM -->
-      <div id="form-break" class="modal-form space-y-3 hidden">
-
-        <select
-          id="breakDay"
-          class="input"
-        >
-          <option value="0">Montag</option>
-          <option value="1">Dienstag</option>
-          <option value="2">Mittwoch</option>
-          <option value="3">Donnerstag</option>
-          <option value="4">Freitag</option>
-        </select>
-
-        <input
-          id="breakName"
-          type="text"
-          placeholder="z. B. Große Pause"
-          class="input"
-        />
-
-        <div>
-          <label class="text-xs text-slate-400">
-            Von
-          </label>
-
-          <input
-            id="breakFrom"
-            type="time"
-            class="input mt-1"
-          />
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-400">
-            Bis
-          </label>
-
-          <input
-            id="breakTo"
-            type="time"
-            class="input mt-1"
-          />
-        </div>
-
-        <button
-          onclick="addBreak()"
-          class="save-btn"
-        >
-          Pause speichern
-        </button>
-
-      </div>
-
-
-
-      <!-- EVENT FORM -->
-      <div id="form-event" class="modal-form space-y-3 hidden">
-
-        <input
-          id="eventTitle"
-          type="text"
-          placeholder="Titel z. B. Mathe Klausur"
-          class="input"
-        />
-
-        <input
-          id="eventDate"
-          type="date"
-          class="input"
-        />
-
-        <input
-          id="eventType"
-          type="text"
-          placeholder="Typ z. B. Klausur, Ausflug"
-          class="input"
-        />
-
-        <button
-          onclick="addEvent()"
-          class="save-btn"
-        >
-          Termin speichern
-        </button>
-
-      </div>
-
-
-
-      <!-- ANNOUNCEMENT FORM -->
-      <div id="form-announcement" class="modal-form space-y-3 hidden">
-
-        <textarea
-          id="annText"
-          rows="4"
-          placeholder="Ankündigung"
-          class="input"
-        ></textarea>
-
-        <button
-          onclick="addAnnouncement()"
-          class="save-btn"
-        >
-          Ankündigung speichern
-        </button>
-
-      </div>
-
-
-
-      <!-- ABSENCE FORM -->
-      <div id="form-absence" class="modal-form space-y-3 hidden">
-
-        <input
-          id="absName"
-          type="text"
-          placeholder="Name"
-          class="input"
-        />
-
-        <input
-          id="absDate"
-          type="date"
-          class="input"
-        />
-
-        <input
-          id="absReason"
-          type="text"
-          placeholder="Grund"
-          class="input"
-        />
-
-        <button
-          onclick="addAbsence()"
-          class="save-btn"
-        >
-          Absenz speichern
-        </button>
-
-      </div>
-
-    </div>
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- BOTTOM NAV -->
+<!-- ========================================================= -->
+
+<nav class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-800">
+
+  <div class="max-w-lg mx-auto flex justify-around px-2 py-2">
+
+    <button onclick="showTab('dashboard')"
+            data-tab="dashboard"
+            class="nav-btn active navItem">
+      🏠
+      <span>Home</span>
+    </button>
+
+    <button onclick="showTab('grades')"
+            data-tab="grades"
+            class="nav-btn navItem">
+      📊
+      <span>Noten</span>
+    </button>
+
+    <button onclick="showTab('homework')"
+            data-tab="homework"
+            class="nav-btn navItem">
+      📝
+      <span>Aufgaben</span>
+    </button>
+
+    <button onclick="showTab('schedule')"
+            data-tab="schedule"
+            class="nav-btn navItem">
+      🗓️
+      <span>Plan</span>
+    </button>
+
+    <button onclick="showTab('checklists')"
+            data-tab="checklists"
+            class="nav-btn navItem">
+      🎒
+      <span>Tasche</span>
+    </button>
 
   </div>
 
+</nav>
 
+
+
+<!-- ========================================================= -->
+<!-- STYLES -->
+<!-- ========================================================= -->
+
+<style>
+
+.field {
+  width: 100%;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.field:focus {
+  border-color: #3b82f6;
+}
+
+.primaryBtn {
+  width: 100%;
+  background: #2563eb;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.primaryBtn:hover {
+  background: #3b82f6;
+}
+
+.secondaryBtn {
+  width: 100%;
+  background: #1e293b;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.adminBox {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adminTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 13px;
+  border-radius: 12px;
+  font-size: 11px;
+  min-width: 58px;
+}
+
+.quickBtn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 9px 13px;
+  border-radius: 12px;
+  font-size: 13px;
+  box-shadow: 0 5px 20px rgba(0,0,0,.3);
+}
+
+.quickBtn:hover {
+  background: #334155;
+}
+
+</style>
+
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
 
 <script>
 
-  /* =========================================
-     STYLING FÜR INPUTS
-  ========================================= */
+/* ============================================================
+   DATA
+============================================================ */
 
-  document.querySelectorAll(".input").forEach(el => {
-    el.classList.add(
-      "w-full",
-      "bg-slate-800",
-      "border",
-      "border-slate-700",
-      "rounded-lg",
-      "px-3",
-      "py-2.5",
-      "text-sm",
-      "outline-none",
-      "focus:border-blue-500"
-    );
-  });
+const defaultData = {
 
+  className: "Meine Klasse",
 
-  document.querySelectorAll(".save-btn").forEach(el => {
-    el.classList.add(
-      "w-full",
-      "bg-blue-600",
-      "hover:bg-blue-500",
-      "py-2.5",
-      "rounded-lg",
-      "text-sm",
-      "font-medium"
-    );
-  });
+  userName: "",
 
+  grades: [],
 
+  homework: [],
 
-  /* =========================================
-     DATEN
-  ========================================= */
+  schedule: [],
 
-  const defaultData = {
-    className: "Meine Klasse",
-    userName: "",
-    grades: [],
-    homework: [],
-    schedule: [],
-    breaks: [],
-    events: [],
-    announcements: [],
-    absences: []
-  };
+  breaks: [],
+
+  events: [],
+
+  announcements: [],
+
+  absences: [],
+
+  subjects: [],
+
+  notes: [],
+
+  bag: [],
+
+  checklist: [],
+
+  substitutions: []
+
+};
 
 
-  let data;
+let stored = localStorage.getItem("klassenBoard");
 
-  try {
-    data =
-      JSON.parse(localStorage.getItem("klassenBoard")) ||
-      structuredClone(defaultData);
-  } catch {
-    data = structuredClone(defaultData);
-  }
+let data;
 
+try {
 
-  // Alte Daten kompatibel machen
-  data.userName ??= "";
-  data.className ??= "Meine Klasse";
-  data.grades ??= [];
-  data.homework ??= [];
-  data.schedule ??= [];
-  data.breaks ??= [];
-  data.events ??= [];
-  data.announcements ??= [];
-  data.absences ??= [];
+  data = stored
+    ? JSON.parse(stored)
+    : structuredClone(defaultData);
+
+} catch {
+
+  data = structuredClone(defaultData);
+
+}
 
 
-  let showCompletedHw = false;
+/* Alte Daten automatisch erweitern */
 
-  let currentDay =
-    new Date().getDay() === 0
-      ? 0
-      : Math.min(new Date().getDay() - 1, 4);
+Object.keys(defaultData).forEach(key => {
 
+  if (!Array.isArray(defaultData[key])) {
 
-
-  function save() {
-
-    localStorage.setItem(
-      "klassenBoard",
-      JSON.stringify(data)
-    );
-
-    renderAll();
-  }
-
-
-
-  function id() {
-
-    if (crypto.randomUUID) {
-      return crypto.randomUUID();
+    if (data[key] === undefined) {
+      data[key] = defaultData[key];
     }
 
-    return Date.now().toString(36) +
-      Math.random().toString(36).slice(2);
+  } else {
 
-  }
-
-
-
-  /* =========================================
-     NAVIGATION
-  ========================================= */
-
-  function showTab(tab) {
-
-    document
-      .querySelectorAll(".tab-content")
-      .forEach(el => {
-        el.classList.remove("active");
-      });
-
-
-    document
-      .querySelectorAll(".nav-btn")
-      .forEach(el => {
-        el.classList.remove("active");
-      });
-
-
-    const target =
-      document.getElementById("tab-" + tab);
-
-    if (target) {
-      target.classList.add("active");
-    }
-
-
-    const btn =
-      document.querySelector(
-        `[data-tab="${tab}"]`
-      );
-
-    if (btn) {
-      btn.classList.add("active");
-    }
-
-
-    if (tab === "schedule") {
-      renderSchedule();
+    if (!Array.isArray(data[key])) {
+      data[key] = [];
     }
 
   }
 
+});
 
 
-  function toggleAdmin() {
+let currentDay =
+  new Date().getDay() === 0
+    ? 0
+    : Math.min(4, new Date().getDay() - 1);
 
-    const admin =
-      document.getElementById("tab-admin");
 
-    if (admin.classList.contains("active")) {
+let showCompletedHw = false;
 
-      showTab("dashboard");
 
-      document.getElementById("adminBtn").textContent =
-        "Einstellungen";
+/* ============================================================
+   SAVE
+============================================================ */
 
-    } else {
+function save() {
 
-      showTab("admin");
+  localStorage.setItem(
+    "klassenBoard",
+    JSON.stringify(data)
+  );
 
-      document.getElementById("adminBtn").textContent =
-        "Zurück";
+  renderAll();
 
+}
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+function showTab(tab) {
+
+  document
+    .querySelectorAll(".tab-content")
+    .forEach(el => el.classList.remove("active"));
+
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach(el => el.classList.remove("active"));
+
+  const section =
+    document.getElementById("tab-" + tab);
+
+  if (section) {
+    section.classList.add("active");
+  }
+
+  const button =
+    document.querySelector(`[data-tab="${tab}"]`);
+
+  if (button) {
+    button.classList.add("active");
+  }
+
+  if (tab === "schedule") {
+    renderSchedule();
+  }
+
+  if (tab === "today") {
+    renderFullTimeline();
+  }
+
+}
+
+
+function toggleAdmin() {
+
+  const admin =
+    document.getElementById("tab-admin");
+
+  if (admin.classList.contains("active")) {
+
+    showTab("dashboard");
+
+    document.getElementById("adminBtn")
+      .textContent = "Einstellungen";
+
+  } else {
+
+    showTab("admin");
+
+    document.getElementById("adminBtn")
+      .textContent = "Zurück";
+
+  }
+
+}
+
+
+/* ============================================================
+   FAB
+============================================================ */
+
+function toggleFab() {
+
+  const menu =
+    document.getElementById("fabMenu");
+
+  const fab =
+    document.getElementById("fab");
+
+  menu.classList.toggle("hidden");
+
+  fab.style.transform =
+    menu.classList.contains("hidden")
+      ? "rotate(0deg)"
+      : "rotate(45deg)";
+
+}
+
+
+function openQuick(type) {
+
+  toggleFab();
+
+  showTab("admin");
+
+  setTimeout(() => {
+
+    if (type === "homework") {
+      document.getElementById("hwSubject").focus();
     }
 
-  }
-
-
-
-  /* =========================================
-     FAB
-  ========================================= */
-
-  function toggleFab() {
-
-    const menu =
-      document.getElementById("fabMenu");
-
-    const fab =
-      document.getElementById("fab");
-
-    menu.classList.toggle("open");
-    fab.classList.toggle("open");
-
-  }
-
-
-
-  function closeFab() {
-
-    document
-      .getElementById("fabMenu")
-      .classList.remove("open");
-
-    document
-      .getElementById("fab")
-      .classList.remove("open");
-
-  }
-
-
-
-  /* =========================================
-     MODAL
-  ========================================= */
-
-  function openAddModal(type) {
-
-    closeFab();
-
-    document
-      .querySelectorAll(".modal-form")
-      .forEach(el => {
-        el.classList.add("hidden");
-      });
-
-
-    const form =
-      document.getElementById("form-" + type);
-
-    if (!form) return;
-
-    form.classList.remove("hidden");
-
-
-    const titles = {
-
-      grade: "Note hinzufügen",
-
-      homework: "Hausaufgabe hinzufügen",
-
-      schedule: "Stunde hinzufügen",
-
-      break: "Pause hinzufügen",
-
-      event: "Termin hinzufügen",
-
-      announcement: "Ankündigung hinzufügen",
-
-      absence: "Absenz hinzufügen"
-
-    };
-
-
-    document.getElementById("modalTitle").textContent =
-      titles[type] || "Hinzufügen";
-
-
-    document
-      .getElementById("addModal")
-      .classList.add("open");
-
-  }
-
-
-
-  function closeAddModal() {
-
-    document
-      .getElementById("addModal")
-      .classList.remove("open");
-
-  }
-
-
-
-  function closeModalOutside(event) {
-
-    if (
-      event.target.id === "addModal"
-    ) {
-      closeAddModal();
+    if (type === "note") {
+      document.getElementById("noteTitle").focus();
     }
 
-  }
+    if (type === "event") {
+      document.getElementById("eventTitle").focus();
+    }
+
+    if (type === "grade") {
+      document.getElementById("gradeSubject").focus();
+    }
+
+    if (type === "schedule") {
+      document.getElementById("schedSubject").focus();
+    }
+
+    if (type === "bag") {
+      document.getElementById("bagItem").focus();
+    }
+
+  }, 100);
+
+}
 
 
+/* ============================================================
+   DATE / TIME
+============================================================ */
 
-  /* =========================================
-     RENDER
-  ========================================= */
+function formatDate(date) {
 
-  function renderAll() {
+  if (!date) return "";
 
-    document.getElementById(
-      "classNameDisplay"
-    ).textContent =
+  return new Date(date).toLocaleDateString(
+    "de-DE",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }
+  );
+
+}
+
+
+function todayISO() {
+
+  return new Date()
+    .toISOString()
+    .slice(0,10);
+
+}
+
+
+function getDayName(day) {
+
+  return [
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag"
+  ][day] || "";
+
+}
+
+
+function timeToMinutes(time) {
+
+  if (!time) return null;
+
+  const parts = time.split(":");
+
+  return (
+    parseInt(parts[0]) * 60 +
+    parseInt(parts[1])
+  );
+
+}
+
+
+function currentMinutes() {
+
+  const now = new Date();
+
+  return now.getHours() * 60 +
+         now.getMinutes() +
+         now.getSeconds() / 60;
+
+}
+
+
+/* ============================================================
+   PROFILE
+============================================================ */
+
+function saveProfile() {
+
+  data.userName =
+    document.getElementById("inputUserName")
+      .value.trim();
+
+  data.className =
+    document.getElementById("inputClassName")
+      .value.trim() || "Meine Klasse";
+
+  save();
+
+  alert("Profil gespeichert!");
+
+}
+
+
+/* ============================================================
+   MAIN RENDER
+============================================================ */
+
+function renderAll() {
+
+  document.getElementById("classNameDisplay")
+    .textContent =
       data.className || "Klassen-Board";
 
-
-    document.getElementById(
-      "inputClassName"
-    ).value =
+  document.getElementById("inputClassName")
+    .value =
       data.className || "";
 
-
-    document.getElementById(
-      "inputUserName"
-    ).value =
+  document.getElementById("inputUserName")
+    .value =
       data.userName || "";
 
 
-    const now = new Date();
+  const now = new Date();
 
-
-    document.getElementById(
-      "dateDisplay"
-    ).textContent =
+  document.getElementById("dateDisplay")
+    .textContent =
       now.toLocaleDateString(
         "de-DE",
         {
@@ -1230,320 +1608,715 @@
       );
 
 
-    let greeting;
+  let greeting = "Hey";
 
-    if (now.getHours() < 12) {
+  if (now.getHours() < 12)
+    greeting = "Guten Morgen";
 
-      greeting = "Guten Morgen";
+  else if (now.getHours() < 18)
+    greeting = "Guten Tag";
 
-    } else if (now.getHours() < 18) {
-
-      greeting = "Guten Tag";
-
-    } else {
-
-      greeting = "Guten Abend";
-
-    }
+  else
+    greeting = "Guten Abend";
 
 
-    document.getElementById(
-      "greeting"
-    ).textContent =
-      greeting +
-      (data.userName
-        ? ` ${data.userName}`
-        : "!");
+  if (data.userName) {
 
-
-    renderDashboard();
-    renderGrades();
-    renderHomework();
-    renderEvents();
-    renderAbsences();
-    renderDaySelector();
+    greeting += ", " + data.userName;
 
   }
 
 
-
-  /* =========================================
-     DASHBOARD
-  ========================================= */
-
-  function renderDashboard() {
-
-    const today =
-      new Date()
-        .toISOString()
-        .slice(0, 10);
+  document.getElementById("greeting")
+    .textContent = greeting;
 
 
-    const upcoming =
-      data.events
-        .filter(e => e.date >= today)
-        .sort(
-          (a, b) =>
-            a.date.localeCompare(b.date)
-        );
+  renderDashboard();
+  renderGrades();
+  renderHomework();
+  renderDaySelector();
+  renderEvents();
+  renderAbsences();
+  renderBag();
+  renderChecklist();
+  renderSubjects();
+  renderNotes();
+  renderSubstitutions();
+  renderFullTimeline();
+
+}
 
 
-    document.getElementById(
-      "nextExam"
-    ).textContent =
-      upcoming.length
-        ? `${upcoming[0].title} (${formatDate(upcoming[0].date)})`
-        : "Keine";
+/* ============================================================
+   DASHBOARD
+============================================================ */
+
+function renderDashboard() {
+
+  const today =
+    new Date().getDay() === 0
+      ? 6
+      : new Date().getDay() - 1;
 
 
-    const open =
-      data.homework.filter(
-        h => !h.done
-      ).length;
-
-
-    document.getElementById(
-      "openHomework"
-    ).textContent = open;
-
-
-    const weekday =
-      new Date().getDay();
-
-
-    const todayIndex =
-      weekday === 0
-        ? 0
-        : weekday - 1;
-
-
-    const lessons =
-      data.schedule
-        .filter(
-          s => s.day === todayIndex
-        )
-        .sort(
-          compareTime
-        );
-
-
-    const breaks =
-      data.breaks
-        .filter(
-          b => b.day === todayIndex
-        )
-        .sort(
-          compareTime
-        );
-
-
-    const timeline = [
-      ...lessons.map(x => ({
-        ...x,
-        type: "lesson"
-      })),
-
-      ...breaks.map(x => ({
-        ...x,
-        type: "break"
-      }))
-    ].sort(compareTime);
-
-
-    const container =
-      document.getElementById(
-        "todaySchedule"
+  const lessons =
+    data.schedule
+      .filter(s => s.day === today)
+      .sort(
+        (a,b) =>
+          timeToMinutes(a.from || "00:00") -
+          timeToMinutes(b.from || "00:00")
       );
 
 
-    if (!timeline.length) {
-
-      container.innerHTML =
-        `<p class="text-slate-500">
-          Kein Stundenplan für heute.
-        </p>`;
-
-    } else {
-
-      container.innerHTML =
-        timeline
-          .map(renderTimelineItem)
-          .join("");
-
-    }
+  const container =
+    document.getElementById("todaySchedule");
 
 
-    document.getElementById(
-      "announcementsList"
-    ).innerHTML =
-      data.announcements.length
+  if (!lessons.length) {
 
-        ? data.announcements
-            .slice()
-            .reverse()
-            .slice(0, 5)
-            .map(a => `
-              <div class="border-l-2 border-blue-500 pl-3">
-                <p>${escapeHtml(a.text)}</p>
-                <p class="text-xs text-slate-500 mt-1">
-                  ${formatDate(a.date)}
-                </p>
-              </div>
-            `)
-            .join("")
+    container.innerHTML =
+      `<p class="text-sm text-slate-500">
+        Kein Stundenplan für heute.
+      </p>`;
 
-        : `<p class="text-slate-500">
-            Noch keine Ankündigungen.
-          </p>`;
+  } else {
 
+    container.innerHTML =
+      lessons.map(l => {
 
-    document.getElementById(
-      "todaySummary"
-    ).textContent =
-      `${open} offene Aufgabe${open !== 1 ? "n" : ""}` +
-      (
-        upcoming[0]
-          ? ` · Nächster Termin: ${upcoming[0].title}`
-          : ""
-      );
+        return `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-sm font-bold text-blue-400">
+              ${l.period}.
+            </div>
 
-  }
+            <div class="flex-1">
 
+              <p class="font-medium text-sm">
+                ${escapeHTML(l.subject)}
+              </p>
 
-
-  /* =========================================
-     TIMELINE
-  ========================================= */
-
-  function renderTimelineItem(item) {
-
-    if (item.type === "break") {
-
-      return `
-        <div class="flex items-center gap-3 py-1">
-
-          <div class="w-16 text-xs text-slate-500">
-            ${item.from || ""}<br>
-            ${item.to || ""}
-          </div>
-
-          <div class="flex-1 bg-amber-950/30 border border-amber-900/50 rounded-lg px-3 py-2">
-
-            <div class="flex items-center gap-2">
-
-              <span>☕</span>
-
-              <span class="font-medium text-amber-300">
-                ${escapeHtml(item.name || "Pause")}
-              </span>
+              <p class="text-xs text-slate-500">
+                ${l.from || "--"} – ${l.to || "--"}
+                ${l.room ? " · " + escapeHTML(l.room) : ""}
+              </p>
 
             </div>
 
           </div>
+        `;
 
-        </div>
-      `;
-
-    }
-
-
-    return `
-      <div class="flex items-center gap-3 py-1">
-
-        <div class="w-16 text-xs text-slate-500">
-          ${item.from || ""}<br>
-          ${item.to || ""}
-        </div>
-
-        <div class="flex-1 bg-slate-800/70 rounded-lg px-3 py-2">
-
-          <div class="flex items-center gap-2">
-
-            <span class="font-medium">
-              ${escapeHtml(item.subject)}
-            </span>
-
-            ${
-              item.period
-                ? `<span class="text-xs text-slate-500">
-                    ${item.period}.
-                  </span>`
-                : ""
-            }
-
-          </div>
-
-          ${
-            item.room
-              ? `<p class="text-xs text-slate-500">
-                  Raum ${escapeHtml(item.room)}
-                </p>`
-              : ""
-          }
-
-        </div>
-
-      </div>
-    `;
+      }).join("");
 
   }
 
 
+  const open =
+    data.homework.filter(h => !h.done).length;
 
-  /* =========================================
-     NOTEN
-  ========================================= */
+  document.getElementById("openHomework")
+    .textContent = open;
 
-  function renderGrades() {
 
-    const list =
-      document.getElementById(
-        "gradesList"
+  const avg =
+    calculateAverage();
+
+  document.getElementById("dashboardAverage")
+    .textContent =
+      avg === null ? "-" : avg.toFixed(2);
+
+
+  const upcoming =
+    data.events
+      .filter(e =>
+        new Date(e.date) >=
+        new Date().setHours(0,0,0,0)
+      )
+      .sort(
+        (a,b) =>
+          new Date(a.date) -
+          new Date(b.date)
       );
 
 
-    if (!data.grades.length) {
+  let summary =
+    `${open} offene Aufgabe${open === 1 ? "" : "n"}`;
 
-      list.innerHTML =
-        `<p class="text-slate-500 text-center py-8">
-          Noch keine Noten eingetragen.<br>
-          <span class="text-xs">
-            Unten rechts auf + drücken.
-          </span>
-        </p>`;
+  if (upcoming[0]) {
 
-      document.getElementById(
-        "overallAverage"
-      ).textContent = "Ø –";
+    summary +=
+      ` · Nächster Termin: ${upcoming[0].title}`;
 
-      return;
+  }
+
+
+  document.getElementById("todaySummary")
+    .textContent = summary;
+
+
+  const ann =
+    document.getElementById("announcementsList");
+
+
+  if (!data.announcements.length) {
+
+    ann.innerHTML =
+      `<p class="text-slate-500 text-sm">
+        Keine neuen Ankündigungen.
+      </p>`;
+
+  } else {
+
+    ann.innerHTML =
+      data.announcements
+        .slice()
+        .reverse()
+        .slice(0,5)
+        .map(a => `
+
+          <div class="border-l-2 border-blue-500 pl-3">
+
+            <p class="text-sm">
+              ${escapeHTML(a.text)}
+            </p>
+
+            <p class="text-xs text-slate-500 mt-1">
+              ${formatDate(a.date)}
+            </p>
+
+          </div>
+
+        `)
+        .join("");
+
+  }
+
+}
+
+
+/* ============================================================
+   LIVE LESSON
+============================================================ */
+
+function updateLiveLesson() {
+
+  const today =
+    new Date().getDay() === 0
+      ? 6
+      : new Date().getDay() - 1;
+
+
+  if (today < 0 || today > 4) {
+
+    setNoLesson("Wochenende");
+
+    return;
+
+  }
+
+
+  const now =
+    currentMinutes();
+
+
+  const lessons =
+    data.schedule
+      .filter(s =>
+        s.day === today &&
+        s.from &&
+        s.to
+      )
+      .sort(
+        (a,b) =>
+          timeToMinutes(a.from) -
+          timeToMinutes(b.from)
+      );
+
+
+  const breaks =
+    data.breaks
+      .filter(b =>
+        b.day === today &&
+        b.from &&
+        b.to
+      );
+
+
+  let current = null;
+
+
+  for (const lesson of lessons) {
+
+    const start =
+      timeToMinutes(lesson.from);
+
+    const end =
+      timeToMinutes(lesson.to);
+
+    if (now >= start && now < end) {
+
+      current = lesson;
+      break;
 
     }
 
+  }
 
-    const bySubject = {};
 
+  const currentBreak =
+    breaks.find(b => {
 
-    data.grades.forEach(g => {
+      const start =
+        timeToMinutes(b.from);
 
-      if (!bySubject[g.subject]) {
-        bySubject[g.subject] = [];
-      }
+      const end =
+        timeToMinutes(b.to);
 
-      bySubject[g.subject].push(g);
+      return now >= start && now < end;
 
     });
 
 
-    let totalSum = 0;
-    let totalWeight = 0;
-    let html = "";
+  if (currentBreak) {
+
+    const end =
+      timeToMinutes(currentBreak.to);
+
+    const remaining =
+      end - now;
+
+    document.getElementById("liveStatus")
+      .textContent = "☕ Pause";
+
+    document.getElementById("liveTitle")
+      .textContent =
+        currentBreak.name || "Pause";
+
+    document.getElementById("liveDetails")
+      .textContent =
+        `${currentBreak.from} – ${currentBreak.to}`;
+
+    document.getElementById("liveRemaining")
+      .textContent =
+        formatRemaining(remaining);
+
+    document.getElementById("lessonProgress")
+      .style.width = "0%";
+
+    return;
+
+  }
 
 
-    for (
-      const [subject, grades]
-      of Object.entries(bySubject)
-    ) {
+  if (current) {
+
+    const start =
+      timeToMinutes(current.from);
+
+    const end =
+      timeToMinutes(current.to);
+
+    const duration = end - start;
+
+    const passed = now - start;
+
+    const remaining = end - now;
+
+    const percent =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          (passed / duration) * 100
+        )
+      );
+
+
+    document.getElementById("liveStatus")
+      .textContent =
+        `${current.period}. Stunde · läuft`;
+
+    document.getElementById("liveTitle")
+      .textContent =
+        current.subject;
+
+    document.getElementById("liveDetails")
+      .textContent =
+        `${current.from} – ${current.to}` +
+        (current.room
+          ? ` · Raum ${current.room}`
+          : "");
+
+    document.getElementById("liveRemaining")
+      .textContent =
+        formatRemaining(remaining);
+
+    document.getElementById("lessonProgress")
+      .style.width =
+        percent + "%";
+
+  } else {
+
+    const next =
+      lessons.find(
+        l => timeToMinutes(l.from) > now
+      );
+
+
+    if (next) {
+
+      const diff =
+        timeToMinutes(next.from) - now;
+
+      document.getElementById("liveStatus")
+        .textContent = "🔜 Nächste Stunde";
+
+      document.getElementById("liveTitle")
+        .textContent = next.subject;
+
+      document.getElementById("liveDetails")
+        .textContent =
+          `${next.from} – ${next.to}`;
+
+      document.getElementById("liveRemaining")
+        .textContent =
+          "in " + formatRemaining(diff);
+
+      document.getElementById("lessonProgress")
+        .style.width = "0%";
+
+    } else {
+
+      setNoLesson("Schule vorbei");
+
+    }
+
+  }
+
+
+  renderNextLesson(lessons, now);
+
+}
+
+
+function setNoLesson(text) {
+
+  document.getElementById("liveStatus")
+    .textContent = text;
+
+  document.getElementById("liveTitle")
+    .textContent = "Keine aktuelle Stunde";
+
+  document.getElementById("liveDetails")
+    .textContent = "";
+
+  document.getElementById("liveRemaining")
+    .textContent = "--";
+
+  document.getElementById("lessonProgress")
+    .style.width = "0%";
+
+}
+
+
+function renderNextLesson(lessons, now) {
+
+  const next =
+    lessons.find(
+      l => timeToMinutes(l.from) > now
+    );
+
+
+  if (!next) {
+
+    document.getElementById("nextLesson")
+      .textContent =
+        "Keine weitere Stunde";
+
+    document.getElementById("nextLessonDetails")
+      .textContent = "";
+
+    document.getElementById("nextCountdown")
+      .textContent = "";
+
+    return;
+
+  }
+
+
+  const diff =
+    timeToMinutes(next.from) - now;
+
+
+  document.getElementById("nextLesson")
+    .textContent =
+      `${next.period}. Stunde · ${next.subject}`;
+
+  document.getElementById("nextLessonDetails")
+    .textContent =
+      `${next.from} – ${next.to}` +
+      (next.room
+        ? ` · Raum ${next.room}`
+        : "");
+
+  document.getElementById("nextCountdown")
+    .textContent =
+      "in " + formatRemaining(diff);
+
+}
+
+
+function formatRemaining(minutes) {
+
+  if (minutes < 0) minutes = 0;
+
+  const totalSeconds =
+    Math.floor(minutes * 60);
+
+  const h =
+    Math.floor(totalSeconds / 3600);
+
+  const m =
+    Math.floor(
+      (totalSeconds % 3600) / 60
+    );
+
+  const s =
+    totalSeconds % 60;
+
+
+  if (h > 0) {
+
+    return `${h}h ${m}m`;
+
+  }
+
+  return `${m}:${String(s).padStart(2,"0")}`;
+
+}
+
+
+/* ============================================================
+   FULL TIMELINE
+============================================================ */
+
+function renderFullTimeline() {
+
+  const container =
+    document.getElementById("fullDayTimeline");
+
+  if (!container) return;
+
+
+  const today =
+    new Date().getDay() === 0
+      ? 6
+      : new Date().getDay() - 1;
+
+
+  const lessons =
+    data.schedule
+      .filter(s => s.day === today)
+      .sort(
+        (a,b) =>
+          timeToMinutes(a.from || "00:00") -
+          timeToMinutes(b.from || "00:00")
+      );
+
+
+  const breaks =
+    data.breaks
+      .filter(b => b.day === today)
+      .sort(
+        (a,b) =>
+          timeToMinutes(a.from) -
+          timeToMinutes(b.from)
+      );
+
+
+  const items = [];
+
+
+  lessons.forEach(l => {
+
+    items.push({
+      type: "lesson",
+      time: timeToMinutes(l.from),
+      html: `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div class="flex gap-3">
+
+            <div class="text-blue-400 font-bold">
+              ${l.period}.
+            </div>
+
+            <div class="flex-1">
+
+              <p class="font-semibold">
+                ${escapeHTML(l.subject)}
+              </p>
+
+              <p class="text-xs text-slate-500 mt-1">
+                ${l.from} – ${l.to}
+                ${l.room ? " · Raum " + escapeHTML(l.room) : ""}
+              </p>
+
+            </div>
+
+          </div>
+        </div>
+      `
+    });
+
+  });
+
+
+  breaks.forEach(b => {
+
+    items.push({
+      type: "break",
+      time: timeToMinutes(b.from),
+      html: `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+          ☕ ${escapeHTML(b.name || "Pause")}
+          <span class="text-xs text-slate-500 ml-2">
+            ${b.from} – ${b.to}
+          </span>
+        </div>
+      `
+    });
+
+  });
+
+
+  items.sort((a,b) => a.time - b.time);
+
+
+  container.innerHTML =
+    items.length
+      ? items.map(x => x.html).join("")
+      : `<p class="text-slate-500 text-center py-8">
+          Kein Stundenplan für heute.
+        </p>`;
+
+}
+
+
+/* ============================================================
+   GRADES
+============================================================ */
+
+function parseGrade(value) {
+
+  const val =
+    String(value)
+      .trim()
+      .replace(",", ".");
+
+
+  const match =
+    val.match(/^(\d)([+-])?$/);
+
+
+  if (!match) {
+
+    const num =
+      parseFloat(val);
+
+    return isNaN(num)
+      ? null
+      : num;
+
+  }
+
+
+  let num =
+    parseInt(match[1]);
+
+
+  if (match[2] === "+")
+    num -= .3;
+
+  if (match[2] === "-")
+    num += .3;
+
+
+  return num;
+
+}
+
+
+function calculateAverage() {
+
+  let sum = 0;
+  let weight = 0;
+
+
+  data.grades.forEach(g => {
+
+    const n =
+      parseGrade(g.value);
+
+    if (n !== null) {
+
+      const w =
+        parseFloat(g.weight) || 1;
+
+      sum += n * w;
+      weight += w;
+
+    }
+
+  });
+
+
+  return weight
+    ? sum / weight
+    : null;
+
+}
+
+
+function renderGrades() {
+
+  const list =
+    document.getElementById("gradesList");
+
+
+  if (!data.grades.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-center py-8">
+        Noch keine Noten.
+      </p>`;
+
+    document.getElementById("overallAverage")
+      .textContent = "Ø –";
+
+    return;
+
+  }
+
+
+  const groups = {};
+
+
+  data.grades.forEach(g => {
+
+    if (!groups[g.subject])
+      groups[g.subject] = [];
+
+    groups[g.subject].push(g);
+
+  });
+
+
+  let html = "";
+
+
+  Object.entries(groups)
+    .forEach(([subject, grades]) => {
 
       let sum = 0;
       let weight = 0;
@@ -1551,16 +2324,15 @@
 
       grades.forEach(g => {
 
-        const num =
+        const n =
           parseGrade(g.value);
 
-        const w =
-          parseFloat(g.weight) || 1;
+        if (n !== null) {
 
+          const w =
+            parseFloat(g.weight) || 1;
 
-        if (num !== null) {
-
-          sum += num * w;
+          sum += n * w;
           weight += w;
 
         }
@@ -1574,54 +2346,51 @@
           : "–";
 
 
-      totalSum += sum;
-      totalWeight += weight;
-
-
       html += `
-        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
 
-          <div class="px-4 py-3 flex items-center justify-between border-b border-slate-800">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+
+          <div class="px-4 py-3 border-b border-slate-800 flex justify-between">
 
             <span class="font-semibold">
-              ${escapeHtml(subject)}
+              ${escapeHTML(subject)}
             </span>
 
-            <span class="text-blue-400 font-medium">
+            <span class="text-blue-400">
               Ø ${avg}
             </span>
 
           </div>
 
+
           <div class="divide-y divide-slate-800">
 
             ${grades.map(g => `
 
-              <div class="px-4 py-2.5 flex items-center justify-between text-sm">
+              <div class="px-4 py-3 flex justify-between items-center">
 
                 <div>
 
-                  <span class="font-medium">
-                    ${escapeHtml(g.value)}
+                  <span class="font-bold">
+                    ${escapeHTML(g.value)}
                   </span>
 
-                  <span class="text-slate-500 ml-2">
-                    ${escapeHtml(g.type || "")}
+                  <span class="text-xs text-slate-500 ml-2">
+                    ${escapeHTML(g.type || "")}
                   </span>
 
                 </div>
 
                 <div class="flex items-center gap-3">
 
-                  <span class="text-slate-500 text-xs">
+                  <span class="text-xs text-slate-500">
                     ${formatDate(g.date)}
                   </span>
 
                   <button
                     onclick="deleteGrade('${g.id}')"
-                    class="text-red-400 text-xs"
-                  >
-                    ✕
+                    class="text-red-400">
+                    ×
                   </button>
 
                 </div>
@@ -1633,1474 +2402,1684 @@
           </div>
 
         </div>
+
       `;
 
-    }
+    });
 
 
-    list.innerHTML = html;
+  list.innerHTML = html;
 
 
-    document.getElementById(
-      "overallAverage"
-    ).textContent =
-      totalWeight
-        ? `Ø ${(totalSum / totalWeight).toFixed(2)}`
-        : "Ø –";
+  const avg =
+    calculateAverage();
+
+  document.getElementById("overallAverage")
+    .textContent =
+      avg === null
+        ? "Ø –"
+        : `Ø ${avg.toFixed(2)}`;
+
+}
+
+
+function addGrade() {
+
+  const subject =
+    document.getElementById("gradeSubject")
+      .value.trim();
+
+  const value =
+    document.getElementById("gradeValue")
+      .value.trim();
+
+
+  if (!subject || !value) {
+
+    alert("Fach und Note eingeben.");
+
+    return;
 
   }
 
 
+  data.grades.push({
 
-  /* =========================================
-     HAUSAUFGABEN
-  ========================================= */
+    id: crypto.randomUUID(),
 
-  function renderHomework() {
+    subject,
 
-    const list =
-      document.getElementById(
-        "homeworkList"
-      );
+    value,
 
+    weight:
+      document.getElementById("gradeWeight")
+        .value || "1",
 
-    let items =
-      data.homework.slice();
+    date:
+      document.getElementById("gradeDate")
+        .value || todayISO(),
 
+    type:
+      document.getElementById("gradeType")
+        .value.trim()
 
-    if (!showCompletedHw) {
-
-      items =
-        items.filter(
-          h => !h.done
-        );
-
-    }
+  });
 
 
-    items.sort(
-      (a, b) =>
-        a.due.localeCompare(b.due)
+  save();
+
+  clearFields([
+    "gradeSubject",
+    "gradeValue",
+    "gradeType"
+  ]);
+
+}
+
+
+function deleteGrade(id) {
+
+  data.grades =
+    data.grades.filter(
+      g => g.id !== id
     );
 
+  save();
 
-    if (!items.length) {
+}
 
-      list.innerHTML =
-        `<p class="text-slate-500 text-center py-8">
-          Keine offenen Hausaufgaben.
-        </p>`;
 
-      return;
+/* ============================================================
+   HOMEWORK
+============================================================ */
 
-    }
+function renderHomework() {
 
+  const list =
+    document.getElementById("homeworkList");
+
+
+  let items =
+    data.homework.slice();
+
+
+  if (!showCompletedHw) {
+
+    items =
+      items.filter(
+        h => !h.done
+      );
+
+  }
+
+
+  items.sort(
+    (a,b) =>
+      new Date(a.due) -
+      new Date(b.due)
+  );
+
+
+  if (!items.length) {
 
     list.innerHTML =
-      items.map(h => {
+      `<p class="text-slate-500 text-center py-8">
+        Keine offenen Hausaufgaben.
+      </p>`;
 
-        const overdue =
-          !h.done &&
-          h.due <
-          new Date()
-            .toISOString()
-            .slice(0, 10);
+    return;
+
+  }
 
 
-        return `
-          <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 flex gap-3 ${h.done ? "opacity-50" : ""}">
+  list.innerHTML =
+    items.map(h => {
 
-            <button
-              onclick="toggleHomework('${h.id}')"
-              class="mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
-                h.done
-                  ? "bg-green-500 border-green-500"
-                  : "border-slate-600"
-              }"
-            >
-              ${
-                h.done
-                  ? "✓"
-                  : ""
-              }
-            </button>
+      const overdue =
+        !h.done &&
+        new Date(h.due) <
+        new Date().setHours(0,0,0,0);
 
-            <div class="flex-1 min-w-0">
 
-              <div class="flex items-center gap-2">
+      return `
 
-                <span class="font-medium text-sm">
-                  ${escapeHtml(h.subject)}
-                </span>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-3">
 
-                <span class="text-xs ${
-                  overdue
-                    ? "text-red-400"
-                    : "text-slate-500"
-                }">
-                  ${formatDate(h.due)}
-                </span>
+          <button
+            onclick="toggleHomework('${h.id}')"
+            class="w-6 h-6 rounded-full border-2 flex items-center justify-center
+            ${h.done
+              ? "bg-green-500 border-green-500"
+              : "border-slate-600"}">
 
-              </div>
+            ${h.done ? "✓" : ""}
 
-              <p class="text-sm text-slate-300 mt-1">
-                ${escapeHtml(h.task)}
-              </p>
+          </button>
+
+
+          <div class="flex-1">
+
+            <div class="flex justify-between gap-2">
+
+              <span class="font-semibold text-sm">
+                ${escapeHTML(h.subject)}
+              </span>
+
+              <span class="text-xs ${
+                overdue
+                  ? "text-red-400"
+                  : "text-slate-500"
+              }">
+
+                ${formatDate(h.due)}
+
+              </span>
 
             </div>
 
-            <button
-              onclick="deleteHomework('${h.id}')"
-              class="text-slate-600 hover:text-red-400 text-xs"
-            >
-              ✕
-            </button>
+            <p class="text-sm text-slate-300 mt-1">
+              ${escapeHTML(h.task)}
+            </p>
 
           </div>
-        `;
 
-      }).join("");
+
+          <button
+            onclick="deleteHomework('${h.id}')"
+            class="text-red-400">
+            ×
+          </button>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+function addHomework() {
+
+  const subject =
+    document.getElementById("hwSubject")
+      .value.trim();
+
+  const task =
+    document.getElementById("hwTask")
+      .value.trim();
+
+
+  if (!subject || !task) {
+
+    alert("Fach und Aufgabe eingeben.");
+
+    return;
 
   }
 
 
+  data.homework.push({
 
-  function toggleCompletedHomework() {
+    id: crypto.randomUUID(),
 
-    showCompletedHw =
-      !showCompletedHw;
+    subject,
+
+    task,
+
+    due:
+      document.getElementById("hwDue")
+        .value || todayISO(),
+
+    done: false
+
+  });
 
 
-    document.getElementById(
-      "toggleHwBtn"
-    ).textContent =
+  save();
+
+  clearFields([
+    "hwSubject",
+    "hwTask"
+  ]);
+
+}
+
+
+function toggleHomework(id) {
+
+  const item =
+    data.homework.find(
+      h => h.id === id
+    );
+
+  if (item)
+    item.done = !item.done;
+
+  save();
+
+}
+
+
+function deleteHomework(id) {
+
+  data.homework =
+    data.homework.filter(
+      h => h.id !== id
+    );
+
+  save();
+
+}
+
+
+function toggleCompletedHomework() {
+
+  showCompletedHw =
+    !showCompletedHw;
+
+  document.getElementById("toggleHwBtn")
+    .textContent =
       showCompletedHw
         ? "Erledigte ausblenden"
         : "Erledigte anzeigen";
 
+  renderHomework();
 
-    renderHomework();
-
-  }
-
+}
 
 
-  /* =========================================
-     STUNDENPLAN
-  ========================================= */
+/* ============================================================
+   SCHEDULE
+============================================================ */
 
-  function renderDaySelector() {
+function renderDaySelector() {
 
-    const days = [
-      "Mo",
-      "Di",
-      "Mi",
-      "Do",
-      "Fr"
-    ];
+  const days =
+    ["Mo","Di","Mi","Do","Fr"];
 
 
-    document.getElementById(
-      "daySelector"
-    ).innerHTML =
-      days.map((day, i) => `
+  document.getElementById("daySelector")
+    .innerHTML =
+      days.map((day,i) => `
 
         <button
           onclick="selectDay(${i})"
-          class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+          class="px-4 py-2 rounded-full text-sm whitespace-nowrap ${
             currentDay === i
               ? "bg-blue-600 text-white"
               : "bg-slate-800 text-slate-300"
-          }"
-        >
+          }">
+
           ${day}
+
         </button>
 
       `).join("");
 
 
-    renderSchedule();
+  renderSchedule();
 
-  }
-
-
-
-  function selectDay(day) {
-
-    currentDay = day;
-
-    renderDaySelector();
-
-  }
+}
 
 
+function selectDay(day) {
 
-  function renderSchedule() {
+  currentDay = day;
 
-    const list =
-      document.getElementById(
-        "scheduleList"
+  renderDaySelector();
+
+}
+
+
+function renderSchedule() {
+
+  const list =
+    document.getElementById("scheduleList");
+
+
+  const lessons =
+    data.schedule
+      .filter(s => s.day === currentDay)
+      .sort(
+        (a,b) =>
+          (a.period || 0) -
+          (b.period || 0)
       );
 
 
-    const lessons =
-      data.schedule
-        .filter(
-          s => s.day === currentDay
-        )
-        .map(x => ({
-          ...x,
-          type: "lesson"
-        }));
-
-
-    const breaks =
-      data.breaks
-        .filter(
-          b => b.day === currentDay
-        )
-        .map(x => ({
-          ...x,
-          type: "break"
-        }));
-
-
-    const timeline =
-      [...lessons, ...breaks]
-        .sort(compareTime);
-
-
-    if (!timeline.length) {
-
-      list.innerHTML =
-        `<div class="bg-slate-900 rounded-xl border border-slate-800 p-6 text-center">
-
-          <p class="text-slate-500">
-            Noch nichts eingetragen.
-          </p>
-
-          <p class="text-xs text-slate-600 mt-2">
-            Über + kannst du Stunden und Pausen hinzufügen.
-          </p>
-
-        </div>`;
-
-      return;
-
-    }
-
+  if (!lessons.length) {
 
     list.innerHTML =
-      timeline
-        .map(item => {
+      `<p class="text-slate-500 text-center py-8">
+        Kein Stundenplan für ${getDayName(currentDay)}.
+      </p>`;
 
-          if (item.type === "break") {
-
-            return `
-              <div class="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4">
-
-                <div class="flex items-center gap-4">
-
-                  <div class="text-2xl">
-                    ☕
-                  </div>
-
-                  <div class="flex-1">
-
-                    <p class="font-semibold text-amber-300">
-                      ${escapeHtml(item.name || "Pause")}
-                    </p>
-
-                    <p class="text-sm text-slate-400 mt-1">
-                      ${item.from || "–"} – ${item.to || "–"}
-                    </p>
-
-                  </div>
-
-                  <button
-                    onclick="deleteBreak('${item.id}')"
-                    class="text-slate-600 hover:text-red-400"
-                  >
-                    ✕
-                  </button>
-
-                </div>
-
-              </div>
-            `;
-
-          }
-
-
-          return `
-            <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
-
-              <div class="flex items-center gap-4">
-
-                <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex flex-col items-center justify-center">
-
-                  <span class="font-bold">
-                    ${item.period || "–"}.
-                  </span>
-
-                </div>
-
-                <div class="flex-1">
-
-                  <p class="font-semibold">
-                    ${escapeHtml(item.subject)}
-                  </p>
-
-                  <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-slate-500">
-
-                    <span>
-                      🕐 ${item.from || "–"} – ${item.to || "–"}
-                    </span>
-
-                    ${
-                      item.room
-                        ? `<span>Raum ${escapeHtml(item.room)}</span>`
-                        : ""
-                    }
-
-                  </div>
-
-                </div>
-
-                <button
-                  onclick="deleteSchedule('${item.id}')"
-                  class="text-slate-600 hover:text-red-400"
-                >
-                  ✕
-                </button>
-
-              </div>
-
-            </div>
-          `;
-
-        })
-        .join("");
+    return;
 
   }
 
 
+  const now =
+    currentMinutes();
 
-  function compareTime(a, b) {
-
-    return (
-      (a.from || "99:99")
-        .localeCompare(
-          b.from || "99:99"
-        )
-    );
-
-  }
+  const today =
+    new Date().getDay() - 1;
 
 
+  list.innerHTML =
+    lessons.map(l => {
 
-  /* =========================================
-     TERMINE
-  ========================================= */
+      let state = "";
 
-  function renderEvents() {
+      if (
+        today === currentDay &&
+        l.from &&
+        l.to
+      ) {
 
-    const list =
-      document.getElementById(
-        "eventsList"
-      );
+        const start =
+          timeToMinutes(l.from);
 
-
-    const sorted =
-      data.events
-        .slice()
-        .sort(
-          (a, b) =>
-            a.date.localeCompare(b.date)
-        );
+        const end =
+          timeToMinutes(l.to);
 
 
-    if (!sorted.length) {
+        if (now >= start && now < end)
+          state = "lesson-current";
 
-      list.innerHTML =
-        `<p class="text-slate-500 text-center py-8">
-          Noch keine Termine.
-        </p>`;
+        else if (now >= end)
+          state = "lesson-finished";
 
-      return;
-
-    }
+      }
 
 
-    list.innerHTML =
-      sorted.map(e => {
+      return `
 
-        const past =
-          e.date <
-          new Date()
-            .toISOString()
-            .slice(0, 10);
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 ${state}">
 
+          <div class="flex items-center gap-4">
 
-        const date =
-          new Date(
-            e.date + "T12:00:00"
-          );
-
-
-        return `
-          <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 flex gap-4 ${
-            past ? "opacity-50" : ""
-          }">
-
-            <div class="text-center min-w-[50px]">
-
-              <p class="text-2xl font-bold text-blue-400">
-                ${date.getDate()}
-              </p>
-
-              <p class="text-xs text-slate-500 uppercase">
-                ${date.toLocaleDateString(
-                  "de-DE",
-                  { month: "short" }
-                )}
-              </p>
-
+            <div class="w-11 h-11 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-blue-400">
+              ${l.period}.
             </div>
+
 
             <div class="flex-1">
 
               <p class="font-semibold">
-                ${escapeHtml(e.title)}
+                ${escapeHTML(l.subject)}
               </p>
 
-              <p class="text-xs text-slate-500 mt-1">
-                ${escapeHtml(e.type || "Termin")}
+              <p class="text-xs text-slate-400 mt-1">
+
+                ${l.from || "--"} – ${l.to || "--"}
+
+                ${l.room
+                  ? " · Raum " + escapeHTML(l.room)
+                  : ""}
+
               </p>
 
             </div>
 
+
             <button
-              onclick="deleteEvent('${e.id}')"
-              class="text-slate-600 hover:text-red-400"
-            >
-              ✕
+              onclick="deleteSchedule('${l.id}')"
+              class="text-red-400">
+              ×
             </button>
 
           </div>
-        `;
 
-      }).join("");
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+function addSchedule() {
+
+  const subject =
+    document.getElementById("schedSubject")
+      .value.trim();
+
+  const period =
+    parseInt(
+      document.getElementById("schedPeriod")
+        .value
+    );
+
+
+  if (!subject || !period) {
+
+    alert("Stunde und Fach eingeben.");
+
+    return;
 
   }
 
 
+  data.schedule.push({
 
-  /* =========================================
-     ABSENZEN
-  ========================================= */
+    id: crypto.randomUUID(),
 
-  function renderAbsences() {
+    day:
+      parseInt(
+        document.getElementById("schedDay")
+          .value
+      ),
 
-    const list =
-      document.getElementById(
-        "absencesList"
+    period,
+
+    subject,
+
+    room:
+      document.getElementById("schedRoom")
+        .value.trim(),
+
+    from:
+      document.getElementById("schedFrom")
+        .value,
+
+    to:
+      document.getElementById("schedTo")
+        .value
+
+  });
+
+
+  save();
+
+  clearFields([
+    "schedSubject",
+    "schedRoom",
+    "schedFrom",
+    "schedTo",
+    "schedPeriod"
+  ]);
+
+}
+
+
+function deleteSchedule(id) {
+
+  data.schedule =
+    data.schedule.filter(
+      s => s.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   BREAKS
+============================================================ */
+
+function addBreak() {
+
+  const name =
+    document.getElementById("breakName")
+      .value.trim();
+
+
+  const from =
+    document.getElementById("breakFrom")
+      .value;
+
+  const to =
+    document.getElementById("breakTo")
+      .value;
+
+
+  if (!from || !to) {
+
+    alert("Start und Ende der Pause eingeben.");
+
+    return;
+
+  }
+
+
+  data.breaks.push({
+
+    id: crypto.randomUUID(),
+
+    day:
+      parseInt(
+        document.getElementById("breakDay")
+          .value
+      ),
+
+    name: name || "Pause",
+
+    from,
+
+    to
+
+  });
+
+
+  save();
+
+  clearFields([
+    "breakName",
+    "breakFrom",
+    "breakTo"
+  ]);
+
+}
+
+
+/* ============================================================
+   EVENTS
+============================================================ */
+
+function renderEvents() {
+
+  const list =
+    document.getElementById("eventsList");
+
+
+  const events =
+    data.events
+      .slice()
+      .sort(
+        (a,b) =>
+          new Date(a.date) -
+          new Date(b.date)
       );
 
 
-    if (!data.absences.length) {
-
-      list.innerHTML =
-        `<p class="text-slate-500 text-center py-8">
-          Keine Absenzen eingetragen.
-        </p>`;
-
-      return;
-
-    }
-
-
-    const sorted =
-      data.absences
-        .slice()
-        .sort(
-          (a, b) =>
-            b.date.localeCompare(a.date)
-        );
-
+  if (!events.length) {
 
     list.innerHTML =
-      sorted.map(a => `
+      `<p class="text-slate-500 text-center py-8">
+        Keine Termine.
+      </p>`;
 
-        <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 flex items-center justify-between">
+    return;
+
+  }
+
+
+  list.innerHTML =
+    events.map(e => `
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-4">
+
+        <div class="text-center min-w-[55px]">
+
+          <p class="text-2xl font-bold text-blue-400">
+            ${new Date(e.date).getDate()}
+          </p>
+
+          <p class="text-xs text-slate-500">
+            ${new Date(e.date)
+              .toLocaleDateString(
+                "de-DE",
+                {month:"short"}
+              )}
+          </p>
+
+        </div>
+
+
+        <div class="flex-1">
+
+          <p class="font-semibold">
+            ${escapeHTML(e.title)}
+          </p>
+
+          <p class="text-xs text-slate-500 mt-1">
+            ${escapeHTML(e.type || "Termin")}
+            ${e.time ? " · " + e.time : ""}
+          </p>
+
+        </div>
+
+
+        <button
+          onclick="deleteEvent('${e.id}')"
+          class="text-red-400">
+          ×
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function addEvent() {
+
+  const title =
+    document.getElementById("eventTitle")
+      .value.trim();
+
+
+  if (!title) {
+
+    alert("Titel eingeben.");
+
+    return;
+
+  }
+
+
+  data.events.push({
+
+    id: crypto.randomUUID(),
+
+    title,
+
+    date:
+      document.getElementById("eventDate")
+        .value || todayISO(),
+
+    time:
+      document.getElementById("eventTime")
+        .value,
+
+    type:
+      document.getElementById("eventType")
+        .value.trim()
+
+  });
+
+
+  save();
+
+  clearFields([
+    "eventTitle",
+    "eventTime",
+    "eventType"
+  ]);
+
+}
+
+
+function deleteEvent(id) {
+
+  data.events =
+    data.events.filter(
+      e => e.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   BAG
+============================================================ */
+
+function renderBag() {
+
+  const list =
+    document.getElementById("bagList");
+
+  const preview =
+    document.getElementById("bagPreview");
+
+  const count =
+    document.getElementById("bagCount");
+
+
+  const items =
+    data.bag;
+
+
+  const checked =
+    items.filter(
+      x => x.done
+    ).length;
+
+
+  count.textContent =
+    `${checked}/${items.length}`;
+
+
+  if (!items.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-sm">
+        Noch nichts eingetragen.
+      </p>`;
+
+    preview.innerHTML =
+      `<p class="text-slate-500 text-sm">
+        Tasche ist leer.
+      </p>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    items.map(item => `
+
+      <div class="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+
+        <button
+          onclick="toggleBag('${item.id}')"
+          class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+            item.done
+              ? "bg-green-500 border-green-500"
+              : "border-slate-600"
+          }">
+
+          ${item.done ? "✓" : ""}
+
+        </button>
+
+        <span class="flex-1 ${
+          item.done
+            ? "line-through text-slate-500"
+            : ""
+        }">
+
+          ${escapeHTML(item.name)}
+
+        </span>
+
+        <button
+          onclick="deleteBag('${item.id}')"
+          class="text-red-400">
+          ×
+        </button>
+
+      </div>
+
+    `).join("");
+
+
+  preview.innerHTML =
+    items.slice(0,5).map(item => `
+
+      <div class="flex items-center gap-2 text-sm">
+
+        <span class="${
+          item.done
+            ? "text-green-400"
+            : "text-slate-500"
+        }">
+
+          ${item.done ? "✓" : "○"}
+
+        </span>
+
+        <span class="${
+          item.done
+            ? "line-through text-slate-500"
+            : ""
+        }">
+
+          ${escapeHTML(item.name)}
+
+        </span>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function addBagItem() {
+
+  const name =
+    document.getElementById("bagItem")
+      .value.trim();
+
+
+  if (!name) return;
+
+
+  data.bag.push({
+
+    id: crypto.randomUUID(),
+
+    name,
+
+    done: false
+
+  });
+
+
+  save();
+
+  clearFields(["bagItem"]);
+
+}
+
+
+function toggleBag(id) {
+
+  const item =
+    data.bag.find(
+      x => x.id === id
+    );
+
+  if (item)
+    item.done = !item.done;
+
+  save();
+
+}
+
+
+function deleteBag(id) {
+
+  data.bag =
+    data.bag.filter(
+      x => x.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   CHECKLIST
+============================================================ */
+
+function renderChecklist() {
+
+  const list =
+    document.getElementById("checklistList");
+
+
+  if (!data.checklist.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-sm">
+        Keine Punkte.
+      </p>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    data.checklist.map(item => `
+
+      <div class="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+
+        <button
+          onclick="toggleCheck('${item.id}')"
+          class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+            item.done
+              ? "bg-green-500 border-green-500"
+              : "border-slate-600"
+          }">
+
+          ${item.done ? "✓" : ""}
+
+        </button>
+
+        <span class="flex-1 ${
+          item.done
+            ? "line-through text-slate-500"
+            : ""
+        }">
+
+          ${escapeHTML(item.name)}
+
+        </span>
+
+        <button
+          onclick="deleteCheck('${item.id}')"
+          class="text-red-400">
+          ×
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function addCheckItem() {
+
+  const name =
+    document.getElementById("checkItem")
+      .value.trim();
+
+
+  if (!name) return;
+
+
+  data.checklist.push({
+
+    id: crypto.randomUUID(),
+
+    name,
+
+    done: false
+
+  });
+
+
+  save();
+
+  clearFields(["checkItem"]);
+
+}
+
+
+function toggleCheck(id) {
+
+  const item =
+    data.checklist.find(
+      x => x.id === id
+    );
+
+  if (item)
+    item.done = !item.done;
+
+  save();
+
+}
+
+
+function deleteCheck(id) {
+
+  data.checklist =
+    data.checklist.filter(
+      x => x.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   SUBJECTS
+============================================================ */
+
+function renderSubjects() {
+
+  const list =
+    document.getElementById("subjectsList");
+
+
+  if (!data.subjects.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-center py-8">
+        Noch keine Fächer eingetragen.
+      </p>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    data.subjects.map(s => `
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
+
+        <div class="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center">
+          📚
+        </div>
+
+        <div class="flex-1">
+
+          <p class="font-semibold">
+            ${escapeHTML(s.name)}
+          </p>
+
+          <p class="text-xs text-slate-500">
+
+            ${s.teacher
+              ? escapeHTML(s.teacher)
+              : "Kein Lehrer"}
+
+            ${s.room
+              ? " · Raum " + escapeHTML(s.room)
+              : ""}
+
+          </p>
+
+        </div>
+
+        <button
+          onclick="deleteSubject('${s.id}')"
+          class="text-red-400">
+          ×
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function addSubject() {
+
+  const name =
+    document.getElementById("subjectName")
+      .value.trim();
+
+
+  if (!name) return;
+
+
+  data.subjects.push({
+
+    id: crypto.randomUUID(),
+
+    name,
+
+    teacher:
+      document.getElementById("subjectTeacher")
+        .value.trim(),
+
+    room:
+      document.getElementById("subjectRoom")
+        .value.trim()
+
+  });
+
+
+  save();
+
+  clearFields([
+    "subjectName",
+    "subjectTeacher",
+    "subjectRoom"
+  ]);
+
+}
+
+
+function deleteSubject(id) {
+
+  data.subjects =
+    data.subjects.filter(
+      x => x.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   NOTES
+============================================================ */
+
+function renderNotes() {
+
+  const list =
+    document.getElementById("notesList");
+
+
+  if (!data.notes.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-center py-8">
+        Keine Notizen.
+      </p>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    data.notes
+      .slice()
+      .reverse()
+      .map(n => `
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+
+          <div class="flex justify-between">
+
+            <p class="font-semibold">
+              ${escapeHTML(n.title || "Notiz")}
+            </p>
+
+            <button
+              onclick="deleteNote('${n.id}')"
+              class="text-red-400">
+              ×
+            </button>
+
+          </div>
+
+          <p class="text-sm text-slate-300 mt-2 whitespace-pre-wrap">
+            ${escapeHTML(n.text)}
+          </p>
+
+          <p class="text-xs text-slate-500 mt-2">
+            ${formatDate(n.date)}
+          </p>
+
+        </div>
+
+      `).join("");
+
+}
+
+
+function addNote() {
+
+  const title =
+    document.getElementById("noteTitle")
+      .value.trim();
+
+  const text =
+    document.getElementById("noteText")
+      .value.trim();
+
+
+  if (!text) return;
+
+
+  data.notes.push({
+
+    id: crypto.randomUUID(),
+
+    title,
+
+    text,
+
+    date: todayISO()
+
+  });
+
+
+  save();
+
+  clearFields([
+    "noteTitle",
+    "noteText"
+  ]);
+
+}
+
+
+function deleteNote(id) {
+
+  data.notes =
+    data.notes.filter(
+      x => x.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   SUBSTITUTIONS
+============================================================ */
+
+function renderSubstitutions() {
+
+  const list =
+    document.getElementById("substitutionList");
+
+
+  if (!data.substitutions.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-center py-8">
+        Keine Vertretungen.
+      </p>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    data.substitutions.map(s => `
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+
+        <div class="flex items-center gap-3">
+
+          <div class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+            ${s.period}.
+          </div>
+
+          <div class="flex-1">
+
+            <p class="font-semibold">
+              ${escapeHTML(s.newSubject || "Vertretung")}
+            </p>
+
+            <p class="text-xs text-slate-500">
+
+              ${getDayName(s.day)}
+
+              · vorher:
+              ${escapeHTML(s.oldSubject || "-")}
+
+              ${s.room
+                ? " · Raum " + escapeHTML(s.room)
+                : ""}
+
+            </p>
+
+          </div>
+
+          <button
+            onclick="deleteSubstitution('${s.id}')"
+            class="text-red-400">
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function addSubstitution() {
+
+  const period =
+    parseInt(
+      document.getElementById("subPeriod")
+        .value
+    );
+
+
+  if (!period) return;
+
+
+  data.substitutions.push({
+
+    id: crypto.randomUUID(),
+
+    day:
+      parseInt(
+        document.getElementById("subDay")
+          .value
+      ),
+
+    period,
+
+    oldSubject:
+      document.getElementById("subOld")
+        .value.trim(),
+
+    newSubject:
+      document.getElementById("subNew")
+        .value.trim(),
+
+    room:
+      document.getElementById("subRoom")
+        .value.trim()
+
+  });
+
+
+  save();
+
+  clearFields([
+    "subPeriod",
+    "subOld",
+    "subNew",
+    "subRoom"
+  ]);
+
+}
+
+
+function deleteSubstitution(id) {
+
+  data.substitutions =
+    data.substitutions.filter(
+      x => x.id !== id
+    );
+
+  save();
+
+}
+
+
+/* ============================================================
+   ANNOUNCEMENTS
+============================================================ */
+
+function addAnnouncement() {
+
+  const text =
+    document.getElementById("annText")
+      .value.trim();
+
+
+  if (!text) return;
+
+
+  data.announcements.push({
+
+    id: crypto.randomUUID(),
+
+    text,
+
+    date: todayISO()
+
+  });
+
+
+  save();
+
+  clearFields(["annText"]);
+
+}
+
+
+/* ============================================================
+   ABSENCES
+============================================================ */
+
+function renderAbsences() {
+
+  const list =
+    document.getElementById("absencesList");
+
+
+  if (!data.absences.length) {
+
+    list.innerHTML =
+      `<p class="text-slate-500 text-center py-8">
+        Keine Absenzen.
+      </p>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    data.absences
+      .slice()
+      .reverse()
+      .map(a => `
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between">
 
           <div>
 
-            <p class="font-medium">
-              ${escapeHtml(a.name)}
+            <p class="font-semibold">
+              ${escapeHTML(a.name)}
             </p>
 
             <p class="text-xs text-slate-500 mt-1">
               ${formatDate(a.date)}
-              ${a.reason ? " · " + escapeHtml(a.reason) : ""}
+              ${a.reason
+                ? " · " + escapeHTML(a.reason)
+                : ""}
             </p>
 
           </div>
 
           <button
             onclick="deleteAbsence('${a.id}')"
-            class="text-slate-600 hover:text-red-400"
-          >
-            ✕
+            class="text-red-400">
+            ×
           </button>
 
         </div>
 
       `).join("");
 
-  }
+}
 
 
+function addAbsence() {
 
-  /* =========================================
-     EINSTELLUNGEN
-  ========================================= */
-
-  function saveUserName() {
-
-    data.userName =
-      document
-        .getElementById("inputUserName")
-        .value
-        .trim();
+  const name =
+    document.getElementById("absName")
+      .value.trim();
 
 
-    save();
+  if (!name) return;
 
-    alert(
-      data.userName
-        ? `Name "${data.userName}" gespeichert!`
-        : "Name gelöscht."
+
+  data.absences.push({
+
+    id: crypto.randomUUID(),
+
+    name,
+
+    date:
+      document.getElementById("absDate")
+        .value || todayISO(),
+
+    reason:
+      document.getElementById("absReason")
+        .value.trim()
+
+  });
+
+
+  save();
+
+  clearFields([
+    "absName",
+    "absReason"
+  ]);
+
+}
+
+
+function deleteAbsence(id) {
+
+  data.absences =
+    data.absences.filter(
+      x => x.id !== id
     );
 
-  }
+  save();
 
+}
 
 
-  function saveClassName() {
+/* ============================================================
+   BACKUP
+============================================================ */
 
-    data.className =
-      document
-        .getElementById("inputClassName")
-        .value
-        .trim() ||
-      "Meine Klasse";
+function exportData() {
 
-
-    save();
-
-    alert("Klassenname gespeichert!");
-
-  }
-
-
-
-  /* =========================================
-     NOTE HINZUFÜGEN
-  ========================================= */
-
-  function addGrade() {
-
-    const subject =
-      document
-        .getElementById("gradeSubject")
-        .value
-        .trim();
-
-
-    const value =
-      document
-        .getElementById("gradeValue")
-        .value
-        .trim();
-
-
-    if (!subject || !value) {
-
-      alert("Fach und Note angeben!");
-
-      return;
-
-    }
-
-
-    data.grades.push({
-
-      id: id(),
-
-      subject,
-
-      value,
-
-      weight:
-        document.getElementById(
-          "gradeWeight"
-        ).value || "1",
-
-      date:
-        document.getElementById(
-          "gradeDate"
-        ).value ||
-        today(),
-
-      type:
-        document.getElementById(
-          "gradeType"
-        ).value.trim()
-
-    });
-
-
-    save();
-
-    clearFields([
-      "gradeSubject",
-      "gradeValue",
-      "gradeType"
-    ]);
-
-    closeAddModal();
-
-    showTab("grades");
-
-  }
-
-
-
-  function deleteGrade(id) {
-
-    if (
-      !confirm(
-        "Note wirklich löschen?"
-      )
-    ) return;
-
-
-    data.grades =
-      data.grades.filter(
-        g => g.id !== id
-      );
-
-
-    save();
-
-  }
-
-
-
-  /* =========================================
-     HAUSAUFGABE HINZUFÜGEN
-  ========================================= */
-
-  function addHomework() {
-
-    const subject =
-      document
-        .getElementById("hwSubject")
-        .value
-        .trim();
-
-
-    const task =
-      document
-        .getElementById("hwTask")
-        .value
-        .trim();
-
-
-    if (!subject || !task) {
-
-      alert(
-        "Fach und Aufgabe angeben!"
-      );
-
-      return;
-
-    }
-
-
-    data.homework.push({
-
-      id: id(),
-
-      subject,
-
-      task,
-
-      due:
-        document.getElementById(
-          "hwDue"
-        ).value || today(),
-
-      done: false
-
-    });
-
-
-    save();
-
-    clearFields([
-      "hwSubject",
-      "hwTask"
-    ]);
-
-    closeAddModal();
-
-    showTab("homework");
-
-  }
-
-
-
-  function toggleHomework(id) {
-
-    const hw =
-      data.homework.find(
-        h => h.id === id
-      );
-
-
-    if (hw) {
-      hw.done = !hw.done;
-    }
-
-
-    save();
-
-  }
-
-
-
-  function deleteHomework(id) {
-
-    data.homework =
-      data.homework.filter(
-        h => h.id !== id
-      );
-
-
-    save();
-
-  }
-
-
-
-  /* =========================================
-     STUNDE HINZUFÜGEN
-  ========================================= */
-
-  function addSchedule() {
-
-    const day =
-      parseInt(
-        document.getElementById(
-          "schedDay"
-        ).value
-      );
-
-
-    const period =
-      parseInt(
-        document.getElementById(
-          "schedPeriod"
-        ).value
-      );
-
-
-    const subject =
-      document
-        .getElementById(
-          "schedSubject"
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          data,
+          null,
+          2
         )
-        .value
-        .trim();
-
-
-    const room =
-      document
-        .getElementById(
-          "schedRoom"
-        )
-        .value
-        .trim();
-
-
-    const from =
-      document.getElementById(
-        "schedFrom"
-      ).value;
-
-
-    const to =
-      document.getElementById(
-        "schedTo"
-      ).value;
-
-
-    if (
-      !subject ||
-      !period ||
-      !from ||
-      !to
-    ) {
-
-      alert(
-        "Stunde, Fach, Beginn und Ende angeben!"
-      );
-
-      return;
-
-    }
-
-
-    if (from >= to) {
-
-      alert(
-        "Das Ende muss nach dem Beginn liegen."
-      );
-
-      return;
-
-    }
-
-
-    data.schedule.push({
-
-      id: id(),
-
-      day,
-
-      period,
-
-      subject,
-
-      room,
-
-      from,
-
-      to
-
-    });
-
-
-    save();
-
-    clearFields([
-      "schedPeriod",
-      "schedSubject",
-      "schedRoom",
-      "schedFrom",
-      "schedTo"
-    ]);
-
-    closeAddModal();
-
-    currentDay = day;
-
-    showTab("schedule");
-
-  }
-
-
-
-  function deleteSchedule(id) {
-
-    data.schedule =
-      data.schedule.filter(
-        s => s.id !== id
-      );
-
-
-    save();
-
-  }
-
-
-
-  /* =========================================
-     PAUSE HINZUFÜGEN
-  ========================================= */
-
-  function addBreak() {
-
-    const day =
-      parseInt(
-        document.getElementById(
-          "breakDay"
-        ).value
-      );
-
-
-    const name =
-      document
-        .getElementById(
-          "breakName"
-        )
-        .value
-        .trim();
-
-
-    const from =
-      document.getElementById(
-        "breakFrom"
-      ).value;
-
-
-    const to =
-      document.getElementById(
-        "breakTo"
-      ).value;
-
-
-    if (
-      !name ||
-      !from ||
-      !to
-    ) {
-
-      alert(
-        "Name, Beginn und Ende angeben!"
-      );
-
-      return;
-
-    }
-
-
-    if (from >= to) {
-
-      alert(
-        "Das Ende muss nach dem Beginn liegen."
-      );
-
-      return;
-
-    }
-
-
-    data.breaks.push({
-
-      id: id(),
-
-      day,
-
-      name,
-
-      from,
-
-      to
-
-    });
-
-
-    save();
-
-    clearFields([
-      "breakName",
-      "breakFrom",
-      "breakTo"
-    ]);
-
-    closeAddModal();
-
-    currentDay = day;
-
-    showTab("schedule");
-
-  }
-
-
-
-  function deleteBreak(id) {
-
-    data.breaks =
-      data.breaks.filter(
-        b => b.id !== id
-      );
-
-
-    save();
-
-  }
-
-
-
-  /* =========================================
-     TERMIN
-  ========================================= */
-
-  function addEvent() {
-
-    const title =
-      document
-        .getElementById(
-          "eventTitle"
-        )
-        .value
-        .trim();
-
-
-    if (!title) {
-
-      alert("Titel angeben!");
-
-      return;
-
-    }
-
-
-    data.events.push({
-
-      id: id(),
-
-      title,
-
-      date:
-        document.getElementById(
-          "eventDate"
-        ).value || today(),
-
-      type:
-        document.getElementById(
-          "eventType"
-        ).value.trim()
-
-    });
-
-
-    save();
-
-    clearFields([
-      "eventTitle",
-      "eventType"
-    ]);
-
-    closeAddModal();
-
-    showTab("events");
-
-  }
-
-
-
-  function deleteEvent(id) {
-
-    data.events =
-      data.events.filter(
-        e => e.id !== id
-      );
-
-
-    save();
-
-  }
-
-
-
-  /* =========================================
-     ANKÜNDIGUNG
-  ========================================= */
-
-  function addAnnouncement() {
-
-    const text =
-      document
-        .getElementById(
-          "annText"
-        )
-        .value
-        .trim();
-
-
-    if (!text) {
-
-      alert("Text eingeben!");
-
-      return;
-
-    }
-
-
-    data.announcements.push({
-
-      id: id(),
-
-      text,
-
-      date: today()
-
-    });
-
-
-    save();
-
-    clearFields([
-      "annText"
-    ]);
-
-    closeAddModal();
-
-    showTab("dashboard");
-
-  }
-
-
-
-  /* =========================================
-     ABSENZ
-  ========================================= */
-
-  function addAbsence() {
-
-    const name =
-      document
-        .getElementById(
-          "absName"
-        )
-        .value
-        .trim();
-
-
-    if (!name) {
-
-      alert("Name angeben!");
-
-      return;
-
-    }
-
-
-    data.absences.push({
-
-      id: id(),
-
-      name,
-
-      date:
-        document.getElementById(
-          "absDate"
-        ).value || today(),
-
-      reason:
-        document.getElementById(
-          "absReason"
-        ).value.trim()
-
-    });
-
-
-    save();
-
-    clearFields([
-      "absName",
-      "absReason"
-    ]);
-
-    closeAddModal();
-
-    showTab("absences");
-
-  }
-
-
-
-  function deleteAbsence(id) {
-
-    data.absences =
-      data.absences.filter(
-        a => a.id !== id
-      );
-
-
-    save();
-
-  }
-
-
-
-  /* =========================================
-     HILFSFUNKTIONEN
-  ========================================= */
-
-  function today() {
-
-    return new Date()
-      .toISOString()
-      .slice(0, 10);
-
-  }
-
-
-
-  function formatDate(dateStr) {
-
-    if (!dateStr) return "";
-
-    const d =
-      new Date(
-        dateStr + "T12:00:00"
-      );
-
-
-    return d.toLocaleDateString(
-      "de-DE",
+      ],
       {
-        day: "2-digit",
-        month: "2-digit"
+        type: "application/json"
       }
     );
 
-  }
+
+  const url =
+    URL.createObjectURL(blob);
 
 
+  const a =
+    document.createElement("a");
 
-  function clearFields(ids) {
+  a.href = url;
 
-    ids.forEach(id => {
+  a.download =
+    `klassenboard-${data.className || "backup"}.json`;
 
-      const el =
-        document.getElementById(id);
+  a.click();
 
-      if (el) {
-        el.value = "";
+  URL.revokeObjectURL(url);
+
+}
+
+
+function importData() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+
+  input.accept = ".json";
+
+
+  input.onchange = e => {
+
+    const file =
+      e.target.files[0];
+
+    if (!file) return;
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload = event => {
+
+      try {
+
+        const imported =
+          JSON.parse(
+            event.target.result
+          );
+
+
+        data = {
+          ...structuredClone(defaultData),
+          ...imported
+        };
+
+
+        save();
+
+        alert("Daten importiert.");
+
+      } catch {
+
+        alert("Ungültige JSON-Datei.");
+
       }
-
-    });
-
-  }
-
-
-
-  function parseGrade(value) {
-
-    value =
-      value
-        .toString()
-        .trim()
-        .replace(",", ".");
-
-
-    const match =
-      value.match(
-        /^(\d)([+-])?$/
-      );
-
-
-    if (!match) {
-
-      const num =
-        parseFloat(value);
-
-      return isNaN(num)
-        ? null
-        : num;
-
-    }
-
-
-    let num =
-      parseInt(match[1]);
-
-
-    if (match[2] === "+") {
-      num -= 0.3;
-    }
-
-
-    if (match[2] === "-") {
-      num += 0.3;
-    }
-
-
-    return num;
-
-  }
-
-
-
-  function escapeHtml(value) {
-
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-
-
-  /* =========================================
-     EXPORT
-  ========================================= */
-
-  function exportData() {
-
-    const blob =
-      new Blob(
-        [
-          JSON.stringify(
-            data,
-            null,
-            2
-          )
-        ],
-        {
-          type: "application/json"
-        }
-      );
-
-
-    const url =
-      URL.createObjectURL(blob);
-
-
-    const a =
-      document.createElement("a");
-
-
-    a.href = url;
-
-    a.download =
-      `klassenboard-${data.className || "export"}.json`;
-
-
-    a.click();
-
-
-    URL.revokeObjectURL(url);
-
-  }
-
-
-
-  /* =========================================
-     IMPORT
-  ========================================= */
-
-  function importData() {
-
-    const input =
-      document.createElement(
-        "input"
-      );
-
-
-    input.type = "file";
-
-    input.accept = ".json";
-
-
-    input.onchange = event => {
-
-      const file =
-        event.target.files[0];
-
-
-      if (!file) return;
-
-
-      const reader =
-        new FileReader();
-
-
-      reader.onload = e => {
-
-        try {
-
-          const imported =
-            JSON.parse(
-              e.target.result
-            );
-
-
-          data = {
-            ...structuredClone(
-              defaultData
-            ),
-            ...imported
-          };
-
-
-          save();
-
-          alert(
-            "Daten erfolgreich importiert!"
-          );
-
-        } catch {
-
-          alert(
-            "Ungültige Datei."
-          );
-
-        }
-
-      };
-
-
-      reader.readAsText(file);
 
     };
 
 
-    input.click();
+    reader.readAsText(file);
 
-  }
-
-
-
-  /* =========================================
-     ALLES LÖSCHEN
-  ========================================= */
-
-  function clearAllData() {
-
-    if (
-      !confirm(
-        "Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden!"
-      )
-    ) return;
+  };
 
 
-    data =
-      structuredClone(
-        defaultData
-      );
+  input.click();
+
+}
 
 
-    localStorage.removeItem(
-      "klassenBoard"
-    );
+function clearAllData() {
+
+  if (
+    !confirm(
+      "Wirklich alle Daten löschen?"
+    )
+  ) return;
 
 
-    save();
+  data =
+    structuredClone(defaultData);
 
 
-    alert(
-      "Alle Daten wurden gelöscht."
-    );
-
-  }
+  localStorage.removeItem(
+    "klassenBoard"
+  );
 
 
+  save();
 
-  /* =========================================
-     START
-  ========================================= */
+}
 
-  renderAll();
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+function clearFields(ids) {
+
+  ids.forEach(id => {
+
+    const el =
+      document.getElementById(id);
+
+    if (el)
+      el.value = "";
+
+  });
+
+}
+
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+/* ============================================================
+   START
+============================================================ */
+
+renderAll();
+
+
+/* Live Uhr */
+
+setInterval(() => {
+
+  updateLiveLesson();
+
+}, 1000);
+
+
+/* Alle paar Sekunden UI aktualisieren */
+
+setInterval(() => {
+
+  renderDashboard();
+
+}, 5000);
+
+
+updateLiveLesson();
 
 </script>
 
