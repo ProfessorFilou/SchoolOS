@@ -2,2922 +2,5843 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0b0f19">
-<title>KlassenBoard</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
+<title>KlassenBoard · ProfessorFilou</title>
+
+<link rel="icon" type="image/png" href="ProfessorFilouLOGO.png">
+<link rel="apple-touch-icon" href="ProfessorFilouLOGO.png">
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
-      }
-    }
-  }
-}
-</script>
-
 <style>
-* {
-  box-sizing: border-box;
+:root{
+  --bg:#f4f6f9;
+  --surface:rgba(255,255,255,.78);
+  --surface-solid:#fff;
+  --surface-2:rgba(245,247,250,.92);
+  --text:#15171a;
+  --muted:#70757d;
+  --border:rgba(0,0,0,.08);
+  --shadow:0 12px 35px rgba(0,0,0,.07);
+  --accent:#2563eb;
+  --accent-soft:rgba(37,99,235,.11);
+  --danger:#ef4444;
+  --success:#16a34a;
+  --radius:22px;
 }
 
-html {
-  scroll-behavior: smooth;
+.dark{
+  --bg:#0d0f12;
+  --surface:rgba(25,28,33,.82);
+  --surface-solid:#191c21;
+  --surface-2:#20242a;
+  --text:#f4f5f7;
+  --muted:#9ca3af;
+  --border:rgba(255,255,255,.09);
+  --shadow:0 15px 40px rgba(0,0,0,.28);
+  --accent:#60a5fa;
+  --accent-soft:rgba(96,165,250,.13);
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html{
+  width:100%;
+  min-height:100%;
+  background:var(--bg);
+}
+
+body{
+  margin:0;
+  min-height:100vh;
   background:
-    radial-gradient(circle at 10% 0%, rgba(80,110,255,.14), transparent 28%),
-    radial-gradient(circle at 90% 10%, rgba(0,200,255,.08), transparent 25%),
-    #080b12;
-  color: #f5f7fb;
+    radial-gradient(circle at 10% 0%,rgba(37,99,235,.06),transparent 28%),
+    radial-gradient(circle at 100% 20%,rgba(124,58,237,.05),transparent 25%),
+    var(--bg);
+  color:var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "SF Pro Text",
+    Inter,
+    system-ui,
+    sans-serif;
+  overflow-x:hidden;
 }
 
 button,
 input,
-select,
-textarea {
-  font: inherit;
+textarea,
+select{
+  font:inherit;
 }
 
-button {
-  -webkit-tap-highlight-color: transparent;
+button{
+  cursor:pointer;
 }
 
-.glass {
-  background: rgba(17, 22, 34, .78);
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow:
-    0 15px 45px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.025);
-  backdrop-filter: blur(22px);
+.app{
+  min-height:100vh;
 }
 
-.card {
-  border-radius: 22px;
+/* =========================
+   DESKTOP LAYOUT
+========================= */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:265px;
+  padding:20px 14px;
+  background:var(--surface);
+  backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:blur(28px);
+  border-right:1px solid var(--border);
+  z-index:50;
+  display:flex;
+  flex-direction:column;
 }
 
-.input {
-  width: 100%;
-  border: 1px solid rgba(255,255,255,.09);
-  background: rgba(255,255,255,.045);
-  color: white;
-  border-radius: 14px;
-  padding: 12px 14px;
-  outline: none;
-  transition: .2s;
+.main{
+  margin-left:265px;
+  min-height:100vh;
+  width:calc(100% - 265px);
 }
 
-.input:focus {
-  border-color: rgba(100,140,255,.7);
-  background: rgba(255,255,255,.065);
-  box-shadow: 0 0 0 3px rgba(80,110,255,.12);
+.content{
+  width:100%;
+  max-width:1600px;
+  margin:auto;
+  padding:24px clamp(18px,2.5vw,42px) 80px;
 }
 
-.input option {
-  background: #111622;
+/* =========================
+   BRAND
+========================= */
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:8px 9px 22px;
 }
 
-textarea.input {
-  min-height: 100px;
-  resize: vertical;
+.brand img{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+  border-radius:12px;
 }
 
-.btn {
-  border-radius: 13px;
-  padding: 10px 14px;
-  font-weight: 600;
-  transition: .18s;
-  cursor: pointer;
+.brand-title{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-.4px;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
+.brand-subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:1px;
 }
 
-.btn:active {
-  transform: scale(.98);
+/* =========================
+   NAV
+========================= */
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  overflow:auto;
 }
 
-.btn-primary {
-  background: #5875ff;
-  color: white;
+.nav button{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  width:100%;
+  min-height:44px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:9px 12px;
+  text-align:left;
+  font-size:14px;
+  transition:.18s ease;
 }
 
-.btn-secondary {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.08);
+.nav button:hover{
+  background:var(--surface-2);
+  color:var(--text);
 }
 
-.btn-danger {
-  background: rgba(255,70,80,.12);
-  color: #ff8b92;
-  border: 1px solid rgba(255,70,80,.15);
+.nav button.active{
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-weight:700;
 }
 
-.nav-btn {
-  width: 100%;
-  text-align: left;
-  padding: 12px 14px;
-  border-radius: 14px;
-  color: #aeb6c8;
-  transition: .18s;
+.nav-icon{
+  width:22px;
+  text-align:center;
+  font-size:17px;
 }
 
-.nav-btn:hover {
-  background: rgba(255,255,255,.055);
-  color: white;
+.sidebar-bottom{
+  margin-top:auto;
+  padding-top:14px;
 }
 
-.nav-btn.active {
-  background: rgba(88,117,255,.16);
-  color: white;
-  border: 1px solid rgba(88,117,255,.22);
+.profile-mini{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px;
+  border-radius:16px;
+  background:var(--surface-2);
 }
 
-.sidebar {
-  width: 250px;
-  flex-shrink: 0;
+.profile-avatar{
+  width:34px;
+  height:34px;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-weight:800;
 }
 
-.page {
-  width: min(1500px, calc(100vw - 40px));
-  margin: auto;
+.profile-name{
+  font-weight:700;
+  font-size:13px;
 }
 
-.grid-auto {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 16px;
+.profile-class{
+  color:var(--muted);
+  font-size:11px;
 }
 
-.grid-wide {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
-  gap: 18px;
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:24px;
 }
 
-.schedule-grid {
-  display: grid;
-  grid-template-columns: 110px repeat(5, minmax(150px, 1fr));
-  gap: 8px;
-  min-width: 850px;
+.page-title{
+  font-size:clamp(25px,2.2vw,34px);
+  line-height:1.05;
+  font-weight:850;
+  letter-spacing:-1px;
 }
 
-.schedule-cell {
-  min-height: 74px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.06);
-  padding: 10px;
+.page-subtitle{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:6px;
 }
 
-.modal-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-.modal {
-  width: min(650px, 100%);
-  max-height: min(90vh, 900px);
-  overflow-y: auto;
-  border-radius: 24px;
-  padding: 22px;
+.icon-btn{
+  width:42px;
+  height:42px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  box-shadow:var(--shadow);
 }
 
-.fab {
-  position: fixed;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: max(24px, env(safe-area-inset-bottom));
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  background: #5875ff;
-  color: white;
-  font-size: 30px;
-  line-height: 1;
-  box-shadow: 0 15px 40px rgba(65,90,255,.4);
-  z-index: 80;
-  transition: .2s;
+.icon-btn:active{
+  transform:scale(.96);
 }
 
-.fab:hover {
-  transform: scale(1.06) rotate(90deg);
+/* =========================
+   CARDS
+========================= */
+
+.card{
+  background:var(--surface);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:20px;
 }
 
-.fab-menu {
-  position: fixed;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: calc(max(24px, env(safe-area-inset-bottom)) + 75px);
-  width: min(330px, calc(100vw - 32px));
-  z-index: 79;
+.card.compact{
+  padding:16px;
 }
 
-.fab-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 13px;
-  border-radius: 15px;
-  background: rgba(20,25,38,.94);
-  border: 1px solid rgba(255,255,255,.08);
-  margin-top: 7px;
-  color: white;
-  text-align: left;
+.card-title{
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:-.2px;
 }
 
-.progress {
-  height: 8px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: rgba(255,255,255,.08);
+.card-muted{
+  color:var(--muted);
+  font-size:12px;
 }
 
-.progress > div {
-  height: 100%;
-  border-radius: inherit;
-  background: #5875ff;
-  transition: width .5s linear;
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard{
+  display:grid;
+  grid-template-columns:
+    repeat(12,minmax(0,1fr));
+  gap:16px;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 4px 9px;
-  font-size: 12px;
-  background: rgba(255,255,255,.07);
-  color: #b8c0d2;
+.span-12{grid-column:span 12}
+.span-8{grid-column:span 8}
+.span-7{grid-column:span 7}
+.span-6{grid-column:span 6}
+.span-5{grid-column:span 5}
+.span-4{grid-column:span 4}
+.span-3{grid-column:span 3}
+
+.now-card{
+  min-height:220px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
 
-.empty {
-  padding: 35px 15px;
-  text-align: center;
-  color: #778198;
+.now-label{
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.7px;
 }
 
-::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+.now-subject{
+  font-size:clamp(28px,3vw,44px);
+  font-weight:850;
+  letter-spacing:-1.5px;
+  margin-top:7px;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.now-room{
+  color:var(--muted);
+  margin-top:4px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.12);
-  border-radius: 999px;
+.progress{
+  height:8px;
+  border-radius:999px;
+  background:var(--surface-2);
+  overflow:hidden;
+  margin-top:18px;
 }
 
-@media(max-width: 1000px) {
-  .sidebar {
-    width: 210px;
+.progress > div{
+  height:100%;
+  background:var(--accent);
+  border-radius:inherit;
+  transition:width .4s linear;
+}
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.stat{
+  background:var(--surface-2);
+  border-radius:16px;
+  padding:14px;
+  min-width:0;
+}
+
+.stat-value{
+  font-size:25px;
+  font-weight:850;
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:13px;
+}
+
+.list-item{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px 12px;
+  border-radius:15px;
+  background:var(--surface-2);
+  min-width:0;
+}
+
+.list-item-main{
+  min-width:0;
+  flex:1;
+}
+
+.list-item-title{
+  font-weight:700;
+  font-size:13px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.list-item-sub{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:5px 9px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section-header{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:12px;
+  margin:24px 0 12px;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:850;
+  letter-spacing:-.4px;
+}
+
+.section-description{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn{
+  min-height:40px;
+  padding:9px 14px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  border-radius:12px;
+  font-size:13px;
+  font-weight:700;
+  transition:.15s ease;
+}
+
+.btn:hover{
+  background:var(--surface-2);
+}
+
+.btn-primary{
+  border-color:transparent;
+  background:var(--accent);
+  color:white;
+}
+
+.btn-danger{
+  border-color:transparent;
+  background:var(--danger);
+  color:white;
+}
+
+.btn-small{
+  min-height:34px;
+  padding:7px 10px;
+  font-size:12px;
+}
+
+/* =========================
+   TABLE / TIMETABLE
+========================= */
+
+.table-wrap{
+  width:100%;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:18px;
+}
+
+.schedule{
+  display:grid;
+  grid-template-columns:74px repeat(5,minmax(150px,1fr));
+  min-width:820px;
+}
+
+.schedule-head{
+  padding:12px 9px;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--border);
+  font-size:12px;
+  font-weight:800;
+}
+
+.period-cell{
+  padding:8px;
+  min-height:82px;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+.period-number{
+  font-size:12px;
+  font-weight:800;
+}
+
+.period-time{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:2px;
+}
+
+.lesson{
+  width:100%;
+  min-height:62px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface-2);
+  padding:10px;
+  text-align:left;
+}
+
+.lesson-name{
+  font-size:12px;
+  font-weight:800;
+}
+
+.lesson-teacher,
+.lesson-room{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:2px;
+}
+
+.lesson.current{
+  outline:2px solid var(--accent);
+  background:var(--accent-soft);
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  min-height:42px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface-2);
+  color:var(--text);
+  padding:9px 11px;
+  outline:none;
+}
+
+.field textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:var(--accent);
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-layer{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(7px);
+}
+
+.modal-layer.show{
+  display:flex;
+}
+
+.modal{
+  width:min(650px,100%);
+  max-height:min(88vh,800px);
+  overflow:auto;
+  background:var(--surface-solid);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:24px;
+  box-shadow:0 30px 90px rgba(0,0,0,.25);
+  padding:22px;
+}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.modal-title{
+  font-size:20px;
+  font-weight:850;
+}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:18px;
+}
+
+/* =========================
+   FAB
+========================= */
+
+.fab{
+  position:fixed;
+  right:28px;
+  bottom:28px;
+  z-index:70;
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:20px;
+  background:var(--accent);
+  color:white;
+  font-size:28px;
+  display:grid;
+  place-items:center;
+  box-shadow:0 15px 35px rgba(0,0,0,.22);
+  transition:.18s ease;
+}
+
+.fab:hover{
+  transform:translateY(-2px);
+}
+
+.quick-menu{
+  position:fixed;
+  right:28px;
+  bottom:96px;
+  z-index:69;
+  width:210px;
+  padding:8px;
+  border-radius:18px;
+  background:var(--surface-solid);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  display:none;
+}
+
+.quick-menu.show{
+  display:block;
+}
+
+.quick-menu button{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  padding:11px;
+  border-radius:12px;
+  text-align:left;
+  font-size:13px;
+}
+
+.quick-menu button:hover{
+  background:var(--surface-2);
+}
+
+/* =========================
+   MOBILE NAV
+========================= */
+
+.mobile-nav{
+  display:none;
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty{
+  padding:28px 15px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* =========================
+   IPAD
+========================= */
+
+/*
+  iPad Landscape:
+  - Sidebar bleibt sichtbar
+  - Content wird kompakter
+  - Karten nutzen 12er Grid
+*/
+
+@media (max-width:1180px){
+
+  .sidebar{
+    width:225px;
   }
 
-  .grid-wide {
-    grid-template-columns: 1fr;
+  .main{
+    margin-left:225px;
+    width:calc(100% - 225px);
+  }
+
+  .content{
+    padding:
+      20px
+      clamp(14px,2vw,28px)
+      70px;
+  }
+
+  .card{
+    padding:16px;
+    border-radius:19px;
+  }
+
+  .dashboard{
+    gap:12px;
+  }
+
+  .now-card{
+    min-height:190px;
+  }
+
+  .now-subject{
+    font-size:30px;
+  }
+
+  .section-title{
+    font-size:16px;
+  }
+
+  .nav button{
+    min-height:41px;
+    font-size:13px;
   }
 }
 
-@media(max-width: 760px) {
-  .sidebar {
-    display: none;
+/*
+  iPad Portrait:
+  Hier ist besonders wichtig:
+  keine zu breiten Karten,
+  2-Spalten-Layout,
+  kleinere Abstände.
+*/
+
+@media (min-width:700px) and (max-width:1024px){
+
+  .sidebar{
+    width:190px;
+    padding:14px 9px;
   }
 
-  .page {
-    width: calc(100vw - 24px);
+  .main{
+    margin-left:190px;
+    width:calc(100% - 190px);
   }
 
-  .mobile-nav {
-    display: flex !important;
+  .content{
+    padding:16px 14px 65px;
   }
 
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
+  .brand{
+    padding-bottom:14px;
   }
 
-  .grid-auto {
-    grid-template-columns: repeat(2, minmax(0,1fr));
+  .brand img{
+    width:36px;
+    height:36px;
   }
 
-  .modal {
-    padding: 17px;
-    border-radius: 20px;
+  .brand-title{
+    font-size:15px;
+  }
+
+  .brand-subtitle{
+    font-size:10px;
+  }
+
+  .nav button{
+    min-height:39px;
+    padding:8px 9px;
+    font-size:12px;
+    gap:8px;
+  }
+
+  .nav-icon{
+    font-size:15px;
+  }
+
+  .dashboard{
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .span-12,
+  .span-8,
+  .span-7{
+    grid-column:span 6;
+  }
+
+  .span-6{
+    grid-column:span 3;
+  }
+
+  .span-5,
+  .span-4,
+  .span-3{
+    grid-column:span 3;
+  }
+
+  .card{
+    padding:14px;
+    border-radius:17px;
+  }
+
+  .now-card{
+    min-height:180px;
+  }
+
+  .now-subject{
+    font-size:27px;
+  }
+
+  .stat{
+    padding:11px;
+  }
+
+  .stat-value{
+    font-size:21px;
+  }
+
+  .list-item{
+    padding:9px 10px;
+  }
+
+  .fab{
+    right:20px;
+    bottom:20px;
   }
 }
 
-@media(max-width: 480px) {
-  .grid-auto {
-    grid-template-columns: 1fr;
+/* =========================
+   PHONE
+========================= */
+
+@media (max-width:699px){
+
+  body{
+    padding-bottom:72px;
   }
 
-  .page {
-    width: calc(100vw - 16px);
+  .sidebar{
+    display:none;
   }
 
-  .fab {
-    width: 58px;
-    height: 58px;
-    right: 16px;
-    bottom: 16px;
+  .main{
+    margin:0;
+    width:100%;
   }
 
-  .fab-menu {
-    right: 16px;
-    bottom: 82px;
+  .content{
+    padding:14px 12px 90px;
+  }
+
+  .topbar{
+    margin-bottom:17px;
+  }
+
+  .page-title{
+    font-size:25px;
+  }
+
+  .page-subtitle{
+    font-size:11px;
+  }
+
+  .dashboard{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .span-12,
+  .span-8,
+  .span-7,
+  .span-6,
+  .span-5,
+  .span-4,
+  .span-3{
+    grid-column:span 1;
+  }
+
+  .card{
+    padding:14px;
+    border-radius:17px;
+  }
+
+  .now-card{
+    min-height:180px;
+  }
+
+  .now-subject{
+    font-size:29px;
+  }
+
+  .stat-grid{
+    gap:7px;
+  }
+
+  .stat{
+    padding:10px;
+  }
+
+  .stat-value{
+    font-size:20px;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .field.full{
+    grid-column:auto;
+  }
+
+  .mobile-nav{
+    position:fixed;
+    left:8px;
+    right:8px;
+    bottom:8px;
+    height:60px;
+    z-index:60;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:4px;
+    padding:5px;
+    background:var(--surface-solid);
+    border:1px solid var(--border);
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,.18);
+  }
+
+  .mobile-nav button{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    border-radius:15px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    font-size:9px;
+  }
+
+  .mobile-nav button.active{
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-weight:800;
+  }
+
+  .mobile-nav span:first-child{
+    font-size:17px;
+  }
+
+  .fab{
+    right:15px;
+    bottom:82px;
+    width:52px;
+    height:52px;
+    border-radius:18px;
+  }
+
+  .quick-menu{
+    right:15px;
+    bottom:143px;
+  }
+
+  .top-actions .icon-btn{
+    width:38px;
+    height:38px;
   }
 }
 
-.mobile-nav {
-  display: none;
+/* =========================
+   ACCESSIBILITY / SAFE AREA
+========================= */
+
+@supports(padding:max(0px)){
+  .mobile-nav{
+    padding-bottom:max(5px,env(safe-area-inset-bottom));
+  }
+
+  body{
+    padding-bottom:max(72px,calc(72px + env(safe-area-inset-bottom)));
+  }
 }
 
-.light {
-  background: #eef2f8;
-  color: #101522;
+.hidden{
+  display:none!important;
 }
 
-.light .glass {
-  background: rgba(255,255,255,.82);
-  border-color: rgba(0,0,0,.07);
-  box-shadow: 0 15px 40px rgba(0,0,0,.07);
-}
-
-.light .input {
-  background: rgba(0,0,0,.035);
-  color: #111827;
-  border-color: rgba(0,0,0,.08);
-}
-
-.light .nav-btn {
-  color: #657084;
-}
-
-.light .nav-btn.active {
-  color: #172033;
-}
-
-.light .btn-secondary {
-  background: rgba(0,0,0,.045);
-  border-color: rgba(0,0,0,.07);
-}
-
-.light .schedule-cell {
-  background: rgba(0,0,0,.025);
-  border-color: rgba(0,0,0,.06);
-}
-
-.light .fab-item {
-  background: rgba(255,255,255,.96);
-  color: #111827;
+.no-select{
+  user-select:none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="app"></div>
+<div class="app">
+
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <img src="ProfessorFilouLOGO.png" alt="ProfessorFilou">
+      <div>
+        <div class="brand-title">KlassenBoard</div>
+        <div class="brand-subtitle">ProfessorFilou</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="sidebarNav">
+
+      <button data-page="dashboard" class="active">
+        <span class="nav-icon">⌂</span>
+        <span>Dashboard</span>
+      </button>
+
+      <button data-page="now">
+        <span class="nav-icon">◷</span>
+        <span>Jetzt</span>
+      </button>
+
+      <button data-page="schedule">
+        <span class="nav-icon">▦</span>
+        <span>Stundenplan</span>
+      </button>
+
+      <button data-page="tasks">
+        <span class="nav-icon">✓</span>
+        <span>Aufgaben</span>
+      </button>
+
+      <button data-page="backpack">
+        <span class="nav-icon">▢</span>
+        <span>Rucksack</span>
+      </button>
+
+      <button data-page="calendar">
+        <span class="nav-icon">□</span>
+        <span>Kalender</span>
+      </button>
+
+      <button data-page="grades">
+        <span class="nav-icon">◇</span>
+        <span>Noten</span>
+      </button>
+
+      <button data-page="learning">
+        <span class="nav-icon">✦</span>
+        <span>Lernen</span>
+      </button>
+
+      <button data-page="notes">
+        <span class="nav-icon">▤</span>
+        <span>Notizen</span>
+      </button>
+
+      <button data-page="checklists">
+        <span class="nav-icon">☑</span>
+        <span>Checklisten</span>
+      </button>
+
+      <button data-page="subjects">
+        <span class="nav-icon">●</span>
+        <span>Fächer</span>
+      </button>
+
+      <button data-page="teachers">
+        <span class="nav-icon">♙</span>
+        <span>Lehrer</span>
+      </button>
+
+      <button data-page="substitutions">
+        <span class="nav-icon">↔</span>
+        <span>Vertretungen</span>
+      </button>
+
+      <button data-page="settings">
+        <span class="nav-icon">⚙</span>
+        <span>Einstellungen</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="profile-mini">
+        <div class="profile-avatar" id="profileAvatar">P</div>
+        <div>
+          <div class="profile-name" id="profileName">ProfessorFilou</div>
+          <div class="profile-class" id="profileClass">Klasse</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main class="main">
+
+    <div class="content">
+
+      <header class="topbar">
+
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div class="page-subtitle" id="pageSubtitle">
+            Dein Schulalltag auf einen Blick
+          </div>
+        </div>
+
+        <div class="top-actions">
+
+          <button class="icon-btn"
+                  title="Suchen"
+                  onclick="openSearch()">
+            ⌕
+          </button>
+
+          <button class="icon-btn"
+                  title="Theme"
+                  onclick="toggleTheme()">
+            ◐
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <!-- =========================
+           PAGE CONTAINER
+      ========================== -->
+
+      <div id="page"></div>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       MOBILE NAV
+  ========================== -->
+
+  <nav class="mobile-nav" id="mobileNav">
+
+    <button data-page="dashboard" class="active">
+      <span>⌂</span>
+      <span>Home</span>
+    </button>
+
+    <button data-page="now">
+      <span>◷</span>
+      <span>Jetzt</span>
+    </button>
+
+    <button data-page="schedule">
+      <span>▦</span>
+      <span>Plan</span>
+    </button>
+
+    <button data-page="tasks">
+      <span>✓</span>
+      <span>Aufgaben</span>
+    </button>
+
+    <button data-page="settings">
+      <span>⚙</span>
+      <span>Mehr</span>
+    </button>
+
+  </nav>
+
+
+  <!-- =========================
+       FAB
+  ========================== -->
+
+  <button class="fab" id="fab" onclick="toggleQuickMenu()">+</button>
+
+  <div class="quick-menu" id="quickMenu">
+
+    <button onclick="openModal('homework')">
+      📝 Hausaufgabe
+    </button>
+
+    <button onclick="openModal('task')">
+      ✓ Aufgabe
+    </button>
+
+    <button onclick="openModal('note')">
+      ▤ Notiz
+    </button>
+
+    <button onclick="openModal('event')">
+      □ Termin
+    </button>
+
+    <button onclick="openModal('grade')">
+      ◇ Note
+    </button>
+
+    <button onclick="openModal('backpack')">
+      🎒 Rucksack
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       MODAL
+  ========================== -->
+
+  <div class="modal-layer" id="modalLayer">
+
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle"></div>
+
+        <button class="icon-btn"
+                onclick="closeModal()">
+          ×
+        </button>
+      </div>
+
+      <div id="modalContent"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
 
 <script>
+
 /* =========================================================
-   KLASSENBOARD SCHOOL OS
-   Alles lokal im Browser
+   DATA
 ========================================================= */
 
-const STORAGE_KEY = "klassenboard_v3";
+const STORAGE_KEY = "klassenboard_v5";
 
 const defaultData = {
-  settings: {
-    name: "",
-    className: "Meine Klasse",
-    theme: "dark"
+
+  settings:{
+    name:"ProfessorFilou",
+    className:"",
+    theme:"light"
   },
 
-  subjects: [
-    {id:"mathe", name:"Mathematik", teacher:"", room:"", color:"#5875ff"},
-    {id:"deutsch", name:"Deutsch", teacher:"", room:"", color:"#8b5cf6"},
-    {id:"englisch", name:"Englisch", teacher:"", room:"", color:"#06b6d4"}
-  ],
+  subjects:[],
+  teachers:[],
+  schedule:[],
+  breaks:[],
 
-  teachers: [],
+  homework:[],
+  tasks:[],
+  notes:[],
+  events:[],
+  grades:[],
+  backpack:[],
 
-  schedule: [],
-  breaks: [],
-  homework: [],
-  tasks: [],
-  notes: [],
-  events: [],
-  grades: [],
-  backpack: [],
-  checklists: [],
-  checklistItems: [],
-  flashcards: [],
-  goals: [],
-  substitutions: [],
-  reminders: [],
+  checklists:[],
+  checklistItems:[],
 
-  deleted: []
+  flashcards:[],
+  goals:[],
+
+  substitutions:[],
+  reminders:[]
+
 };
 
 let data = loadData();
+
 let currentPage = "dashboard";
-let modal = null;
-let searchTerm = "";
-let fabOpen = false;
-let selectedCalendarDate = new Date().toISOString().slice(0,10);
 
-function uid(prefix="id") {
-  return prefix + "_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
-}
+let modalState = null;
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return structuredClone(defaultData);
 
-    const saved = JSON.parse(raw);
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function loadData(){
+
+  try{
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if(!saved){
+      return structuredClone(defaultData);
+    }
 
     return {
       ...structuredClone(defaultData),
-      ...saved,
-      settings: {...defaultData.settings, ...(saved.settings || {})}
+      ...JSON.parse(saved)
     };
-  } catch {
+
+  }catch(e){
+
+    console.error(e);
+
     return structuredClone(defaultData);
+
   }
+
 }
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  render();
+
+function save(){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+
+  updateProfile();
+
 }
 
-function esc(value="") {
-  return String(value)
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const days = [
+  "Montag",
+  "Dienstag",
+  "Mittwoch",
+  "Donnerstag",
+  "Freitag"
+];
+
+
+function uid(){
+
+  return Date.now().toString(36)
+    + Math.random().toString(36).slice(2);
+
+}
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+
 }
 
-function todayISO() {
-  return new Date().toISOString().slice(0,10);
+
+function formatDate(date){
+
+  return new Intl.DateTimeFormat(
+    "de-DE",
+    {
+      weekday:"short",
+      day:"2-digit",
+      month:"2-digit"
+    }
+  ).format(date);
+
 }
 
-function formatDate(date) {
-  if (!date) return "";
-  return new Date(date + "T12:00:00").toLocaleDateString("de-DE", {
-    day:"2-digit",
-    month:"2-digit",
-    year:"numeric"
-  });
-}
 
-function dayName(index) {
-  return ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag"][index] || "";
-}
+function todayISO(){
 
-function weekdayIndex(date = new Date()) {
-  let n = date.getDay();
-  return n === 0 ? 6 : n - 1;
-}
-
-function timeToMinutes(time) {
-  if (!time) return 0;
-  const [h,m] = time.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function nowMinutes() {
   const d = new Date();
-  return d.getHours()*60 + d.getMinutes() + d.getSeconds()/60;
+
+  const y = d.getFullYear();
+
+  const m = String(d.getMonth()+1)
+    .padStart(2,"0");
+
+  const day = String(d.getDate())
+    .padStart(2,"0");
+
+  return `${y}-${m}-${day}`;
+
 }
 
-function formatRemaining(minutes) {
-  if (minutes <= 0) return "0 Min.";
-  const m = Math.floor(minutes);
-  if (m < 60) return `${m} Min.`;
-  const h = Math.floor(m/60);
-  const rest = m % 60;
-  return `${h} Std. ${rest} Min.`;
+
+function getSubject(id){
+
+  return data.subjects.find(x => x.id === id);
+
 }
 
-function subjectName(id) {
-  return data.subjects.find(s => s.id === id)?.name || id || "Ohne Fach";
+
+function subjectName(id){
+
+  return getSubject(id)?.name || "Ohne Fach";
+
 }
 
-function subjectColor(id) {
-  return data.subjects.find(s => s.id === id)?.color || "#5875ff";
+
+function subjectColor(id){
+
+  const colors = [
+    "#2563eb",
+    "#7c3aed",
+    "#059669",
+    "#ea580c",
+    "#db2777",
+    "#0891b2",
+    "#65a30d"
+  ];
+
+  let n = 0;
+
+  for(const c of String(id||"")){
+    n += c.charCodeAt(0);
+  }
+
+  return colors[n % colors.length];
+
 }
+
 
 /* =========================================================
-   CURRENT LESSON
+   THEME
 ========================================================= */
 
-function currentStatus() {
-  const day = weekdayIndex();
-  const now = nowMinutes();
+function applyTheme(){
 
-  if (day > 4) {
-    return {type:"free", title:"Wochenende", subtitle:"Kein Unterricht heute"};
-  }
+  document.documentElement.classList.toggle(
+    "dark",
+    data.settings.theme === "dark"
+  );
 
-  const lessons = data.schedule
-    .filter(x => Number(x.day) === day)
-    .sort((a,b) => timeToMinutes(a.from)-timeToMinutes(b.from));
-
-  const breaks = data.breaks
-    .filter(x => Number(x.day) === day)
-    .sort((a,b) => timeToMinutes(a.from)-timeToMinutes(b.from));
-
-  for (const b of breaks) {
-    if (now >= timeToMinutes(b.from) && now < timeToMinutes(b.to)) {
-      return {
-        type:"break",
-        title:b.name || "Pause",
-        subtitle:`Bis ${b.to}`,
-        item:b,
-        remaining:timeToMinutes(b.to)-now
-      };
-    }
-  }
-
-  for (const l of lessons) {
-    const from = timeToMinutes(l.from);
-    const to = timeToMinutes(l.to);
-
-    if (now >= from && now < to) {
-      return {
-        type:"lesson",
-        title:subjectName(l.subject),
-        subtitle:`Bis ${l.to}`,
-        item:l,
-        remaining:to-now,
-        total:to-from,
-        elapsed:now-from
-      };
-    }
-  }
-
-  const next = lessons.find(x => timeToMinutes(x.from) > now);
-
-  if (next) {
-    return {
-      type:"next",
-      title:`Als Nächstes: ${subjectName(next.subject)}`,
-      subtitle:`Um ${next.from}`,
-      item:next,
-      remaining:timeToMinutes(next.from)-now
-    };
-  }
-
-  return {
-    type:"done",
-    title:"Schule vorbei",
-    subtitle:"Für heute ist nichts mehr eingetragen."
-  };
 }
+
+
+function toggleTheme(){
+
+  data.settings.theme =
+    data.settings.theme === "dark"
+      ? "light"
+      : "dark";
+
+  save();
+  applyTheme();
+
+}
+
+
+applyTheme();
+
 
 /* =========================================================
-   LAYOUT
+   PROFILE
 ========================================================= */
 
-function render() {
-  document.body.className = data.settings.theme === "light" ? "light" : "";
+function updateProfile(){
 
-  document.getElementById("app").innerHTML = `
-    <div class="min-h-screen flex">
+  const name =
+    data.settings.name || "ProfessorFilou";
 
-      <aside class="sidebar glass min-h-screen p-4 hidden md:block">
-        ${sidebar()}
-      </aside>
+  document.getElementById("profileName")
+    .textContent = name;
 
-      <main class="flex-1 min-w-0">
-        <header class="topbar glass m-2 md:m-4 rounded-2xl">
-          <div class="px-4 md:px-6 py-4 flex items-center gap-3">
-            <button class="md:hidden btn btn-secondary" onclick="toggleMobileNav()">☰</button>
+  document.getElementById("profileClass")
+    .textContent =
+      data.settings.className || "Klasse";
 
-            <div class="flex-1 min-w-0">
-              <div class="text-lg font-bold truncate">KlassenBoard</div>
-              <div class="text-xs text-gray-400 truncate">
-                ${esc(data.settings.className)}
-              </div>
-            </div>
+  document.getElementById("profileAvatar")
+    .textContent =
+      name.charAt(0).toUpperCase();
 
-            <div class="hidden sm:flex relative w-56">
-              <input
-                class="input"
-                placeholder="Suchen..."
-                value="${esc(searchTerm)}"
-                oninput="globalSearch(this.value)"
-              >
-            </div>
-
-            <button class="btn btn-secondary" onclick="openSettings()">⚙️</button>
-          </div>
-        </header>
-
-        <div id="mobileNav" class="mobile-nav glass m-2 rounded-2xl p-2 gap-1 overflow-x-auto">
-          ${mobileNavigation()}
-        </div>
-
-        <div class="page py-3 md:py-5 pb-28">
-          ${pageContent()}
-        </div>
-      </main>
-    </div>
-
-    ${fab()}
-    ${modal ? renderModal() : ""}
-  `;
-
-  if (modal) {
-    setTimeout(() => {
-      const first = document.querySelector("#modalContent input, #modalContent textarea, #modalContent select");
-      if (first) first.focus();
-    }, 50);
-  }
 }
 
-function sidebar() {
-  return `
-    <div class="px-3 pt-3 pb-5">
-      <div class="text-2xl font-black tracking-tight">KlassenBoard</div>
-      <div class="text-xs text-gray-500 mt-1">School OS</div>
-    </div>
 
-    <nav class="space-y-1">
-      ${nav("dashboard","⌂","Dashboard")}
-      ${nav("today","◷","Jetzt")}
-      ${nav("schedule","▦","Stundenplan")}
-      ${nav("homework","✓","Aufgaben")}
-      ${nav("backpack","▣","Mitnehmen")}
-      ${nav("calendar","□","Kalender")}
-      ${nav("grades","◇","Noten")}
-      ${nav("learning","✦","Lernen")}
-      ${nav("notes","✎","Notizen")}
-      ${nav("checklists","☑","Checklisten")}
-      ${nav("subjects","●","Fächer")}
-      ${nav("teachers","♙","Lehrer")}
-      ${nav("substitutions","↻","Vertretung")}
-    </nav>
+updateProfile();
 
-    <div class="mt-8 pt-4 border-t border-white/5">
-      <button class="nav-btn" onclick="openSettings()">⚙️ Einstellungen</button>
-      <button class="nav-btn" onclick="exportData()">💾 Backup exportieren</button>
-      <button class="nav-btn" onclick="openImport()">📥 Backup importieren</button>
-    </div>
-  `;
-}
 
-function nav(id, icon, text) {
-  return `
-    <button class="nav-btn ${currentPage===id ? "active":""}"
-      onclick="navigate('${id}')">
-      <span class="inline-block w-7">${icon}</span>${text}
-    </button>
-  `;
-}
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-function mobileNavigation() {
-  return [
-    ["dashboard","⌂"],
-    ["today","◷"],
-    ["schedule","▦"],
-    ["homework","✓"],
-    ["backpack","▣"],
-    ["calendar","□"],
-    ["grades","◇"],
-    ["learning","✦"],
-    ["notes","✎"]
-  ].map(x => `
-    <button
-      onclick="navigate('${x[0]}')"
-      class="px-4 py-2 rounded-xl whitespace-nowrap ${currentPage===x[0]?"bg-white/10":"text-gray-400"}">
-      ${x[1]}
-    </button>
-  `).join("");
-}
+const pageMeta = {
 
-function navigate(page) {
+  dashboard:[
+    "Dashboard",
+    "Dein Schulalltag auf einen Blick"
+  ],
+
+  now:[
+    "Jetzt",
+    "Aktuelle und nächste Stunde"
+  ],
+
+  schedule:[
+    "Stundenplan",
+    "Deine Woche"
+  ],
+
+  tasks:[
+    "Aufgaben",
+    "Hausaufgaben und To-dos"
+  ],
+
+  backpack:[
+    "Rucksack",
+    "Was musst du mitnehmen?"
+  ],
+
+  calendar:[
+    "Kalender",
+    "Termine und wichtige Tage"
+  ],
+
+  grades:[
+    "Noten",
+    "Notenübersicht und Durchschnitt"
+  ],
+
+  learning:[
+    "Lernen",
+    "Karteikarten, Ziele und Fokus"
+  ],
+
+  notes:[
+    "Notizen",
+    "Deine gespeicherten Notizen"
+  ],
+
+  checklists:[
+    "Checklisten",
+    "Eigene Listen"
+  ],
+
+  subjects:[
+    "Fächer",
+    "Fächer verwalten"
+  ],
+
+  teachers:[
+    "Lehrer",
+    "Lehrerübersicht"
+  ],
+
+  substitutions:[
+    "Vertretungen",
+    "Änderungen im Stundenplan"
+  ],
+
+  settings:[
+    "Einstellungen",
+    "KlassenBoard anpassen"
+  ]
+
+};
+
+
+function navigate(page){
+
   currentPage = page;
-  fabOpen = false;
+
+  document.getElementById("pageTitle")
+    .textContent = pageMeta[page][0];
+
+  document.getElementById("pageSubtitle")
+    .textContent = pageMeta[page][1];
+
+  document
+    .querySelectorAll("#sidebarNav button,#mobileNav button")
+    .forEach(btn => {
+
+      btn.classList.toggle(
+        "active",
+        btn.dataset.page === page
+      );
+
+    });
+
   render();
-  window.scrollTo({top:0,behavior:"smooth"});
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
 }
 
-/* =========================================================
-   PAGES
-========================================================= */
 
-function pageContent() {
-  switch(currentPage) {
-    case "today": return todayPage();
-    case "schedule": return schedulePage();
-    case "homework": return homeworkPage();
-    case "backpack": return backpackPage();
-    case "calendar": return calendarPage();
-    case "grades": return gradesPage();
-    case "learning": return learningPage();
-    case "notes": return notesPage();
-    case "checklists": return checklistsPage();
-    case "subjects": return subjectsPage();
-    case "teachers": return teachersPage();
-    case "substitutions": return substitutionsPage();
-    default: return dashboardPage();
-  }
-}
+document
+  .querySelectorAll("#sidebarNav button,#mobileNav button")
+  .forEach(btn => {
+
+    btn.addEventListener(
+      "click",
+      () => navigate(btn.dataset.page)
+    );
+
+  });
+
 
 /* =========================================================
    DASHBOARD
 ========================================================= */
 
-function dashboardPage() {
-  const status = currentStatus();
+function getCurrentLesson(){
 
-  const openTasks = data.tasks.filter(x=>!x.done).length +
-                    data.homework.filter(x=>!x.done).length;
+  const now = new Date();
 
-  const avg = gradeAverage();
+  const day = now.getDay();
 
-  return `
-    <section class="mb-6">
-      <div class="text-sm text-gray-400">${greeting()}</div>
-      <h1 class="text-3xl md:text-5xl font-black mt-1">
-        ${esc(data.settings.name ? data.settings.name : "Willkommen")}
-      </h1>
-      <p class="text-gray-500 mt-2">
-        ${new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}
-      </p>
-    </section>
-
-    <div class="grid-auto mb-5">
-      ${statCard("◷","Jetzt",status.title,status.type==="lesson" ? formatRemaining(status.remaining) : "")}
-      ${statCard("✓","Offene Aufgaben",openTasks,"")}
-      ${statCard("◇","Notendurchschnitt",avg ?? "—","")}
-      ${statCard("▣","Mitnehmen",data.backpack.filter(x=>x.active!==false).length,"")}
-    </div>
-
-    <div class="grid-wide">
-      <div class="space-y-4">
-        ${currentCard(status)}
-        ${nextLessonsCard()}
-      </div>
-
-      <div class="space-y-4">
-        ${todayTasksCard()}
-        ${tomorrowCard()}
-      </div>
-    </div>
-  `;
-}
-
-function statCard(icon,label,value,small) {
-  return `
-    <div class="glass card p-5">
-      <div class="flex items-center justify-between">
-        <span class="text-gray-400">${icon} ${label}</span>
-        ${small ? `<span class="badge">${small}</span>` : ""}
-      </div>
-      <div class="text-2xl font-black mt-4 truncate">${esc(value)}</div>
-    </div>
-  `;
-}
-
-function currentCard(status) {
-  let color = status.type==="lesson" ? subjectColor(status.item.subject) : "#5875ff";
-
-  if (status.type === "lesson") {
-    const percent = Math.max(0,Math.min(100,(status.elapsed/status.total)*100));
-
-    return `
-      <div class="glass card p-5 md:p-7">
-        <div class="flex justify-between gap-4">
-          <div>
-            <div class="text-sm text-gray-400">GERADE</div>
-            <div class="text-3xl font-black mt-1">${esc(status.title)}</div>
-            <div class="text-gray-400 mt-2">
-              ${esc(status.item.room || "Kein Raum")}
-              · ${status.item.from} – ${status.item.to}
-            </div>
-          </div>
-
-          <div class="text-right">
-            <div class="text-sm text-gray-400">NOCH</div>
-            <div id="liveRemaining" class="text-2xl font-black mt-1">
-              ${formatRemaining(status.remaining)}
-            </div>
-          </div>
-        </div>
-
-        <div class="progress mt-6">
-          <div id="liveProgress" style="width:${percent}%;background:${color}"></div>
-        </div>
-
-        <div class="flex justify-between text-xs text-gray-500 mt-2">
-          <span>${status.item.from}</span>
-          <span>${status.item.to}</span>
-        </div>
-      </div>
-    `;
+  if(day < 1 || day > 5){
+    return null;
   }
 
-  return `
-    <div class="glass card p-6">
-      <div class="text-sm text-gray-400">AKTUELL</div>
-      <div class="text-3xl font-black mt-1">${esc(status.title)}</div>
-      <div class="text-gray-400 mt-2">${esc(status.subtitle)}</div>
-    </div>
-  `;
+  const dayName = days[day-1];
+
+  const minutes =
+    now.getHours()*60 +
+    now.getMinutes();
+
+  return data.schedule.find(lesson => {
+
+    if(lesson.day !== dayName){
+      return false;
+    }
+
+    const [sh,sm] =
+      lesson.from.split(":").map(Number);
+
+    const [eh,em] =
+      lesson.to.split(":").map(Number);
+
+    const start = sh*60+sm;
+    const end = eh*60+em;
+
+    return minutes >= start && minutes < end;
+
+  }) || null;
+
 }
 
-function nextLessonsCard() {
-  const day = weekdayIndex();
-  const now = nowMinutes();
 
-  const next = data.schedule
-    .filter(x=>Number(x.day)===day && timeToMinutes(x.from)>now)
-    .sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from))
+function getNextLessons(){
+
+  const now = new Date();
+
+  const day = now.getDay();
+
+  if(day < 1 || day > 5){
+    return [];
+  }
+
+  const dayName = days[day-1];
+
+  const minutes =
+    now.getHours()*60 +
+    now.getMinutes();
+
+  return data.schedule
+
+    .filter(x => x.day === dayName)
+
+    .filter(x => {
+
+      const [h,m] =
+        x.from.split(":").map(Number);
+
+      return h*60+m > minutes;
+
+    })
+
+    .sort((a,b) =>
+      a.period - b.period
+    )
+
     .slice(0,4);
 
+}
+
+
+function getOpenTasks(){
+
+  return data.tasks
+    .filter(x => !x.done)
+    .sort((a,b) =>
+      String(a.date||"9999")
+        .localeCompare(String(b.date||"9999"))
+    );
+
+}
+
+
+function averageGrade(){
+
+  if(!data.grades.length){
+    return "—";
+  }
+
+  const values =
+    data.grades
+      .map(x => Number(x.grade))
+      .filter(x => !isNaN(x));
+
+  if(!values.length){
+    return "—";
+  }
+
+  const avg =
+    values.reduce((a,b)=>a+b,0)
+    / values.length;
+
+  return avg.toFixed(2)
+    .replace(".",",");
+
+}
+
+
+function renderDashboard(){
+
+  const current = getCurrentLesson();
+
+  const next = getNextLessons();
+
+  const openTasks = getOpenTasks();
+
+  const today = todayISO();
+
+  const todayTasks =
+    data.homework
+      .filter(x => x.date === today);
+
   return `
-    <div class="glass card p-5">
-      <div class="flex justify-between mb-4">
+
+    <div class="dashboard">
+
+      <!-- NOW -->
+
+      <section class="card now-card span-8">
+
         <div>
-          <div class="text-sm text-gray-400">WEITER</div>
-          <h2 class="text-xl font-bold">Nächste Stunden</h2>
+
+          <div class="now-label">
+            ${current ? "JETZT" : "SCHULE"}
+          </div>
+
+          <div class="now-subject">
+            ${
+              current
+              ? escapeHTML(subjectName(current.subjectId))
+              : "Keine aktuelle Stunde"
+            }
+          </div>
+
+          <div class="now-room">
+            ${
+              current
+              ? `${escapeHTML(current.from)}–${escapeHTML(current.to)}
+                 · ${escapeHTML(current.room || "Kein Raum")}`
+              : "Du hast gerade keine eingetragene Stunde."
+            }
+          </div>
+
         </div>
-        <button class="btn btn-secondary" onclick="navigate('schedule')">Alle</button>
-      </div>
 
-      ${
-        next.length
-        ? next.map(lessonRow).join("")
-        : `<div class="empty">Keine weiteren Stunden heute.</div>`
-      }
-    </div>
-  `;
-}
+        ${
+          current
+          ? `
+            <div>
 
-function lessonRow(l) {
-  return `
-    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.035] mb-2">
-      <div class="w-1 h-11 rounded-full" style="background:${subjectColor(l.subject)}"></div>
-      <div class="flex-1 min-w-0">
-        <div class="font-semibold truncate">${esc(subjectName(l.subject))}</div>
-        <div class="text-xs text-gray-500">
-          ${l.from} – ${l.to}${l.room ? ` · ${esc(l.room)}`:""}
+              <div class="progress">
+                <div
+                  id="lessonProgress"
+                  style="width:0%">
+                </div>
+              </div>
+
+              <div style="
+                display:flex;
+                justify-content:space-between;
+                margin-top:7px;
+                color:var(--muted);
+                font-size:10px;
+              ">
+                <span>${escapeHTML(current.from)}</span>
+                <span id="remainingTime">—</span>
+                <span>${escapeHTML(current.to)}</span>
+              </div>
+
+            </div>
+          `
+          : ""
+        }
+
+      </section>
+
+
+      <!-- STATS -->
+
+      <section class="card span-4">
+
+        <div class="card-title">
+          Überblick
         </div>
-      </div>
-    </div>
-  `;
-}
 
-function todayTasksCard() {
-  const tasks = [
-    ...data.homework.map(x=>({...x,_type:"Hausaufgabe"})),
-    ...data.tasks.map(x=>({...x,_type:"Aufgabe"}))
-  ].filter(x=>!x.done).slice(0,5);
+        <div class="stat-grid" style="margin-top:13px">
 
-  return `
-    <div class="glass card p-5">
-      <div class="flex justify-between mb-4">
-        <h2 class="text-xl font-bold">Heute erledigen</h2>
-        <button class="btn btn-secondary" onclick="navigate('homework')">Alle</button>
-      </div>
-      ${tasks.length ? tasks.map(taskMini).join("") : `<div class="empty">Alles erledigt 🎉</div>`}
-    </div>
-  `;
-}
+          <div class="stat">
+            <div class="stat-value">
+              ${openTasks.length}
+            </div>
+            <div class="stat-label">
+              Offen
+            </div>
+          </div>
 
-function taskMini(t) {
-  return `
-    <div class="flex gap-3 items-center p-3 rounded-xl bg-white/[.035] mb-2">
-      <button onclick="toggleTask('${t.id}','${t._type}')"
-        class="w-6 h-6 rounded-full border border-white/20 flex-shrink-0">
-        ${t.done ? "✓":""}
-      </button>
-      <div class="flex-1 min-w-0">
-        <div class="${t.done?"line-through text-gray-500":""} truncate">
-          ${esc(t.title || t.text)}
+          <div class="stat">
+            <div class="stat-value">
+              ${data.grades.length}
+            </div>
+            <div class="stat-label">
+              Noten
+            </div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-value">
+              ${averageGrade()}
+            </div>
+            <div class="stat-label">
+              Schnitt
+            </div>
+          </div>
+
         </div>
-        <div class="text-xs text-gray-500">${esc(t._type)}</div>
-      </div>
+
+      </section>
+
+
+      <!-- NEXT -->
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Nächste Stunden
+        </div>
+
+        ${
+          next.length
+          ? `
+            <div class="list">
+
+              ${next.map(x => `
+
+                <div class="list-item">
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title">
+                      ${escapeHTML(subjectName(x.subjectId))}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(x.from)}–${escapeHTML(x.to)}
+                      ${x.room ? ` · ${escapeHTML(x.room)}` : ""}
+                    </div>
+
+                  </div>
+
+                  <span class="badge">
+                    ${x.period}. Std.
+                  </span>
+
+                </div>
+
+              `).join("")}
+
+            </div>
+          `
+          : `<div class="empty">Keine weiteren Stunden eingetragen.</div>`
+        }
+
+      </section>
+
+
+      <!-- TASKS -->
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Offene Aufgaben
+        </div>
+
+        ${
+          openTasks.length
+          ? `
+            <div class="list">
+
+              ${openTasks.slice(0,5).map(x => `
+
+                <div class="list-item">
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title">
+                      ${escapeHTML(x.title)}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(x.date || "Kein Datum")}
+                    </div>
+
+                  </div>
+
+                  <button
+                    class="btn btn-small"
+                    onclick="completeTask('${x.id}')">
+                    ✓
+                  </button>
+
+                </div>
+
+              `).join("")}
+
+            </div>
+          `
+          : `<div class="empty">Alles erledigt 🎉</div>`
+        }
+
+      </section>
+
+
+      <!-- TODAY -->
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Heute
+        </div>
+
+        ${
+          todayTasks.length
+          ? `
+            <div class="list">
+
+              ${todayTasks.map(x => `
+
+                <div class="list-item">
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title">
+                      ${escapeHTML(x.title)}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(subjectName(x.subjectId))}
+                    </div>
+
+                  </div>
+
+                </div>
+
+              `).join("")}
+
+            </div>
+          `
+          : `<div class="empty">Keine Hausaufgaben für heute.</div>`
+        }
+
+      </section>
+
+
+      <!-- TOMORROW -->
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Morgen
+        </div>
+
+        <div class="list">
+
+          ${
+            getTomorrowLessons()
+              .slice(0,5)
+              .map(x => `
+
+                <div class="list-item">
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title">
+                      ${escapeHTML(subjectName(x.subjectId))}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(x.from)}–${escapeHTML(x.to)}
+                    </div>
+
+                  </div>
+
+                  <span class="badge">
+                    ${x.period}. Std.
+                  </span>
+
+                </div>
+
+              `).join("")
+            ||
+            `<div class="empty">Keine Stunden eingetragen.</div>`
+          }
+
+        </div>
+
+      </section>
+
     </div>
+
   `;
+
 }
 
-function tomorrowCard() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate()+1);
-  const day = weekdayIndex(tomorrow);
 
-  if(day > 4) {
-    return `
-      <div class="glass card p-5">
-        <div class="text-sm text-gray-400">MORGEN</div>
-        <div class="text-xl font-bold mt-1">Wochenende</div>
-      </div>
-    `;
+function getTomorrowLessons(){
+
+  const day = new Date().getDay();
+
+  if(day >= 5 || day === 0){
+    return data.schedule
+      .filter(x => x.day === "Montag")
+      .sort((a,b)=>a.period-b.period);
   }
 
-  const lessons = data.schedule
-    .filter(x=>Number(x.day)===day)
-    .sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from))
-    .slice(0,4);
+  const tomorrow = days[day];
 
-  return `
-    <div class="glass card p-5">
-      <div class="text-sm text-gray-400">MORGEN</div>
-      <div class="text-xl font-bold mt-1">${dayName(day)}</div>
-      <div class="mt-4">
-        ${lessons.length ? lessons.map(lessonRow).join("") : `<div class="empty">Noch kein Stundenplan.</div>`}
-      </div>
-    </div>
-  `;
+  return data.schedule
+    .filter(x => x.day === tomorrow)
+    .sort((a,b)=>a.period-b.period);
+
 }
 
-function greeting() {
-  const h = new Date().getHours();
-  if(h < 11) return "Guten Morgen";
-  if(h < 17) return "Guten Tag";
-  return "Guten Abend";
+
+function completeTask(id){
+
+  const item =
+    data.tasks.find(x => x.id === id);
+
+  if(item){
+    item.done = true;
+    save();
+    render();
+  }
+
 }
+
 
 /* =========================================================
-   TODAY
+   NOW PAGE
 ========================================================= */
 
-function todayPage() {
-  const status = currentStatus();
+function renderNow(){
+
+  const current = getCurrentLesson();
+
+  const next = getNextLessons();
 
   return `
-    <section class="mb-6">
-      <div class="text-sm text-gray-400">LIVE</div>
-      <h1 class="text-3xl md:text-4xl font-black">Jetzt</h1>
-      <p class="text-gray-500 mt-1">Dein aktueller Schultag in Echtzeit.</p>
+
+    <section class="dashboard">
+
+      <div class="card span-7">
+
+        <div class="now-label">
+          AKTUELL
+        </div>
+
+        <div class="now-subject">
+          ${
+            current
+              ? escapeHTML(subjectName(current.subjectId))
+              : "Keine Stunde"
+          }
+        </div>
+
+        <div class="page-subtitle">
+          ${
+            current
+              ? `${escapeHTML(current.from)} – ${escapeHTML(current.to)}
+                 ${current.room ? ` · Raum ${escapeHTML(current.room)}` : ""}`
+              : "Aktuell ist keine Stunde aktiv."
+          }
+        </div>
+
+        ${
+          current
+          ? `
+            <div class="progress">
+              <div id="nowProgress" style="width:0%"></div>
+            </div>
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              color:var(--muted);
+              font-size:11px;
+              margin-top:7px;
+            ">
+              <span>${escapeHTML(current.from)}</span>
+              <span id="nowRemaining">—</span>
+              <span>${escapeHTML(current.to)}</span>
+            </div>
+          `
+          : ""
+        }
+
+      </div>
+
+
+      <div class="card span-5">
+
+        <div class="card-title">
+          Danach
+        </div>
+
+        ${
+          next.length
+          ? `
+            <div class="list">
+
+              ${next.map(x=>`
+
+                <div class="list-item">
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title">
+                      ${escapeHTML(subjectName(x.subjectId))}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(x.from)}–${escapeHTML(x.to)}
+                    </div>
+
+                  </div>
+
+                  <span class="badge">
+                    ${x.period}
+                  </span>
+
+                </div>
+
+              `).join("")}
+
+            </div>
+          `
+          : `<div class="empty">Nichts mehr eingetragen.</div>`
+        }
+
+      </div>
+
+
+      <div class="card span-12">
+
+        <div class="card-title">
+          Tages-Timeline
+        </div>
+
+        <div class="list">
+
+          ${
+            getTodaySchedule()
+              .map(x=>`
+
+                <div class="list-item">
+
+                  <span class="badge">
+                    ${x.period}
+                  </span>
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title">
+                      ${escapeHTML(subjectName(x.subjectId))}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(x.from)}–${escapeHTML(x.to)}
+                      ${x.room ? ` · ${escapeHTML(x.room)}` : ""}
+                    </div>
+
+                  </div>
+
+                </div>
+
+              `).join("")
+            ||
+            `<div class="empty">Heute kein Stundenplan.</div>`
+          }
+
+        </div>
+
+      </div>
+
     </section>
 
-    ${currentCard(status)}
-
-    <div class="grid-auto mt-5">
-      ${remainingLessonsCard()}
-      ${schoolEndCard()}
-      ${nextBreakCard()}
-    </div>
-
-    <div class="glass card p-5 mt-5">
-      <h2 class="text-xl font-bold mb-4">Heutiger Ablauf</h2>
-      ${todayTimeline()}
-    </div>
   `;
+
 }
 
-function remainingLessonsCard() {
-  const day=weekdayIndex();
-  const now=nowMinutes();
-  const count=data.schedule.filter(x=>Number(x.day)===day && timeToMinutes(x.to)>now).length;
 
-  return `
-    <div class="glass card p-5">
-      <div class="text-gray-400 text-sm">NOCH</div>
-      <div class="text-3xl font-black mt-2">${count}</div>
-      <div class="text-gray-500">Stunden heute</div>
-    </div>
-  `;
-}
+function getTodaySchedule(){
 
-function schoolEndCard() {
-  const day=weekdayIndex();
-  const lessons=data.schedule
-    .filter(x=>Number(x.day)===day)
-    .sort((a,b)=>timeToMinutes(b.to)-timeToMinutes(a.to));
+  const day = new Date().getDay();
 
-  if(!lessons.length) {
-    return `<div class="glass card p-5"><div class="text-gray-400">Schulschluss</div><div class="text-xl font-bold mt-2">—</div></div>`;
+  if(day < 1 || day > 5){
+    return [];
   }
 
-  const end=lessons[0].to;
-  const remaining=timeToMinutes(end)-nowMinutes();
+  return data.schedule
+    .filter(x => x.day === days[day-1])
+    .sort((a,b)=>a.period-b.period);
 
-  return `
-    <div class="glass card p-5">
-      <div class="text-gray-400 text-sm">SCHULSCHLUSS</div>
-      <div class="text-3xl font-black mt-2">${remaining>0 ? formatRemaining(remaining) : "Fertig"}</div>
-      <div class="text-gray-500">${end} Uhr</div>
-    </div>
-  `;
 }
 
-function nextBreakCard() {
-  const day=weekdayIndex();
-  const now=nowMinutes();
-
-  const b=data.breaks
-    .filter(x=>Number(x.day)===day && timeToMinutes(x.from)>now)
-    .sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from))[0];
-
-  return `
-    <div class="glass card p-5">
-      <div class="text-gray-400 text-sm">NÄCHSTE PAUSE</div>
-      ${
-        b
-        ? `<div class="text-xl font-bold mt-2">${esc(b.name)}</div>
-           <div class="text-gray-500">${b.from} – ${b.to}</div>`
-        : `<div class="text-xl font-bold mt-2">Keine</div>`
-      }
-    </div>
-  `;
-}
-
-function todayTimeline() {
-  const day=weekdayIndex();
-
-  const entries = [
-    ...data.schedule.filter(x=>Number(x.day)===day).map(x=>({...x,type:"lesson"})),
-    ...data.breaks.filter(x=>Number(x.day)===day).map(x=>({...x,type:"break"}))
-  ].sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from));
-
-  if(!entries.length) return `<div class="empty">Noch nichts eingetragen.</div>`;
-
-  return entries.map(x=>`
-    <div class="flex gap-4 items-center py-3 border-b border-white/5 last:border-0">
-      <div class="w-20 text-sm text-gray-500">${x.from}</div>
-      <div class="w-1 h-10 rounded-full" style="background:${x.type==="lesson"?subjectColor(x.subject):"#64748b"}"></div>
-      <div class="flex-1">
-        <div class="font-semibold">${esc(x.type==="lesson"?subjectName(x.subject):x.name)}</div>
-        <div class="text-xs text-gray-500">${x.from} – ${x.to}</div>
-      </div>
-    </div>
-  `).join("");
-}
 
 /* =========================================================
    SCHEDULE
 ========================================================= */
 
-function schedulePage() {
-  const days=[0,1,2,3,4];
+function renderSchedule(){
 
-  return `
-    <section class="mb-6 flex flex-wrap gap-3 items-end justify-between">
-      <div>
-        <div class="text-sm text-gray-400">PLAN</div>
-        <h1 class="text-3xl md:text-4xl font-black">Stundenplan</h1>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('schedule')">＋ Stunde</button>
-    </section>
+  let html = `
 
-    <div class="glass card p-4 overflow-x-auto">
-      <div class="schedule-grid">
-        <div class="schedule-cell font-bold">Zeit</div>
-        ${days.map(d=>`<div class="schedule-cell font-bold">${dayName(d)}</div>`).join("")}
+    <div class="card">
 
-        ${scheduleRows()}
-      </div>
-    </div>
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        margin-bottom:14px;
+      ">
 
-    <div class="grid-auto mt-5">
-      <div class="glass card p-5">
-        <h2 class="font-bold text-xl">Pausen</h2>
-        <div class="mt-4">${data.breaks.length ? data.breaks.map(breakRow).join("") : `<div class="empty">Keine Pausen.</div>`}</div>
-      </div>
+        <div>
+          <div class="card-title">
+            Wochenplan
+          </div>
 
-      <div class="glass card p-5">
-        <h2 class="font-bold text-xl">Schnell hinzufügen</h2>
-        <div class="grid grid-cols-2 gap-2 mt-4">
-          <button class="btn btn-secondary" onclick="openModal('schedule')">Stunde</button>
-          <button class="btn btn-secondary" onclick="openModal('break')">Pause</button>
+          <div class="card-muted">
+            Tippe auf eine Stunde zum Bearbeiten.
+          </div>
         </div>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('schedule')">
+          + Stunde
+        </button>
+
       </div>
-    </div>
-  `;
-}
 
-function scheduleRows() {
-  const max=12;
-  let html="";
+      <div class="table-wrap">
 
-  for(let period=1;period<=max;period++) {
-    html += `<div class="schedule-cell text-gray-500">${period}. Stunde</div>`;
+        <div class="schedule">
 
-    for(let day=0;day<5;day++) {
-      const l=data.schedule.find(x=>Number(x.day)===day && Number(x.period)===period);
+          <div class="schedule-head">
+            #
+          </div>
 
-      html += `
-        <div class="schedule-cell relative">
+          ${days.map(day => `
+            <div class="schedule-head">
+              ${day.slice(0,2)}
+            </div>
+          `).join("")}
+
           ${
-            l
-            ? `<button onclick="editItem('schedule','${l.id}')" class="w-full text-left">
-                 <div class="font-bold">${esc(subjectName(l.subject))}</div>
-                 <div class="text-xs text-gray-500 mt-1">
-                   ${l.from}–${l.to}${l.room ? ` · ${esc(l.room)}`:""}
-                 </div>
-               </button>`
-            : `<button onclick="openScheduleFor(${day},${period})" class="text-gray-600 hover:text-white w-full h-full">＋</button>`
+            Array.from({length:12},(_,i)=>{
+
+              const period = i+1;
+
+              return `
+
+                <div class="period-cell">
+
+                  <div class="period-number">
+                    ${period}
+                  </div>
+
+                  ${
+                    getPeriodTime(period)
+                      ? `
+                        <div class="period-time">
+                          ${getPeriodTime(period)}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+                ${days.map(day => {
+
+                  const lesson =
+                    data.schedule.find(x =>
+                      x.day === day &&
+                      Number(x.period) === period
+                    );
+
+                  if(!lesson){
+
+                    return `
+                      <div class="period-cell">
+                        <button
+                          class="lesson"
+                          onclick="openScheduleFor('${day}',${period})"
+                          style="
+                            color:var(--muted);
+                            border-style:dashed;
+                          ">
+                          + Eintragen
+                        </button>
+                      </div>
+                    `;
+
+                  }
+
+                  return `
+
+                    <div class="period-cell">
+
+                      <button
+                        class="lesson current"
+                        style="
+                          outline:none;
+                          border-left:4px solid ${subjectColor(lesson.subjectId)};
+                        "
+                        onclick="editSchedule('${lesson.id}')">
+
+                        <div class="lesson-name">
+                          ${escapeHTML(subjectName(lesson.subjectId))}
+                        </div>
+
+                        <div class="lesson-teacher">
+                          ${escapeHTML(lesson.teacher || "")}
+                        </div>
+
+                        <div class="lesson-room">
+                          ${escapeHTML(lesson.room || "")}
+                        </div>
+
+                        <div class="lesson-room">
+                          ${escapeHTML(lesson.from)}–${escapeHTML(lesson.to)}
+                        </div>
+
+                      </button>
+
+                    </div>
+
+                  `;
+
+                }).join("")}
+
+              `;
+
+            }).join("")
           }
+
         </div>
-      `;
-    }
-  }
+
+      </div>
+
+    </div>
+
+
+    <div class="section-header">
+      <div>
+        <div class="section-title">Pausen</div>
+        <div class="section-description">
+          Pausenzeiten für deinen Schulalltag
+        </div>
+      </div>
+
+      <button class="btn"
+              onclick="openModal('break')">
+        + Pause
+      </button>
+    </div>
+
+
+    <div class="dashboard">
+
+      ${
+        data.breaks.map(x=>`
+
+          <div class="card span-3">
+
+            <div class="card-title">
+              ${escapeHTML(x.name)}
+            </div>
+
+            <div class="card-muted">
+              ${escapeHTML(x.from)}–${escapeHTML(x.to)}
+            </div>
+
+            <button
+              class="btn btn-small btn-danger"
+              style="margin-top:10px"
+              onclick="deleteItem('breaks','${x.id}')">
+              Löschen
+            </button>
+
+          </div>
+
+        `).join("")
+        ||
+        `<div class="card span-12">
+          <div class="empty">Noch keine Pausen eingetragen.</div>
+        </div>`
+      }
+
+    </div>
+
+  `;
 
   return html;
+
 }
 
-function openScheduleFor(day,period) {
-  modal={type:"schedule",preset:{day,period}};
-  render();
+
+function getPeriodTime(period){
+
+  const item =
+    data.schedule.find(x =>
+      Number(x.period) === period &&
+      x.from &&
+      x.to
+    );
+
+  if(!item){
+    return "";
+  }
+
+  return `${item.from}–${item.to}`;
+
 }
 
-function breakRow(b) {
-  return `
-    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.035] mb-2">
-      <div class="flex-1">
-        <div class="font-semibold">${esc(b.name)}</div>
-        <div class="text-xs text-gray-500">${dayName(Number(b.day))} · ${b.from}–${b.to}</div>
-      </div>
-      <button class="btn btn-danger" onclick="deleteItem('break','${b.id}')">×</button>
-    </div>
-  `;
+
+function openScheduleFor(day,period){
+
+  openModal("schedule",{
+    day,
+    period
+  });
+
 }
+
+
+function editSchedule(id){
+
+  const lesson =
+    data.schedule.find(x=>x.id===id);
+
+  if(lesson){
+
+    openModal(
+      "schedule",
+      {
+        edit:lesson
+      }
+    );
+
+  }
+
+}
+
 
 /* =========================================================
-   HOMEWORK / TASKS
+   TASKS
 ========================================================= */
 
-function homeworkPage() {
+function renderTasks(){
+
   const all = [
-    ...data.homework.map(x=>({...x,_type:"homework"})),
-    ...data.tasks.map(x=>({...x,_type:"task"}))
+    ...data.homework.map(x=>({
+      ...x,
+      type:"Hausaufgabe"
+    })),
+    ...data.tasks.map(x=>({
+      ...x,
+      type:"Aufgabe"
+    }))
   ];
 
   return `
-    <section class="mb-6 flex justify-between gap-3 flex-wrap">
-      <div>
-        <div class="text-sm text-gray-400">ORGANISATION</div>
-        <h1 class="text-3xl md:text-4xl font-black">Aufgaben</h1>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('task')">＋ Aufgabe</button>
-    </section>
 
-    <div class="grid-wide">
-      <div class="glass card p-5">
-        <div class="flex gap-2 mb-5">
-          <button class="btn btn-secondary" onclick="openModal('homework')">📚 Hausaufgabe</button>
-          <button class="btn btn-secondary" onclick="openModal('task')">✓ Aufgabe</button>
+    <div class="dashboard">
+
+      <section class="card span-12">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+        ">
+
+          <div>
+            <div class="card-title">
+              Aufgaben
+            </div>
+
+            <div class="card-muted">
+              Alles an einem Ort.
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openModal('task')">
+            + Aufgabe
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Hausaufgaben
         </div>
 
         ${
-          all.length
-          ? all.sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(taskLarge).join("")
-          : `<div class="empty">Noch keine Aufgaben.</div>`
+          data.homework.length
+          ? `
+            <div class="list">
+
+              ${data.homework
+                .sort((a,b)=>
+                  String(a.date||"9999")
+                  .localeCompare(String(b.date||"9999"))
+                )
+                .map(x=>`
+
+                  <div class="list-item">
+
+                    <div class="list-item-main">
+
+                      <div class="list-item-title">
+                        ${escapeHTML(x.title)}
+                      </div>
+
+                      <div class="list-item-sub">
+                        ${escapeHTML(subjectName(x.subjectId))}
+                        · ${escapeHTML(x.date || "Kein Datum")}
+                      </div>
+
+                    </div>
+
+                    <button
+                      class="btn btn-small"
+                      onclick="deleteItem('homework','${x.id}')">
+                      ×
+                    </button>
+
+                  </div>
+
+                `).join("")}
+
+            </div>
+          `
+          : `<div class="empty">Keine Hausaufgaben.</div>`
         }
-      </div>
 
-      <div class="glass card p-5">
-        <h2 class="text-xl font-bold">Übersicht</h2>
-        <div class="mt-5 space-y-3">
-          ${taskStat("Offen",all.filter(x=>!x.done).length)}
-          ${taskStat("Erledigt",all.filter(x=>x.done).length)}
-          ${taskStat("Heute",all.filter(x=>x.date===todayISO()&&!x.done).length)}
-        </div>
-      </div>
-    </div>
-  `;
-}
+      </section>
 
-function taskStat(a,b) {
-  return `
-    <div class="flex justify-between p-3 rounded-xl bg-white/[.035]">
-      <span class="text-gray-400">${a}</span>
-      <b>${b}</b>
-    </div>
-  `;
-}
 
-function taskLarge(t) {
-  const overdue = t.date && t.date < todayISO() && !t.done;
+      <section class="card span-6">
 
-  return `
-    <div class="p-4 rounded-2xl bg-white/[.035] border border-white/5 mb-3">
-      <div class="flex gap-3">
-        <button onclick="toggleTask('${t.id}','${t._type}')"
-          class="w-7 h-7 rounded-full border border-white/20 flex-shrink-0">
-          ${t.done?"✓":""}
-        </button>
-
-        <div class="flex-1 min-w-0">
-          <div class="font-bold ${t.done?"line-through text-gray-500":""}">
-            ${esc(t.title || t.text)}
-          </div>
-
-          <div class="text-sm text-gray-500 mt-1">
-            ${t.subject ? esc(subjectName(t.subject))+" · ":""}
-            ${t.date ? formatDate(t.date):"Kein Datum"}
-            ${overdue ? " · ⚠️ überfällig":""}
-          </div>
-
-          ${t.description ? `<div class="text-sm text-gray-400 mt-2">${esc(t.description)}</div>`:""}
-
-          <div class="flex flex-wrap gap-2 mt-3">
-            ${t.priority ? `<span class="badge">${priorityLabel(t.priority)}</span>`:""}
-            ${t.bring ? `<span class="badge">🎒 Mitnehmen</span>`:""}
-          </div>
+        <div class="card-title">
+          To-dos
         </div>
 
-        <button class="btn btn-danger h-fit" onclick="deleteItem('${t._type}','${t.id}')">×</button>
-      </div>
+        ${
+          data.tasks.length
+          ? `
+            <div class="list">
+
+              ${data.tasks.map(x=>`
+
+                <div class="list-item">
+
+                  <button
+                    class="btn btn-small"
+                    onclick="completeTask('${x.id}')">
+                    ${x.done ? "✓" : "○"}
+                  </button>
+
+                  <div class="list-item-main">
+
+                    <div class="list-item-title"
+                         style="${x.done ? "text-decoration:line-through;opacity:.5":""}">
+                      ${escapeHTML(x.title)}
+                    </div>
+
+                    <div class="list-item-sub">
+                      ${escapeHTML(x.date || "Kein Datum")}
+                    </div>
+
+                  </div>
+
+                  <button
+                    class="btn btn-small"
+                    onclick="deleteItem('tasks','${x.id}')">
+                    ×
+                  </button>
+
+                </div>
+
+              `).join("")}
+
+            </div>
+          `
+          : `<div class="empty">Keine Aufgaben.</div>`
+        }
+
+      </section>
+
     </div>
+
   `;
+
 }
 
-function priorityLabel(p) {
-  return p==="high" ? "🔴 Hoch" : p==="medium" ? "🟡 Mittel" : "🟢 Niedrig";
-}
-
-function toggleTask(id,type) {
-  const arr=type==="homework" ? data.homework : data.tasks;
-  const item=arr.find(x=>x.id===id);
-  if(item) item.done=!item.done;
-  save();
-}
 
 /* =========================================================
    BACKPACK
 ========================================================= */
 
-function backpackPage() {
-  const active=data.backpack.filter(x=>x.active!==false);
+function renderBackpack(){
 
   return `
-    <section class="mb-6 flex justify-between flex-wrap gap-3">
-      <div>
-        <div class="text-sm text-gray-400">VORBEREITUNG</div>
-        <h1 class="text-3xl md:text-4xl font-black">Mitnehmen</h1>
-        <p class="text-gray-500 mt-1">Alles, was du für die Schule brauchst.</p>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('backpack')">＋ Gegenstand</button>
-    </section>
 
-    <div class="grid-wide">
-      <div class="glass card p-5">
-        <div class="flex justify-between items-center mb-5">
-          <h2 class="text-xl font-bold">Rucksack</h2>
-          <span class="badge">${active.length} Dinge</span>
+    <div class="dashboard">
+
+      <section class="card span-8">
+
+        <div class="card-title">
+          Rucksack
         </div>
 
-        ${
-          active.length
-          ? active.map(backpackItem).join("")
-          : `<div class="empty">Noch nichts eingetragen.</div>`
-        }
-      </div>
-
-      <div class="space-y-4">
-        ${tomorrowPackCard()}
-        ${subjectPackCard()}
-      </div>
-    </div>
-  `;
-}
-
-function backpackItem(x) {
-  return `
-    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.035] mb-2">
-      <input
-        type="checkbox"
-        ${x.packed?"checked":""}
-        onchange="togglePacked('${x.id}')"
-        class="w-5 h-5"
-      >
-
-      <div class="flex-1">
-        <div class="${x.packed?"line-through text-gray-500":""}">
-          ${esc(x.name)}
+        <div class="card-muted">
+          Dinge, die du nicht vergessen willst.
         </div>
-        ${x.subject ? `<div class="text-xs text-gray-500">${esc(subjectName(x.subject))}</div>`:""}
-      </div>
 
-      <button class="btn btn-danger" onclick="deleteItem('backpack','${x.id}')">×</button>
-    </div>
-  `;
-}
+        <div class="list">
 
-function togglePacked(id) {
-  const x=data.backpack.find(x=>x.id===id);
-  if(x) x.packed=!x.packed;
-  save();
-}
+          ${
+            data.backpack.map(x=>`
 
-function tomorrowPackCard() {
-  const d=new Date();
-  d.setDate(d.getDate()+1);
-  const day=weekdayIndex(d);
+              <div class="list-item">
 
-  const subjects=[
-    ...new Set(
-      data.schedule
-      .filter(x=>Number(x.day)===day)
-      .map(x=>x.subject)
-    )
-  ];
+                <button
+                  class="btn btn-small"
+                  onclick="toggleBackpack('${x.id}')">
+                  ${x.done ? "✓" : "○"}
+                </button>
 
-  return `
-    <div class="glass card p-5">
-      <div class="text-sm text-gray-400">MORGEN</div>
-      <h2 class="text-xl font-bold mt-1">Was brauchst du?</h2>
+                <div class="list-item-main">
 
-      <div class="mt-4 space-y-2">
-        ${
-          subjects.length
-          ? subjects.map(s=>`
-              <div class="p-3 rounded-xl bg-white/[.035]">
-                <b>${esc(subjectName(s))}</b>
-                ${
-                  data.backpack.filter(x=>x.subject===s).length
-                  ? `<div class="text-xs text-gray-500 mt-1">
-                      ${data.backpack.filter(x=>x.subject===s).map(x=>esc(x.name)).join(", ")}
-                     </div>`
-                  : ""
-                }
+                  <div
+                    class="list-item-title"
+                    style="${x.done ? "text-decoration:line-through;opacity:.5":""}">
+                    ${escapeHTML(x.name)}
+                  </div>
+
+                  <div class="list-item-sub">
+                    ${escapeHTML(x.note || "")}
+                  </div>
+
+                </div>
+
+                <button
+                  class="btn btn-small"
+                  onclick="deleteItem('backpack','${x.id}')">
+                  ×
+                </button>
+
               </div>
+
             `).join("")
-          : `<div class="empty">Kein Stundenplan für morgen.</div>`
-        }
-      </div>
+            ||
+            `<div class="empty">Rucksack ist leer.</div>`
+          }
+
+        </div>
+
+      </section>
+
+
+      <section class="card span-4">
+
+        <div class="card-title">
+          Morgen
+        </div>
+
+        <div class="card-muted">
+          Fächer aus deinem morgigen Stundenplan
+        </div>
+
+        <div class="list">
+
+          ${
+            [...new Set(
+              getTomorrowLessons()
+                .map(x=>x.subjectId)
+            )]
+            .map(id=>`
+
+              <div class="list-item">
+
+                <div class="list-item-main">
+
+                  <div class="list-item-title">
+                    ${escapeHTML(subjectName(id))}
+                  </div>
+
+                </div>
+
+                <button
+                  class="btn btn-small"
+                  onclick="openModal('backpack',{
+                    presetSubject:'${id}'
+                  })">
+                  +
+                </button>
+
+              </div>
+
+            `).join("")
+            ||
+            `<div class="empty">Keine Fächer.</div>`
+          }
+
+        </div>
+
+      </section>
+
     </div>
+
   `;
+
 }
 
-function subjectPackCard() {
-  return `
-    <div class="glass card p-5">
-      <h2 class="text-xl font-bold">Schnell hinzufügen</h2>
-      <div class="grid grid-cols-2 gap-2 mt-4">
-        <button class="btn btn-secondary" onclick="openModal('backpack')">📚 Buch</button>
-        <button class="btn btn-secondary" onclick="openModal('backpack')">✏️ Material</button>
-      </div>
-    </div>
-  `;
+
+function toggleBackpack(id){
+
+  const x =
+    data.backpack.find(x=>x.id===id);
+
+  if(x){
+    x.done = !x.done;
+    save();
+    render();
+  }
+
 }
+
 
 /* =========================================================
    CALENDAR
 ========================================================= */
 
-function calendarPage() {
-  const date=new Date(selectedCalendarDate+"T12:00:00");
-  const month=date.getMonth();
-  const year=date.getFullYear();
+function renderCalendar(){
 
-  const first=new Date(year,month,1);
-  const last=new Date(year,month+1,0);
-
-  let start=first.getDay();
-  start=start===0?6:start-1;
-
-  let days=[];
-
-  for(let i=0;i<start;i++) days.push(null);
-  for(let i=1;i<=last.getDate();i++) days.push(i);
+  const upcoming =
+    data.events
+      .filter(x => x.date >= todayISO())
+      .sort((a,b)=>xDate(a.date)-xDate(b.date));
 
   return `
-    <section class="mb-6 flex justify-between flex-wrap gap-3">
-      <div>
-        <div class="text-sm text-gray-400">PLANUNG</div>
-        <h1 class="text-3xl md:text-4xl font-black">Kalender</h1>
+
+    <section class="card">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+      ">
+
+        <div>
+          <div class="card-title">
+            Termine
+          </div>
+
+          <div class="card-muted">
+            Wichtige Termine und Prüfungen
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('event')">
+          + Termin
+        </button>
+
       </div>
-      <button class="btn btn-primary" onclick="openModal('event')">＋ Termin</button>
+
+      <div class="list">
+
+        ${
+          upcoming.map(x=>`
+
+            <div class="list-item">
+
+              <div class="badge">
+                ${escapeHTML(x.date)}
+              </div>
+
+              <div class="list-item-main">
+
+                <div class="list-item-title">
+                  ${escapeHTML(x.title)}
+                </div>
+
+                <div class="list-item-sub">
+                  ${escapeHTML(x.note || "")}
+                </div>
+
+              </div>
+
+              <button
+                class="btn btn-small"
+                onclick="deleteItem('events','${x.id}')">
+                ×
+              </button>
+
+            </div>
+
+          `).join("")
+          ||
+          `<div class="empty">Keine kommenden Termine.</div>`
+        }
+
+      </div>
+
     </section>
 
-    <div class="glass card p-5">
-      <div class="flex justify-between items-center mb-5">
-        <button class="btn btn-secondary" onclick="changeMonth(-1)">←</button>
-        <h2 class="text-xl font-bold">
-          ${date.toLocaleDateString("de-DE",{month:"long",year:"numeric"})}
-        </h2>
-        <button class="btn btn-secondary" onclick="changeMonth(1)">→</button>
-      </div>
-
-      <div class="grid grid-cols-7 gap-2 text-center text-xs text-gray-500 mb-2">
-        ${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div>${x}</div>`).join("")}
-      </div>
-
-      <div class="grid grid-cols-7 gap-2">
-        ${days.map(day=>calendarDay(day,month,year)).join("")}
-      </div>
-    </div>
-
-    <div class="glass card p-5 mt-5">
-      <div class="flex justify-between mb-4">
-        <h2 class="text-xl font-bold">Termine</h2>
-        <button class="btn btn-secondary" onclick="openModal('event')">＋</button>
-      </div>
-      ${
-        data.events.length
-        ? data.events.sort((a,b)=>a.date.localeCompare(b.date)).map(eventRow).join("")
-        : `<div class="empty">Keine Termine.</div>`
-      }
-    </div>
   `;
+
 }
 
-function calendarDay(day,month,year) {
-  if(!day) return `<div></div>`;
 
-  const iso=new Date(year,month,day).toISOString().slice(0,10);
-  const events=data.events.filter(x=>x.date===iso);
+function xDate(date){
 
-  return `
-    <button onclick="selectCalendarDate('${iso}')"
-      class="min-h-16 md:min-h-20 rounded-xl p-2 text-left border
-      ${iso===selectedCalendarDate?"border-blue-400 bg-blue-500/10":"border-white/5 bg-white/[.025]"}">
-      <div class="font-semibold">${day}</div>
-      ${
-        events.slice(0,2).map(e=>`
-          <div class="text-[10px] truncate text-blue-300 mt-1">${esc(e.title)}</div>
-        `).join("")
-      }
-    </button>
-  `;
+  return new Date(date || "9999-12-31");
+
 }
 
-function changeMonth(delta) {
-  const d=new Date(selectedCalendarDate+"T12:00:00");
-  d.setMonth(d.getMonth()+delta);
-  selectedCalendarDate=d.toISOString().slice(0,10);
-  render();
-}
-
-function selectCalendarDate(iso) {
-  selectedCalendarDate=iso;
-  openModal("event");
-}
 
 /* =========================================================
    GRADES
 ========================================================= */
 
-function gradeAverage() {
-  if(!data.grades.length) return null;
+function renderGrades(){
 
-  const values=data.grades
-    .map(x=>Number(x.grade))
-    .filter(x=>Number.isFinite(x));
-
-  if(!values.length) return null;
-
-  return (values.reduce((a,b)=>a+b,0)/values.length).toFixed(2);
-}
-
-function subjectAverage(subject) {
-  const g=data.grades.filter(x=>x.subject===subject);
-  if(!g.length) return null;
-
-  return (g.reduce((a,b)=>a+Number(b.grade),0)/g.length).toFixed(2);
-}
-
-function gradesPage() {
   return `
-    <section class="mb-6 flex justify-between flex-wrap gap-3">
-      <div>
-        <div class="text-sm text-gray-400">ÜBERSICHT</div>
-        <h1 class="text-3xl md:text-4xl font-black">Noten</h1>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('grade')">＋ Note</button>
-    </section>
 
-    <div class="grid-auto mb-5">
-      ${statCard("◇","Gesamtschnitt",gradeAverage() ?? "—","")}
-      ${statCard("●","Anzahl Noten",data.grades.length,"")}
-      ${statCard("📚","Fächer",data.subjects.length,"")}
-    </div>
+    <div class="dashboard">
 
-    <div class="glass card p-5">
-      <h2 class="text-xl font-bold mb-4">Nach Fächern</h2>
+      <section class="card span-4">
 
-      ${
-        data.subjects.map(s=>`
-          <div class="p-4 rounded-xl bg-white/[.035] mb-2 flex justify-between">
-            <div>
-              <b>${esc(s.name)}</b>
-              <div class="text-xs text-gray-500 mt-1">
-                ${data.grades.filter(x=>x.subject===s.id).length} Noten
-              </div>
+        <div class="card-title">
+          Gesamtschnitt
+        </div>
+
+        <div style="
+          font-size:45px;
+          font-weight:900;
+          margin-top:12px;
+        ">
+          ${averageGrade()}
+        </div>
+
+      </section>
+
+
+      <section class="card span-8">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+        ">
+
+          <div>
+            <div class="card-title">
+              Noten
             </div>
-            <div class="text-xl font-black">${subjectAverage(s.id) ?? "—"}</div>
+
+            <div class="card-muted">
+              Übersicht deiner eingetragenen Noten
+            </div>
           </div>
-        `).join("")
-      }
+
+          <button
+            class="btn btn-primary"
+            onclick="openModal('grade')">
+            + Note
+          </button>
+
+        </div>
+
+        <div class="list">
+
+          ${
+            data.grades.map(x=>`
+
+              <div class="list-item">
+
+                <div
+                  class="badge"
+                  style="
+                    background:${subjectColor(x.subjectId)}22;
+                    color:${subjectColor(x.subjectId)};
+                  ">
+                  ${escapeHTML(x.grade)}
+                </div>
+
+                <div class="list-item-main">
+
+                  <div class="list-item-title">
+                    ${escapeHTML(subjectName(x.subjectId))}
+                  </div>
+
+                  <div class="list-item-sub">
+                    ${escapeHTML(x.type || "Note")}
+                    ${x.date ? ` · ${escapeHTML(x.date)}` : ""}
+                  </div>
+
+                </div>
+
+                <button
+                  class="btn btn-small"
+                  onclick="deleteItem('grades','${x.id}')">
+                  ×
+                </button>
+
+              </div>
+
+            `).join("")
+            ||
+            `<div class="empty">Noch keine Noten.</div>`
+          }
+
+        </div>
+
+      </section>
+
     </div>
 
-    <div class="glass card p-5 mt-5">
-      <h2 class="text-xl font-bold mb-4">Alle Noten</h2>
-      ${
-        data.grades.length
-        ? data.grades.map(gradeRow).join("")
-        : `<div class="empty">Noch keine Noten eingetragen.</div>`
-      }
-    </div>
   `;
+
 }
 
-function gradeRow(g) {
-  return `
-    <div class="flex gap-3 items-center p-3 rounded-xl bg-white/[.035] mb-2">
-      <div class="text-2xl font-black w-12">${esc(g.grade)}</div>
-      <div class="flex-1">
-        <b>${esc(subjectName(g.subject))}</b>
-        <div class="text-xs text-gray-500">${esc(g.title||"Leistung")} · ${formatDate(g.date||todayISO())}</div>
-      </div>
-      <button class="btn btn-danger" onclick="deleteItem('grade','${g.id}')">×</button>
-    </div>
-  `;
-}
 
 /* =========================================================
    LEARNING
 ========================================================= */
 
-function learningPage() {
+function renderLearning(){
+
   return `
-    <section class="mb-6">
-      <div class="text-sm text-gray-400">LERNEN</div>
-      <h1 class="text-3xl md:text-4xl font-black">Lernbereich</h1>
-      <p class="text-gray-500 mt-1">Lernen, Ziele und Karteikarten an einem Ort.</p>
-    </section>
 
-    <div class="grid-auto">
-      <div class="glass card p-5">
-        <div class="text-3xl">⏱️</div>
-        <h2 class="text-xl font-bold mt-3">Lern-Timer</h2>
-        <p class="text-gray-500 text-sm mt-1">Fokussiert lernen.</p>
-        <button class="btn btn-primary mt-4" onclick="startStudyTimer()">25 Min starten</button>
-      </div>
+    <div class="dashboard">
 
-      <div class="glass card p-5">
-        <div class="text-3xl">🃏</div>
-        <h2 class="text-xl font-bold mt-3">Karteikarten</h2>
-        <p class="text-gray-500 text-sm mt-1">${data.flashcards.length} Karten</p>
-        <button class="btn btn-secondary mt-4" onclick="openModal('flashcard')">＋ Karte</button>
-      </div>
+      <section class="card span-6">
 
-      <div class="glass card p-5">
-        <div class="text-3xl">🎯</div>
-        <h2 class="text-xl font-bold mt-3">Lernziele</h2>
-        <p class="text-gray-500 text-sm mt-1">${data.goals.filter(x=>!x.done).length} offen</p>
-        <button class="btn btn-secondary mt-4" onclick="openModal('goal')">＋ Ziel</button>
-      </div>
+        <div class="card-title">
+          Fokus-Timer
+        </div>
+
+        <div style="
+          font-size:54px;
+          font-weight:900;
+          text-align:center;
+          margin:25px 0;
+          letter-spacing:-2px;
+        " id="studyTimer">
+          25:00
+        </div>
+
+        <div style="
+          display:flex;
+          justify-content:center;
+          gap:8px;
+        ">
+
+          <button
+            class="btn btn-primary"
+            onclick="startTimer()">
+            Start
+          </button>
+
+          <button
+            class="btn"
+            onclick="resetTimer()">
+            Reset
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="card span-6">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+        ">
+
+          <div>
+            <div class="card-title">
+              Lernziele
+            </div>
+
+            <div class="card-muted">
+              Was möchtest du schaffen?
+            </div>
+          </div>
+
+          <button
+            class="btn"
+            onclick="openModal('goal')">
+            + Ziel
+          </button>
+
+        </div>
+
+        <div class="list">
+
+          ${
+            data.goals.map(x=>`
+
+              <div class="list-item">
+
+                <button
+                  class="btn btn-small"
+                  onclick="toggleGoal('${x.id}')">
+                  ${x.done ? "✓" : "○"}
+                </button>
+
+                <div class="list-item-main">
+
+                  <div class="list-item-title">
+                    ${escapeHTML(x.title)}
+                  </div>
+
+                </div>
+
+                <button
+                  class="btn btn-small"
+                  onclick="deleteItem('goals','${x.id}')">
+                  ×
+                </button>
+
+              </div>
+
+            `).join("")
+            ||
+            `<div class="empty">Noch keine Lernziele.</div>`
+          }
+
+        </div>
+
+      </section>
+
+
+      <section class="card span-12">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+        ">
+
+          <div>
+            <div class="card-title">
+              Karteikarten
+            </div>
+
+            <div class="card-muted">
+              Eigene Lernkarten
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            onclick="openModal('flashcard')">
+            + Karte
+          </button>
+
+        </div>
+
+        <div class="dashboard" style="margin-top:12px">
+
+          ${
+            data.flashcards.map(x=>`
+
+              <div class="card span-4">
+
+                <div style="
+                  font-weight:800;
+                  font-size:14px;
+                ">
+                  ${escapeHTML(x.question)}
+                </div>
+
+                <div style="
+                  color:var(--muted);
+                  font-size:12px;
+                  margin-top:9px;
+                ">
+                  ${escapeHTML(x.answer)}
+                </div>
+
+                <button
+                  class="btn btn-small btn-danger"
+                  style="margin-top:12px"
+                  onclick="deleteItem('flashcards','${x.id}')">
+                  Löschen
+                </button>
+
+              </div>
+
+            `).join("")
+            ||
+            `<div class="card span-12">
+              <div class="empty">Noch keine Karteikarten.</div>
+            </div>`
+          }
+
+        </div>
+
+      </section>
+
     </div>
 
-    <div class="glass card p-5 mt-5">
-      <h2 class="text-xl font-bold mb-4">Lernziele</h2>
-      ${
-        data.goals.length
-        ? data.goals.map(goalRow).join("")
-        : `<div class="empty">Noch keine Lernziele.</div>`
+  `;
+
+}
+
+
+let timerSeconds = 25*60;
+let timerInterval = null;
+
+
+function startTimer(){
+
+  if(timerInterval){
+    return;
+  }
+
+  timerInterval =
+    setInterval(()=>{
+
+      if(timerSeconds <= 0){
+
+        clearInterval(timerInterval);
+        timerInterval = null;
+
+        return;
+
       }
-    </div>
 
-    <div class="glass card p-5 mt-5">
-      <h2 class="text-xl font-bold mb-4">Karteikarten</h2>
-      ${
-        data.flashcards.length
-        ? data.flashcards.map(flashcardRow).join("")
-        : `<div class="empty">Noch keine Karteikarten.</div>`
-      }
-    </div>
-  `;
+      timerSeconds--;
+
+      updateTimer();
+
+    },1000);
+
 }
 
-function goalRow(g) {
-  return `
-    <div class="flex gap-3 items-center p-3 rounded-xl bg-white/[.035] mb-2">
-      <input type="checkbox" ${g.done?"checked":""} onchange="toggleGoal('${g.id}')">
-      <div class="flex-1 ${g.done?"line-through text-gray-500":""}">
-        ${esc(g.title)}
-      </div>
-      <button class="btn btn-danger" onclick="deleteItem('goal','${g.id}')">×</button>
-    </div>
-  `;
+
+function resetTimer(){
+
+  clearInterval(timerInterval);
+
+  timerInterval = null;
+
+  timerSeconds = 25*60;
+
+  updateTimer();
+
 }
 
-function toggleGoal(id) {
-  const g=data.goals.find(x=>x.id===id);
-  if(g) g.done=!g.done;
-  save();
+
+function updateTimer(){
+
+  const el =
+    document.getElementById("studyTimer");
+
+  if(!el){
+    return;
+  }
+
+  const min =
+    String(Math.floor(timerSeconds/60))
+      .padStart(2,"0");
+
+  const sec =
+    String(timerSeconds%60)
+      .padStart(2,"0");
+
+  el.textContent = `${min}:${sec}`;
+
 }
 
-function flashcardRow(f) {
-  return `
-    <div class="p-4 rounded-xl bg-white/[.035] mb-2">
-      <div class="font-bold">${esc(f.question)}</div>
-      <details class="mt-2">
-        <summary class="text-sm text-blue-300 cursor-pointer">Antwort anzeigen</summary>
-        <div class="text-gray-400 mt-2">${esc(f.answer)}</div>
-      </details>
-      <button class="btn btn-danger mt-3" onclick="deleteItem('flashcard','${f.id}')">Löschen</button>
-    </div>
-  `;
+
+function toggleGoal(id){
+
+  const x =
+    data.goals.find(x=>x.id===id);
+
+  if(x){
+    x.done = !x.done;
+    save();
+    render();
+  }
+
 }
 
-function startStudyTimer() {
-  let seconds=25*60;
-
-  modal={
-    type:"timer",
-    seconds
-  };
-
-  render();
-
-  const interval=setInterval(()=>{
-    if(!modal || modal.type!=="timer") {
-      clearInterval(interval);
-      return;
-    }
-
-    modal.seconds--;
-
-    if(modal.seconds<=0) {
-      clearInterval(interval);
-      modal=null;
-      alert("Lernzeit beendet!");
-      render();
-      return;
-    }
-
-    const el=document.getElementById("studyTimer");
-    if(el) el.textContent=formatSeconds(modal.seconds);
-  },1000);
-}
-
-function formatSeconds(s) {
-  const m=Math.floor(s/60);
-  const sec=s%60;
-  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-}
 
 /* =========================================================
    NOTES
 ========================================================= */
 
-function notesPage() {
-  const notes=data.notes.filter(x=>
-    !searchTerm ||
-    (x.title+" "+x.text).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+function renderNotes(){
 
   return `
-    <section class="mb-6 flex justify-between flex-wrap gap-3">
-      <div>
-        <div class="text-sm text-gray-400">NOTIZEN</div>
-        <h1 class="text-3xl md:text-4xl font-black">Notizen</h1>
+
+    <section class="card">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+      ">
+
+        <div>
+          <div class="card-title">
+            Notizen
+          </div>
+
+          <div class="card-muted">
+            Schnell etwas speichern.
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('note')">
+          + Notiz
+        </button>
+
       </div>
-      <button class="btn btn-primary" onclick="openModal('note')">＋ Notiz</button>
+
+      <div class="dashboard" style="margin-top:14px">
+
+        ${
+          data.notes.map(x=>`
+
+            <div class="card span-4">
+
+              <div class="card-title">
+                ${escapeHTML(x.title)}
+              </div>
+
+              <div style="
+                margin-top:9px;
+                color:var(--muted);
+                font-size:12px;
+                white-space:pre-wrap;
+              ">
+                ${escapeHTML(x.text)}
+              </div>
+
+              <button
+                class="btn btn-small btn-danger"
+                style="margin-top:12px"
+                onclick="deleteItem('notes','${x.id}')">
+                Löschen
+              </button>
+
+            </div>
+
+          `).join("")
+          ||
+          `<div class="card span-12">
+            <div class="empty">Keine Notizen.</div>
+          </div>`
+        }
+
+      </div>
+
     </section>
 
-    <div class="grid-auto">
-      ${
-        notes.length
-        ? notes.map(noteCard).join("")
-        : `<div class="glass card empty">Keine Notizen.</div>`
-      }
-    </div>
   `;
+
 }
 
-function noteCard(n) {
-  return `
-    <div class="glass card p-5">
-      <div class="flex justify-between gap-3">
-        <h2 class="font-bold text-lg">${esc(n.title)}</h2>
-        <button class="text-gray-500" onclick="deleteItem('note','${n.id}')">×</button>
-      </div>
-      <div class="text-gray-400 mt-3 whitespace-pre-wrap">${esc(n.text)}</div>
-      <div class="text-xs text-gray-600 mt-4">${formatDate(n.date||todayISO())}</div>
-    </div>
-  `;
-}
 
 /* =========================================================
    CHECKLISTS
 ========================================================= */
 
-function checklistsPage() {
+function renderChecklists(){
+
   return `
-    <section class="mb-6 flex justify-between flex-wrap gap-3">
-      <div>
-        <div class="text-sm text-gray-400">CHECKLISTEN</div>
-        <h1 class="text-3xl md:text-4xl font-black">Checklisten</h1>
+
+    <section class="card">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+      ">
+
+        <div>
+          <div class="card-title">
+            Checklisten
+          </div>
+
+          <div class="card-muted">
+            Für Schule, Lernen oder Projekte.
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('checklist')">
+          + Liste
+        </button>
+
       </div>
-      <button class="btn btn-primary" onclick="openModal('checklist')">＋ Checkliste</button>
+
+      <div class="dashboard" style="margin-top:14px">
+
+        ${
+          data.checklists.map(x=>{
+
+            const items =
+              data.checklistItems
+                .filter(i=>i.listId===x.id);
+
+            const done =
+              items.filter(i=>i.done).length;
+
+            return `
+
+              <div class="card span-4">
+
+                <div class="card-title">
+                  ${escapeHTML(x.title)}
+                </div>
+
+                <div class="card-muted">
+                  ${done}/${items.length} erledigt
+                </div>
+
+                <div class="list">
+
+                  ${items.map(i=>`
+
+                    <div class="list-item">
+
+                      <button
+                        class="btn btn-small"
+                        onclick="toggleChecklistItem('${i.id}')">
+                        ${i.done ? "✓" : "○"}
+                      </button>
+
+                      <div class="list-item-main">
+                        <div class="list-item-title"
+                             style="${i.done ? "text-decoration:line-through;opacity:.5":""}">
+                          ${escapeHTML(i.text)}
+                        </div>
+                      </div>
+
+                    </div>
+
+                  `).join("")}
+
+                </div>
+
+                <button
+                  class="btn btn-small"
+                  style="margin-top:10px"
+                  onclick="openModal('checkitem',{
+                    listId:'${x.id}'
+                  })">
+                  + Eintrag
+                </button>
+
+              </div>
+
+            `;
+
+          }).join("")
+          ||
+          `<div class="card span-12">
+            <div class="empty">Noch keine Checklisten.</div>
+          </div>`
+        }
+
+      </div>
+
     </section>
 
-    <div class="grid-auto">
-      ${
-        data.checklists.length
-        ? data.checklists.map(checklistCard).join("")
-        : `<div class="glass card empty">Noch keine Checklisten.</div>`
-      }
-    </div>
   `;
+
 }
 
-function checklistCard(c) {
-  const items=data.checklistItems.filter(x=>x.listId===c.id);
-  const done=items.filter(x=>x.done).length;
 
-  return `
-    <div class="glass card p-5">
-      <div class="flex justify-between">
-        <div>
-          <h2 class="text-xl font-bold">${esc(c.title)}</h2>
-          <div class="text-xs text-gray-500 mt-1">${done}/${items.length} erledigt</div>
-        </div>
-        <button onclick="deleteChecklist('${c.id}')" class="text-gray-500">×</button>
-      </div>
+function toggleChecklistItem(id){
 
-      <div class="progress mt-4">
-        <div style="width:${items.length?done/items.length*100:0}%"></div>
-      </div>
+  const x =
+    data.checklistItems.find(x=>x.id===id);
 
-      <div class="mt-4">
-        ${items.map(i=>`
-          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer">
-            <input type="checkbox" ${i.done?"checked":""}
-              onchange="toggleChecklistItem('${i.id}')">
-            <span class="${i.done?"line-through text-gray-500":""}">
-              ${esc(i.text)}
-            </span>
-          </label>
-        `).join("")}
-      </div>
+  if(x){
 
-      <button class="btn btn-secondary mt-3 w-full"
-        onclick="addChecklistItem('${c.id}')">
-        ＋ Eintrag
-      </button>
-    </div>
-  `;
+    x.done = !x.done;
+
+    save();
+    render();
+
+  }
+
 }
 
-function addChecklistItem(id) {
-  const text=prompt("Was soll auf die Checkliste?");
-  if(!text) return;
-
-  data.checklistItems.push({
-    id:uid("check"),
-    listId:id,
-    text,
-    done:false
-  });
-
-  save();
-}
-
-function toggleChecklistItem(id) {
-  const i=data.checklistItems.find(x=>x.id===id);
-  if(i) i.done=!i.done;
-  save();
-}
-
-function deleteChecklist(id) {
-  data.checklists=data.checklists.filter(x=>x.id!==id);
-  data.checklistItems=data.checklistItems.filter(x=>x.listId!==id);
-  save();
-}
 
 /* =========================================================
    SUBJECTS
 ========================================================= */
 
-function subjectsPage() {
-  return `
-    <section class="mb-6 flex justify-between">
-      <div>
-        <div class="text-sm text-gray-400">VERWALTUNG</div>
-        <h1 class="text-3xl md:text-4xl font-black">Fächer</h1>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('subject')">＋ Fach</button>
-    </section>
-
-    <div class="grid-auto">
-      ${
-        data.subjects.length
-        ? data.subjects.map(subjectCard).join("")
-        : `<div class="glass card empty">Keine Fächer.</div>`
-      }
-    </div>
-  `;
-}
-
-function subjectCard(s) {
-  const count=data.grades.filter(x=>x.subject===s.id).length;
+function renderSubjects(){
 
   return `
-    <div class="glass card p-5">
-      <div class="flex items-start justify-between">
-        <div class="flex gap-3 items-center">
-          <div class="w-4 h-12 rounded-full" style="background:${s.color}"></div>
-          <div>
-            <h2 class="font-bold text-lg">${esc(s.name)}</h2>
-            <div class="text-xs text-gray-500">${esc(s.teacher||"Kein Lehrer")}</div>
+
+    <section class="card">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+      ">
+
+        <div>
+          <div class="card-title">
+            Fächer
+          </div>
+
+          <div class="card-muted">
+            Deine Unterrichtsfächer
           </div>
         </div>
-        <button onclick="deleteItem('subject','${s.id}')" class="text-gray-500">×</button>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('subject')">
+          + Fach
+        </button>
+
       </div>
 
-      <div class="text-sm text-gray-500 mt-4">
-        Raum: ${esc(s.room||"—")} · ${count} Noten
+      <div class="dashboard" style="margin-top:14px">
+
+        ${
+          data.subjects.map(x=>`
+
+            <div class="card span-3">
+
+              <div style="
+                width:12px;
+                height:12px;
+                border-radius:50%;
+                background:${subjectColor(x.id)};
+                margin-bottom:10px;
+              "></div>
+
+              <div class="card-title">
+                ${escapeHTML(x.name)}
+              </div>
+
+              <div class="card-muted">
+                ${escapeHTML(x.teacher || "Kein Lehrer")}
+              </div>
+
+              <button
+                class="btn btn-small btn-danger"
+                style="margin-top:11px"
+                onclick="deleteItem('subjects','${x.id}')">
+                Löschen
+              </button>
+
+            </div>
+
+          `).join("")
+          ||
+          `<div class="card span-12">
+            <div class="empty">Noch keine Fächer.</div>
+          </div>`
+        }
+
       </div>
-    </div>
+
+    </section>
+
   `;
+
 }
+
 
 /* =========================================================
    TEACHERS
 ========================================================= */
 
-function teachersPage() {
+function renderTeachers(){
+
   return `
-    <section class="mb-6 flex justify-between">
-      <div>
-        <div class="text-sm text-gray-400">VERWALTUNG</div>
-        <h1 class="text-3xl md:text-4xl font-black">Lehrer</h1>
+
+    <section class="card">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+      ">
+
+        <div>
+          <div class="card-title">
+            Lehrer
+          </div>
+
+          <div class="card-muted">
+            Ansprechpartner deiner Fächer
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('teacher')">
+          + Lehrer
+        </button>
+
       </div>
-      <button class="btn btn-primary" onclick="openModal('teacher')">＋ Lehrer</button>
+
+      <div class="dashboard" style="margin-top:14px">
+
+        ${
+          data.teachers.map(x=>`
+
+            <div class="card span-4">
+
+              <div class="card-title">
+                ${escapeHTML(x.name)}
+              </div>
+
+              <div class="card-muted">
+                ${escapeHTML(x.subject || "")}
+              </div>
+
+              <button
+                class="btn btn-small btn-danger"
+                style="margin-top:11px"
+                onclick="deleteItem('teachers','${x.id}')">
+                Löschen
+              </button>
+
+            </div>
+
+          `).join("")
+          ||
+          `<div class="card span-12">
+            <div class="empty">Noch keine Lehrer eingetragen.</div>
+          </div>`
+        }
+
+      </div>
+
     </section>
 
-    <div class="grid-auto">
-      ${
-        data.teachers.length
-        ? data.teachers.map(t=>`
-          <div class="glass card p-5">
-            <div class="flex justify-between">
-              <h2 class="font-bold">${esc(t.name)}</h2>
-              <button onclick="deleteItem('teacher','${t.id}')" class="text-gray-500">×</button>
-            </div>
-            <div class="text-sm text-gray-500 mt-2">${esc(t.subject||"")}</div>
-            ${t.room?`<div class="text-xs text-gray-600 mt-1">Raum ${esc(t.room)}</div>`:""}
-          </div>
-        `).join("")
-        : `<div class="glass card empty">Keine Lehrer eingetragen.</div>`
-      }
-    </div>
   `;
+
 }
+
 
 /* =========================================================
    SUBSTITUTIONS
 ========================================================= */
 
-function substitutionsPage() {
+function renderSubstitutions(){
+
   return `
-    <section class="mb-6 flex justify-between">
-      <div>
-        <div class="text-sm text-gray-400">SCHULE</div>
-        <h1 class="text-3xl md:text-4xl font-black">Vertretungsplan</h1>
+
+    <section class="card">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+      ">
+
+        <div>
+          <div class="card-title">
+            Vertretungen
+          </div>
+
+          <div class="card-muted">
+            Änderungen für deinen Stundenplan
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary"
+          onclick="openModal('substitution')">
+          + Eintrag
+        </button>
+
       </div>
-      <button class="btn btn-primary" onclick="openModal('substitution')">＋ Vertretung</button>
+
+      <div class="list">
+
+        ${
+          data.substitutions.map(x=>`
+
+            <div class="list-item">
+
+              <div class="badge">
+                ${escapeHTML(x.date)}
+              </div>
+
+              <div class="list-item-main">
+
+                <div class="list-item-title">
+                  ${escapeHTML(x.lesson || "Stunde")}
+                </div>
+
+                <div class="list-item-sub">
+                  ${escapeHTML(x.text)}
+                </div>
+
+              </div>
+
+              <button
+                class="btn btn-small"
+                onclick="deleteItem('substitutions','${x.id}')">
+                ×
+              </button>
+
+            </div>
+
+          `).join("")
+          ||
+          `<div class="empty">Keine Vertretungen eingetragen.</div>`
+        }
+
+      </div>
+
     </section>
 
-    <div class="glass card p-5">
-      ${
-        data.substitutions.length
-        ? data.substitutions.map(x=>`
-          <div class="p-4 rounded-xl bg-white/[.035] mb-2">
-            <div class="flex justify-between">
-              <div>
-                <b>${formatDate(x.date)} · ${x.period}. Stunde</b>
-                <div class="mt-1">
-                  ${esc(subjectName(x.subject))}
-                  ${x.replacement ? ` → ${esc(x.replacement)}`:""}
-                </div>
-                <div class="text-xs text-gray-500 mt-1">${esc(x.note||"")}</div>
-              </div>
-              <button onclick="deleteItem('substitution','${x.id}')" class="text-gray-500">×</button>
-            </div>
-          </div>
-        `).join("")
-        : `<div class="empty">Keine Vertretungen.</div>`
-      }
-    </div>
   `;
+
 }
 
-/* =========================================================
-   FAB
-========================================================= */
-
-function fab() {
-  return `
-    ${
-      fabOpen
-      ? `<div class="fab-menu">
-          ${fabItem("📚","Hausaufgabe","homework")}
-          ${fabItem("✓","Aufgabe","task")}
-          ${fabItem("▦","Stunde","schedule")}
-          ${fabItem("☕","Pause","break")}
-          ${fabItem("🎒","Mitnehmen","backpack")}
-          ${fabItem("□","Termin","event")}
-          ${fabItem("✎","Notiz","note")}
-          ${fabItem("◇","Note","grade")}
-          ${fabItem("☑","Checkliste","checklist")}
-          ${fabItem("🃏","Karteikarte","flashcard")}
-          ${fabItem("🎯","Lernziel","goal")}
-        </div>`
-      : ""
-    }
-
-    <button class="fab" onclick="fabOpen=!fabOpen;render()">
-      ${fabOpen ? "×":"+"}
-    </button>
-  `;
-}
-
-function fabItem(icon,text,type) {
-  return `
-    <button class="fab-item" onclick="openModal('${type}')">
-      <span class="text-xl">${icon}</span>
-      <span>${text}</span>
-    </button>
-  `;
-}
-
-/* =========================================================
-   MODALS / EINTRAGEN
-========================================================= */
-
-function openModal(type) {
-  modal={type};
-  render();
-}
-
-function closeModal() {
-  modal=null;
-  render();
-}
-
-function renderModal() {
-  return `
-    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
-      <div class="modal glass" id="modalContent">
-        ${modalContent()}
-      </div>
-    </div>
-  `;
-}
-
-function modalHeader(title,subtitle="") {
-  return `
-    <div class="flex justify-between items-start mb-6">
-      <div>
-        <h2 class="text-2xl font-black">${title}</h2>
-        ${subtitle ? `<p class="text-sm text-gray-500 mt-1">${subtitle}</p>`:""}
-      </div>
-      <button onclick="closeModal()" class="text-2xl text-gray-500">×</button>
-    </div>
-  `;
-}
-
-function field(label,content) {
-  return `
-    <label class="block">
-      <div class="text-sm font-semibold text-gray-400 mb-2">${label}</div>
-      ${content}
-    </label>
-  `;
-}
-
-function subjectSelect(name="subject",selected="") {
-  return `
-    <select class="input" name="${name}">
-      <option value="">Fach auswählen</option>
-      ${data.subjects.map(s=>`
-        <option value="${s.id}" ${s.id===selected?"selected":""}>
-          ${esc(s.name)}
-        </option>
-      `).join("")}
-    </select>
-  `;
-}
-
-function modalButtons(saveFunction) {
-  return `
-    <div class="flex gap-2 justify-end mt-7">
-      <button type="button" class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
-      <button type="submit" class="btn btn-primary">Speichern</button>
-    </div>
-  `;
-}
-
-function modalContent() {
-  const type=modal.type;
-
-  if(type==="timer") {
-    return `
-      ${modalHeader("Lern-Timer","Fokuszeit")}
-      <div class="text-center py-8">
-        <div id="studyTimer" class="text-7xl font-black tracking-tight">
-          ${formatSeconds(modal.seconds)}
-        </div>
-        <p class="text-gray-500 mt-3">Konzentriert bleiben.</p>
-      </div>
-      <button class="btn btn-secondary w-full" onclick="closeModal()">Beenden</button>
-    `;
-  }
-
-  if(type==="schedule") {
-    const p=modal.preset||{};
-    return `
-      ${modalHeader("Unterricht eintragen","Nur die Angaben, die du brauchst.")}
-
-      <form onsubmit="submitSchedule(event)">
-        <div class="grid md:grid-cols-2 gap-4">
-          ${field("Wochentag",`
-            <select class="input" name="day">
-              ${[0,1,2,3,4].map(d=>`
-                <option value="${d}" ${p.day===d?"selected":""}>${dayName(d)}</option>
-              `).join("")}
-            </select>
-          `)}
-
-          ${field("Stunde",`
-            <input class="input" type="number" min="1" max="12"
-              name="period" value="${p.period||1}" required>
-          `)}
-
-          ${field("Fach",subjectSelect("subject"))}
-
-          ${field("Raum",`<input class="input" name="room" placeholder="z. B. 204">`)}
-
-          ${field("Von",`<input class="input" type="time" name="from" required>`)}
-
-          ${field("Bis",`<input class="input" type="time" name="to" required>`)}
-
-          ${field("Lehrer",`<input class="input" name="teacher" placeholder="Optional">`)}
-
-          ${field("Wiederholung",`
-            <select class="input" name="repeat">
-              <option value="once">Nur diese Stunde</option>
-              <option value="weekly">Wöchentlich</option>
-            </select>
-          `)}
-        </div>
-
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="break") {
-    return `
-      ${modalHeader("Pause eintragen","Pausen werden automatisch im Live-Timer berücksichtigt.")}
-
-      <form onsubmit="submitBreak(event)">
-        <div class="grid md:grid-cols-2 gap-4">
-          ${field("Wochentag",`
-            <select class="input" name="day">
-              ${[0,1,2,3,4].map(d=>`<option value="${d}">${dayName(d)}</option>`).join("")}
-            </select>
-          `)}
-
-          ${field("Name",`
-            <input class="input" name="name" placeholder="Große Pause" required>
-          `)}
-
-          ${field("Von",`<input class="input" type="time" name="from" required>`)}
-
-          ${field("Bis",`<input class="input" type="time" name="to" required>`)}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="homework") {
-    return `
-      ${modalHeader("Hausaufgabe","Schnell und übersichtlich eintragen.")}
-
-      <form onsubmit="submitHomework(event)">
-        <div class="space-y-4">
-          ${field("Fach",subjectSelect())}
-          ${field("Aufgabe",`<input class="input" name="title" placeholder="Was musst du machen?" required>`)}
-          ${field("Beschreibung",`<textarea class="input" name="description" placeholder="Details (optional)"></textarea>`)}
-          ${field("Fällig am",`<input class="input" type="date" name="date" value="${todayISO()}">`)}
-
-          ${field("Priorität",`
-            <select class="input" name="priority">
-              <option value="low">🟢 Niedrig</option>
-              <option value="medium" selected>🟡 Mittel</option>
-              <option value="high">🔴 Hoch</option>
-            </select>
-          `)}
-
-          <label class="flex gap-3 items-center">
-            <input type="checkbox" name="bring">
-            <span>🎒 Dafür muss ich etwas mitnehmen</span>
-          </label>
-        </div>
-
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="task") {
-    return `
-      ${modalHeader("Aufgabe","Für alles, was du erledigen möchtest.")}
-
-      <form onsubmit="submitTask(event)">
-        <div class="space-y-4">
-          ${field("Aufgabe",`<input class="input" name="title" placeholder="z. B. Referat vorbereiten" required>`)}
-          ${field("Datum",`<input class="input" type="date" name="date" value="${todayISO()}">`)}
-          ${field("Priorität",`
-            <select class="input" name="priority">
-              <option value="low">🟢 Niedrig</option>
-              <option value="medium" selected>🟡 Mittel</option>
-              <option value="high">🔴 Hoch</option>
-            </select>
-          `)}
-        </div>
-
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="backpack") {
-    return `
-      ${modalHeader("Mitnehmen","Einmal eintragen und später einfach abhaken.")}
-
-      <form onsubmit="submitBackpack(event)">
-        <div class="space-y-4">
-          ${field("Gegenstand",`<input class="input" name="name" placeholder="Mathebuch" required>`)}
-          ${field("Fach",subjectSelect())}
-          <label class="flex gap-3 items-center">
-            <input type="checkbox" name="packed">
-            <span>Ist bereits eingepackt</span>
-          </label>
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="event") {
-    return `
-      ${modalHeader("Termin","Arbeiten, Tests, Ausflüge und wichtige Termine.")}
-
-      <form onsubmit="submitEvent(event)">
-        <div class="space-y-4">
-          ${field("Titel",`<input class="input" name="title" placeholder="Mathearbeit" required>`)}
-          ${field("Datum",`<input class="input" type="date" name="date" value="${selectedCalendarDate}" required>`)}
-          ${field("Uhrzeit",`<input class="input" type="time" name="time">`)}
-          ${field("Beschreibung",`<textarea class="input" name="description" placeholder="Optional"></textarea>`)}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="note") {
-    return `
-      ${modalHeader("Notiz","Alles lokal gespeichert.")}
-
-      <form onsubmit="submitNote(event)">
-        <div class="space-y-4">
-          ${field("Titel",`<input class="input" name="title" placeholder="Titel" required>`)}
-          ${field("Notiz",`<textarea class="input" name="text" placeholder="Deine Notiz..." required></textarea>`)}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="grade") {
-    return `
-      ${modalHeader("Note","Notenübersicht automatisch aktualisieren.")}
-
-      <form onsubmit="submitGrade(event)">
-        <div class="grid md:grid-cols-2 gap-4">
-          ${field("Fach",subjectSelect())}
-          ${field("Note",`
-            <input class="input" type="number" min="1" max="6" step=".1"
-              name="grade" placeholder="1.0" required>
-          `)}
-          ${field("Art",`<input class="input" name="title" placeholder="Klassenarbeit">`)}
-          ${field("Datum",`<input class="input" type="date" name="date" value="${todayISO()}">`)}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="checklist") {
-    return `
-      ${modalHeader("Checkliste","Zum Beispiel Rucksack, Schulsachen oder Projekt.")}
-
-      <form onsubmit="submitChecklist(event)">
-        ${field("Name",`<input class="input" name="title" placeholder="Schulrucksack" required>`)}
-        ${field("Erste Einträge",`
-          <textarea class="input mt-4" name="items"
-            placeholder="Mathebuch&#10;Federmappe&#10;iPad&#10;Hausaufgaben"></textarea>
-        `)}
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="flashcard") {
-    return `
-      ${modalHeader("Karteikarte","Frage und Antwort.")}
-
-      <form onsubmit="submitFlashcard(event)">
-        <div class="space-y-4">
-          ${field("Frage",`<textarea class="input" name="question" placeholder="Was ist ...?" required></textarea>`)}
-          ${field("Antwort",`<textarea class="input" name="answer" placeholder="Die Antwort..." required></textarea>`)}
-          ${field("Fach",subjectSelect())}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="goal") {
-    return `
-      ${modalHeader("Lernziel","Ein Ziel für dein Lernen.")}
-
-      <form onsubmit="submitGoal(event)">
-        ${field("Lernziel",`<input class="input" name="title" placeholder="Ich kann..." required>`)}
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="subject") {
-    return `
-      ${modalHeader("Fach","Fächer werden auch in Stundenplan und Noten verwendet.")}
-
-      <form onsubmit="submitSubject(event)">
-        <div class="space-y-4">
-          ${field("Name",`<input class="input" name="name" placeholder="Physik" required>`)}
-          ${field("Lehrer",`<input class="input" name="teacher" placeholder="Optional">`)}
-          ${field("Raum",`<input class="input" name="room" placeholder="Optional">`)}
-          ${field("Farbe",`<input class="input w-full h-12" type="color" name="color" value="#5875ff">`)}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="teacher") {
-    return `
-      ${modalHeader("Lehrer","Lehrer zentral verwalten.")}
-
-      <form onsubmit="submitTeacher(event)">
-        <div class="space-y-4">
-          ${field("Name",`<input class="input" name="name" placeholder="Herr Müller" required>`)}
-          ${field("Fach",`<input class="input" name="subject" placeholder="Mathematik">`)}
-          ${field("Raum",`<input class="input" name="room" placeholder="204">`)}
-        </div>
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  if(type==="substitution") {
-    return `
-      ${modalHeader("Vertretung","Änderungen am normalen Stundenplan.")}
-
-      <form onsubmit="submitSubstitution(event)">
-        <div class="grid md:grid-cols-2 gap-4">
-          ${field("Datum",`<input class="input" type="date" name="date" value="${todayISO()}" required>`)}
-          ${field("Stunde",`<input class="input" type="number" name="period" min="1" max="12" required>`)}
-          ${field("Fach",subjectSelect())}
-          ${field("Vertretung durch",`<input class="input" name="replacement" placeholder="Lehrer / Fach">`)}
-        </div>
-        ${field("Notiz",`<textarea class="input mt-4" name="note" placeholder="Raumänderung, Ausfall ..."></textarea>`)}
-        ${modalButtons()}
-      </form>
-    `;
-  }
-
-  return "";
-}
-
-/* =========================================================
-   FORM SUBMITS
-========================================================= */
-
-function formData(e) {
-  e.preventDefault();
-  return Object.fromEntries(new FormData(e.target).entries());
-}
-
-function submitSchedule(e) {
-  const f=formData(e);
-
-  if(timeToMinutes(f.to)<=timeToMinutes(f.from)) {
-    alert("Die Bis-Zeit muss nach der Von-Zeit liegen.");
-    return;
-  }
-
-  data.schedule.push({
-    id:uid("lesson"),
-    day:Number(f.day),
-    period:Number(f.period),
-    subject:f.subject,
-    room:f.room,
-    from:f.from,
-    to:f.to,
-    teacher:f.teacher,
-    repeat:f.repeat
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitBreak(e) {
-  const f=formData(e);
-
-  if(timeToMinutes(f.to)<=timeToMinutes(f.from)) {
-    alert("Die Bis-Zeit muss nach der Von-Zeit liegen.");
-    return;
-  }
-
-  data.breaks.push({
-    id:uid("break"),
-    day:Number(f.day),
-    name:f.name,
-    from:f.from,
-    to:f.to
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitHomework(e) {
-  const f=formData(e);
-
-  data.homework.push({
-    id:uid("hw"),
-    subject:f.subject,
-    title:f.title,
-    description:f.description,
-    date:f.date,
-    priority:f.priority,
-    bring:e.target.bring.checked,
-    done:false
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitTask(e) {
-  const f=formData(e);
-
-  data.tasks.push({
-    id:uid("task"),
-    title:f.title,
-    date:f.date,
-    priority:f.priority,
-    done:false
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitBackpack(e) {
-  const f=formData(e);
-
-  data.backpack.push({
-    id:uid("bag"),
-    name:f.name,
-    subject:f.subject,
-    packed:e.target.packed.checked,
-    active:true
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitEvent(e) {
-  const f=formData(e);
-
-  data.events.push({
-    id:uid("event"),
-    title:f.title,
-    date:f.date,
-    time:f.time,
-    description:f.description
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitNote(e) {
-  const f=formData(e);
-
-  data.notes.unshift({
-    id:uid("note"),
-    title:f.title,
-    text:f.text,
-    date:todayISO()
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitGrade(e) {
-  const f=formData(e);
-
-  data.grades.push({
-    id:uid("grade"),
-    subject:f.subject,
-    grade:Number(f.grade),
-    title:f.title,
-    date:f.date
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitChecklist(e) {
-  const f=formData(e);
-
-  const list={
-    id:uid("list"),
-    title:f.title
-  };
-
-  data.checklists.push(list);
-
-  if(f.items) {
-    f.items.split("\n")
-      .map(x=>x.trim())
-      .filter(Boolean)
-      .forEach(text=>{
-        data.checklistItems.push({
-          id:uid("item"),
-          listId:list.id,
-          text,
-          done:false
-        });
-      });
-  }
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitFlashcard(e) {
-  const f=formData(e);
-
-  data.flashcards.push({
-    id:uid("flash"),
-    question:f.question,
-    answer:f.answer,
-    subject:f.subject
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitGoal(e) {
-  const f=formData(e);
-
-  data.goals.push({
-    id:uid("goal"),
-    title:f.title,
-    done:false
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitSubject(e) {
-  const f=formData(e);
-
-  data.subjects.push({
-    id:uid("subject"),
-    name:f.name,
-    teacher:f.teacher,
-    room:f.room,
-    color:f.color
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitTeacher(e) {
-  const f=formData(e);
-
-  data.teachers.push({
-    id:uid("teacher"),
-    name:f.name,
-    subject:f.subject,
-    room:f.room
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-function submitSubstitution(e) {
-  const f=formData(e);
-
-  data.substitutions.push({
-    id:uid("sub"),
-    date:f.date,
-    period:Number(f.period),
-    subject:f.subject,
-    replacement:f.replacement,
-    note:f.note
-  });
-
-  save();
-  modal=null;
-  render();
-}
 
 /* =========================================================
    SETTINGS
 ========================================================= */
 
-function openSettings() {
-  modal={type:"settings"};
-  render();
-}
+function renderSettings(){
 
-function settingsModal() {
   return `
-    ${modalHeader("Einstellungen","Deine Daten bleiben auf diesem Gerät.")}
 
-    <form onsubmit="submitSettings(event)">
-      <div class="space-y-4">
-        ${field("Dein Name",`
-          <input class="input" name="name" value="${esc(data.settings.name)}"
-            placeholder="Wie heißt du?">
-        `)}
+    <div class="dashboard">
 
-        ${field("Klasse",`
-          <input class="input" name="className" value="${esc(data.settings.className)}"
-            placeholder="9a">
-        `)}
+      <section class="card span-6">
 
-        ${field("Darstellung",`
-          <select class="input" name="theme">
-            <option value="dark" ${data.settings.theme==="dark"?"selected":""}>Dunkel</option>
-            <option value="light" ${data.settings.theme==="light"?"selected":""}>Hell</option>
-          </select>
-        `)}
-      </div>
+        <div class="card-title">
+          Profil
+        </div>
 
-      ${modalButtons()}
-    </form>
+        <div class="form-grid" style="margin-top:14px">
 
-    <div class="border-t border-white/5 mt-7 pt-5">
-      <h3 class="font-bold">Daten</h3>
+          <div class="field">
+            <label>Name</label>
+            <input
+              id="settingName"
+              value="${escapeHTML(data.settings.name)}">
+          </div>
 
-      <div class="grid grid-cols-2 gap-2 mt-3">
-        <button class="btn btn-secondary" onclick="exportData()">💾 Export</button>
-        <button class="btn btn-secondary" onclick="openImport()">📥 Import</button>
-      </div>
+          <div class="field">
+            <label>Klasse</label>
+            <input
+              id="settingClass"
+              value="${escapeHTML(data.settings.className)}">
+          </div>
 
-      <button class="btn btn-danger w-full mt-2" onclick="resetData()">
-        Alles zurücksetzen
-      </button>
+        </div>
 
-      <div class="text-xs text-gray-600 mt-4">
-        Speicherung: LocalStorage · keine Anmeldung · kein Backend
-      </div>
+        <button
+          class="btn btn-primary"
+          style="margin-top:13px"
+          onclick="saveSettings()">
+          Speichern
+        </button>
+
+      </section>
+
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Darstellung
+        </div>
+
+        <div class="list">
+
+          <button
+            class="list-item"
+            style="
+              border:0;
+              color:var(--text);
+              text-align:left;
+            "
+            onclick="toggleTheme()">
+
+            <div class="list-item-main">
+
+              <div class="list-item-title">
+                Theme
+              </div>
+
+              <div class="list-item-sub">
+                Aktuell:
+                ${data.settings.theme === "dark"
+                  ? "Dunkel"
+                  : "Hell"}
+              </div>
+
+            </div>
+
+            <span class="badge">
+              ◐
+            </span>
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Daten
+        </div>
+
+        <div class="card-muted">
+          Deine Daten liegen lokal im Browser.
+        </div>
+
+        <div style="
+          display:flex;
+          gap:8px;
+          flex-wrap:wrap;
+          margin-top:13px;
+        ">
+
+          <button
+            class="btn"
+            onclick="exportData()">
+            Export
+          </button>
+
+          <button
+            class="btn"
+            onclick="document.getElementById('importFile').click()">
+            Import
+          </button>
+
+          <input
+            id="importFile"
+            type="file"
+            accept="application/json"
+            hidden
+            onchange="importData(event)">
+
+        </div>
+
+      </section>
+
+
+      <section class="card span-6">
+
+        <div class="card-title">
+          Zurücksetzen
+        </div>
+
+        <div class="card-muted">
+          Löscht alle lokal gespeicherten KlassenBoard-Daten.
+        </div>
+
+        <button
+          class="btn btn-danger"
+          style="margin-top:13px"
+          onclick="resetAll()">
+          Alles löschen
+        </button>
+
+      </section>
+
     </div>
+
   `;
+
 }
 
-/* Inject settings into modal */
-const originalModalContent = modalContent;
-modalContent = function() {
-  if(modal?.type==="settings") return settingsModal();
-  return originalModalContent();
-};
 
-function submitSettings(e) {
-  const f=formData(e);
+function saveSettings(){
 
-  data.settings.name=f.name;
-  data.settings.className=f.className || "Meine Klasse";
-  data.settings.theme=f.theme;
+  data.settings.name =
+    document.getElementById("settingName").value.trim()
+    || "ProfessorFilou";
+
+  data.settings.className =
+    document.getElementById("settingClass").value.trim();
 
   save();
-  modal=null;
+
+  updateProfile();
+
   render();
+
 }
+
 
 /* =========================================================
-   DELETE / EDIT
+   MODAL SYSTEM
 ========================================================= */
 
-function deleteItem(type,id) {
-  const map={
-    schedule:"schedule",
-    break:"breaks",
-    homework:"homework",
-    task:"tasks",
-    backpack:"backpack",
-    event:"events",
-    note:"notes",
-    grade:"grades",
-    flashcard:"flashcards",
-    goal:"goals",
-    subject:"subjects",
-    teacher:"teachers",
-    substitution:"substitutions"
+function openModal(type,preset={}){
+
+  modalState = {
+    type,
+    preset
   };
 
-  const key=map[type];
-  if(!key) return;
+  const layer =
+    document.getElementById("modalLayer");
 
-  const item=data[key].find(x=>x.id===id);
+  layer.classList.add("show");
 
-  if(item) {
-    data.deleted.push({
-      type,
-      item,
-      deletedAt:Date.now()
-    });
+  renderModal();
+
+  document
+    .getElementById("quickMenu")
+    .classList.remove("show");
+
+}
+
+
+function closeModal(){
+
+  document
+    .getElementById("modalLayer")
+    .classList.remove("show");
+
+  modalState = null;
+
+}
+
+
+document
+  .getElementById("modalLayer")
+  .addEventListener("click",e=>{
+
+    if(e.target.id === "modalLayer"){
+      closeModal();
+    }
+
+  });
+
+
+function renderModal(){
+
+  const {type,preset} = modalState;
+
+  let title = "";
+
+  let html = "";
+
+  /* -------------------------
+     SUBJECT
+  ------------------------- */
+
+  if(type === "subject"){
+
+    title = "Fach hinzufügen";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Fachname</label>
+          <input id="fSubjectName" placeholder="z. B. Mathematik">
+        </div>
+
+        <div class="field full">
+          <label>Lehrer</label>
+          <input id="fSubjectTeacher" placeholder="Optional">
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn" onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button class="btn btn-primary"
+                onclick="submitSubject()">
+          Hinzufügen
+        </button>
+
+      </div>
+
+    `;
+
   }
 
-  data[key]=data[key].filter(x=>x.id!==id);
+  /* -------------------------
+     TEACHER
+  ------------------------- */
+
+  else if(type === "teacher"){
+
+    title = "Lehrer hinzufügen";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Name</label>
+          <input id="fTeacherName"
+                 placeholder="z. B. Herr Müller">
+        </div>
+
+        <div class="field full">
+          <label>Fach</label>
+          <input id="fTeacherSubject"
+                 placeholder="z. B. Physik">
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button class="btn btn-primary"
+                onclick="submitTeacher()">
+          Hinzufügen
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     SCHEDULE
+  ------------------------- */
+
+  else if(type === "schedule"){
+
+    title =
+      preset.edit
+      ? "Stunde bearbeiten"
+      : "Stunde eintragen";
+
+    const edit = preset.edit || {};
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Tag</label>
+
+          <select id="fScheduleDay">
+
+            ${days.map(day=>`
+
+              <option
+                value="${day}"
+                ${(edit.day || preset.day) === day ? "selected":""}>
+                ${day}
+              </option>
+
+            `).join("")}
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+          <label>Stunde</label>
+
+          <select id="fSchedulePeriod">
+
+            ${
+              Array.from({length:12},(_,i)=>i+1)
+                .map(i=>`
+
+                  <option
+                    value="${i}"
+                    ${Number(edit.period || preset.period)===i ? "selected":""}>
+                    ${i}. Stunde
+                  </option>
+
+                `).join("")
+            }
+
+          </select>
+
+        </div>
+
+
+        <div class="field full">
+
+          <label>Fach</label>
+
+          <select id="fScheduleSubject">
+
+            <option value="">
+              Fach auswählen
+            </option>
+
+            ${
+              data.subjects.map(x=>`
+
+                <option
+                  value="${x.id}"
+                  ${edit.subjectId===x.id ? "selected":""}>
+                  ${escapeHTML(x.name)}
+                </option>
+
+              `).join("")
+            }
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+          <label>Von</label>
+          <input
+            id="fScheduleFrom"
+            type="time"
+            value="${edit.from || ""}">
+        </div>
+
+
+        <div class="field">
+          <label>Bis</label>
+          <input
+            id="fScheduleTo"
+            type="time"
+            value="${edit.to || ""}">
+        </div>
+
+
+        <div class="field">
+          <label>Raum</label>
+          <input
+            id="fScheduleRoom"
+            value="${escapeHTML(edit.room || "")}"
+            placeholder="z. B. A204">
+        </div>
+
+
+        <div class="field">
+          <label>Lehrer</label>
+          <input
+            id="fScheduleTeacher"
+            value="${escapeHTML(edit.teacher || "")}"
+            placeholder="Optional">
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        ${
+          edit.id
+          ? `
+            <button
+              class="btn btn-danger"
+              onclick="deleteSchedule('${edit.id}')">
+              Löschen
+            </button>
+          `
+          : ""
+        }
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button class="btn btn-primary"
+                onclick="submitSchedule()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     BREAK
+  ------------------------- */
+
+  else if(type === "break"){
+
+    title = "Pause hinzufügen";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Name</label>
+          <input id="fBreakName"
+                 placeholder="Große Pause">
+        </div>
+
+        <div class="field">
+          <label>Von</label>
+          <input id="fBreakFrom" type="time">
+        </div>
+
+        <div class="field">
+          <label>Bis</label>
+          <input id="fBreakTo" type="time">
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button class="btn btn-primary"
+                onclick="submitBreak()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     HOMEWORK
+  ------------------------- */
+
+  else if(type === "homework"){
+
+    title = "Hausaufgabe";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Aufgabe</label>
+          <input id="fHomeworkTitle"
+                 placeholder="Was musst du machen?">
+        </div>
+
+        <div class="field">
+          <label>Fach</label>
+
+          <select id="fHomeworkSubject">
+
+            <option value="">
+              Kein Fach
+            </option>
+
+            ${
+              data.subjects.map(x=>`
+
+                <option value="${x.id}">
+                  ${escapeHTML(x.name)}
+                </option>
+
+              `).join("")
+            }
+
+          </select>
+
+        </div>
+
+        <div class="field">
+          <label>Fällig</label>
+          <input
+            id="fHomeworkDate"
+            type="date"
+            value="${todayISO()}">
+        </div>
+
+        <div class="field full">
+          <label>Notiz</label>
+          <textarea
+            id="fHomeworkNote"
+            placeholder="Optional"></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitHomework()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     TASK
+  ------------------------- */
+
+  else if(type === "task"){
+
+    title = "Aufgabe";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Titel</label>
+          <input id="fTaskTitle"
+                 placeholder="Was musst du erledigen?">
+        </div>
+
+        <div class="field">
+          <label>Datum</label>
+          <input
+            id="fTaskDate"
+            type="date"
+            value="${todayISO()}">
+        </div>
+
+        <div class="field">
+          <label>Priorität</label>
+
+          <select id="fTaskPriority">
+
+            <option value="normal">Normal</option>
+            <option value="hoch">Hoch</option>
+            <option value="niedrig">Niedrig</option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitTask()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     NOTE
+  ------------------------- */
+
+  else if(type === "note"){
+
+    title = "Notiz";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Titel</label>
+          <input id="fNoteTitle"
+                 placeholder="Titel">
+        </div>
+
+        <div class="field full">
+          <label>Text</label>
+          <textarea
+            id="fNoteText"
+            placeholder="Deine Notiz..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitNote()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     EVENT
+  ------------------------- */
+
+  else if(type === "event"){
+
+    title = "Termin";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Titel</label>
+          <input id="fEventTitle"
+                 placeholder="Klassenarbeit, Termin...">
+        </div>
+
+        <div class="field">
+          <label>Datum</label>
+          <input
+            id="fEventDate"
+            type="date"
+            value="${todayISO()}">
+        </div>
+
+        <div class="field">
+          <label>Uhrzeit</label>
+          <input id="fEventTime" type="time">
+        </div>
+
+        <div class="field full">
+          <label>Notiz</label>
+          <textarea id="fEventNote"></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitEvent()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     GRADE
+  ------------------------- */
+
+  else if(type === "grade"){
+
+    title = "Note eintragen";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Fach</label>
+
+          <select id="fGradeSubject">
+
+            <option value="">
+              Fach
+            </option>
+
+            ${
+              data.subjects.map(x=>`
+
+                <option value="${x.id}">
+                  ${escapeHTML(x.name)}
+                </option>
+
+              `).join("")
+            }
+
+          </select>
+
+        </div>
+
+        <div class="field">
+          <label>Note</label>
+
+          <input
+            id="fGrade"
+            type="number"
+            min="1"
+            max="6"
+            step=".1"
+            placeholder="1–6">
+        </div>
+
+        <div class="field">
+          <label>Art</label>
+
+          <input
+            id="fGradeType"
+            placeholder="Arbeit, Test...">
+
+        </div>
+
+        <div class="field">
+          <label>Datum</label>
+
+          <input
+            id="fGradeDate"
+            type="date"
+            value="${todayISO()}">
+
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitGrade()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     BACKPACK
+  ------------------------- */
+
+  else if(type === "backpack"){
+
+    title = "Rucksack";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Gegenstand</label>
+
+          <input
+            id="fBackpackName"
+            placeholder="z. B. Mathebuch">
+
+        </div>
+
+        <div class="field full">
+          <label>Notiz</label>
+
+          <input
+            id="fBackpackNote"
+            placeholder="Optional">
+
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitBackpack()">
+          Hinzufügen
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     GOAL
+  ------------------------- */
+
+  else if(type === "goal"){
+
+    title = "Lernziel";
+
+    html = `
+
+      <div class="field">
+
+        <label>Ziel</label>
+
+        <input
+          id="fGoalTitle"
+          placeholder="z. B. 30 Vokabeln lernen">
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitGoal()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     FLASHCARD
+  ------------------------- */
+
+  else if(type === "flashcard"){
+
+    title = "Karteikarte";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field full">
+
+          <label>Frage</label>
+
+          <textarea
+            id="fFlashQuestion"
+            placeholder="Frage..."></textarea>
+
+        </div>
+
+        <div class="field full">
+
+          <label>Antwort</label>
+
+          <textarea
+            id="fFlashAnswer"
+            placeholder="Antwort..."></textarea>
+
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitFlashcard()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     CHECKLIST
+  ------------------------- */
+
+  else if(type === "checklist"){
+
+    title = "Checkliste";
+
+    html = `
+
+      <div class="field">
+
+        <label>Name</label>
+
+        <input
+          id="fChecklistTitle"
+          placeholder="z. B. Klassenarbeit">
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitChecklist()">
+          Erstellen
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     CHECK ITEM
+  ------------------------- */
+
+  else if(type === "checkitem"){
+
+    title = "Checklisten-Eintrag";
+
+    html = `
+
+      <div class="field">
+
+        <label>Eintrag</label>
+
+        <input
+          id="fCheckItemText"
+          placeholder="Was ist zu erledigen?">
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitCheckItem('${preset.listId}')">
+          Hinzufügen
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  /* -------------------------
+     SUBSTITUTION
+  ------------------------- */
+
+  else if(type === "substitution"){
+
+    title = "Vertretung";
+
+    html = `
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Datum</label>
+          <input
+            id="fSubDate"
+            type="date"
+            value="${todayISO()}">
+        </div>
+
+        <div class="field">
+          <label>Stunde</label>
+          <input
+            id="fSubLesson"
+            placeholder="z. B. 3.">
+        </div>
+
+        <div class="field full">
+          <label>Änderung</label>
+          <textarea
+            id="fSubText"
+            placeholder="z. B. Raum 204 / Vertretung durch..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button class="btn"
+                onclick="closeModal()">
+          Abbrechen
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="submitSubstitution()">
+          Speichern
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+  document.getElementById("modalTitle")
+    .textContent = title;
+
+  document.getElementById("modalContent")
+    .innerHTML = html;
+
+}
+
+
+/* =========================================================
+   SUBMIT FUNCTIONS
+========================================================= */
+
+function submitSubject(){
+
+  const name =
+    document.getElementById("fSubjectName")
+      .value.trim();
+
+  if(!name){
+    return;
+  }
+
+  data.subjects.push({
+
+    id:uid(),
+
+    name,
+
+    teacher:
+      document.getElementById("fSubjectTeacher")
+        .value.trim()
+
+  });
 
   save();
+  closeModal();
+  render();
+
 }
 
-function editItem(type,id) {
-  if(type!=="schedule") return;
 
-  const x=data.schedule.find(x=>x.id===id);
-  if(!x) return;
+function submitTeacher(){
 
-  modal={
-    type:"scheduleEdit",
-    item:x
+  const name =
+    document.getElementById("fTeacherName")
+      .value.trim();
+
+  if(!name){
+    return;
+  }
+
+  data.teachers.push({
+
+    id:uid(),
+
+    name,
+
+    subject:
+      document.getElementById("fTeacherSubject")
+        .value.trim()
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitSchedule(){
+
+  const day =
+    document.getElementById("fScheduleDay").value;
+
+  const period =
+    Number(
+      document.getElementById("fSchedulePeriod").value
+    );
+
+  const subjectId =
+    document.getElementById("fScheduleSubject").value;
+
+  if(!subjectId){
+    alert("Bitte ein Fach auswählen.");
+    return;
+  }
+
+  const edit =
+    modalState.preset.edit;
+
+  const existing =
+    data.schedule.find(x =>
+      x.day === day &&
+      Number(x.period) === period &&
+      x.id !== edit?.id
+    );
+
+  const lesson = {
+
+    id:edit?.id || uid(),
+
+    day,
+
+    period,
+
+    subjectId,
+
+    from:
+      document.getElementById("fScheduleFrom").value,
+
+    to:
+      document.getElementById("fScheduleTo").value,
+
+    room:
+      document.getElementById("fScheduleRoom").value.trim(),
+
+    teacher:
+      document.getElementById("fScheduleTeacher").value.trim()
+
   };
 
+  if(existing){
+
+    if(!confirm(
+      "Für diesen Tag und diese Stunde gibt es bereits einen Eintrag. Ersetzen?"
+    )){
+      return;
+    }
+
+    const index =
+      data.schedule.findIndex(x=>x.id===existing.id);
+
+    data.schedule[index] = lesson;
+
+  }else if(edit){
+
+    const index =
+      data.schedule.findIndex(x=>x.id===edit.id);
+
+    data.schedule[index] = lesson;
+
+  }else{
+
+    data.schedule.push(lesson);
+
+  }
+
+  save();
+  closeModal();
   render();
+
 }
+
+
+function deleteSchedule(id){
+
+  if(!confirm("Stunde wirklich löschen?")){
+    return;
+  }
+
+  data.schedule =
+    data.schedule.filter(x=>x.id!==id);
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitBreak(){
+
+  const name =
+    document.getElementById("fBreakName")
+      .value.trim();
+
+  if(!name){
+    return;
+  }
+
+  data.breaks.push({
+
+    id:uid(),
+
+    name,
+
+    from:
+      document.getElementById("fBreakFrom").value,
+
+    to:
+      document.getElementById("fBreakTo").value
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitHomework(){
+
+  const title =
+    document.getElementById("fHomeworkTitle")
+      .value.trim();
+
+  if(!title){
+    return;
+  }
+
+  data.homework.push({
+
+    id:uid(),
+
+    title,
+
+    subjectId:
+      document.getElementById("fHomeworkSubject").value,
+
+    date:
+      document.getElementById("fHomeworkDate").value,
+
+    note:
+      document.getElementById("fHomeworkNote").value.trim()
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitTask(){
+
+  const title =
+    document.getElementById("fTaskTitle")
+      .value.trim();
+
+  if(!title){
+    return;
+  }
+
+  data.tasks.push({
+
+    id:uid(),
+
+    title,
+
+    date:
+      document.getElementById("fTaskDate").value,
+
+    priority:
+      document.getElementById("fTaskPriority").value,
+
+    done:false
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitNote(){
+
+  const title =
+    document.getElementById("fNoteTitle")
+      .value.trim();
+
+  const text =
+    document.getElementById("fNoteText")
+      .value.trim();
+
+  if(!title && !text){
+    return;
+  }
+
+  data.notes.push({
+
+    id:uid(),
+
+    title:title || "Notiz",
+
+    text
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitEvent(){
+
+  const title =
+    document.getElementById("fEventTitle")
+      .value.trim();
+
+  if(!title){
+    return;
+  }
+
+  data.events.push({
+
+    id:uid(),
+
+    title,
+
+    date:
+      document.getElementById("fEventDate").value,
+
+    time:
+      document.getElementById("fEventTime").value,
+
+    note:
+      document.getElementById("fEventNote").value.trim()
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitGrade(){
+
+  const subjectId =
+    document.getElementById("fGradeSubject").value;
+
+  const grade =
+    Number(
+      document.getElementById("fGrade").value
+    );
+
+  if(!subjectId || isNaN(grade)){
+    alert("Bitte Fach und Note eintragen.");
+    return;
+  }
+
+  data.grades.push({
+
+    id:uid(),
+
+    subjectId,
+
+    grade,
+
+    type:
+      document.getElementById("fGradeType").value.trim(),
+
+    date:
+      document.getElementById("fGradeDate").value
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitBackpack(){
+
+  const name =
+    document.getElementById("fBackpackName")
+      .value.trim();
+
+  if(!name){
+    return;
+  }
+
+  data.backpack.push({
+
+    id:uid(),
+
+    name,
+
+    note:
+      document.getElementById("fBackpackNote").value.trim(),
+
+    done:false
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitGoal(){
+
+  const title =
+    document.getElementById("fGoalTitle")
+      .value.trim();
+
+  if(!title){
+    return;
+  }
+
+  data.goals.push({
+
+    id:uid(),
+
+    title,
+
+    done:false
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitFlashcard(){
+
+  const question =
+    document.getElementById("fFlashQuestion")
+      .value.trim();
+
+  const answer =
+    document.getElementById("fFlashAnswer")
+      .value.trim();
+
+  if(!question || !answer){
+    return;
+  }
+
+  data.flashcards.push({
+
+    id:uid(),
+
+    question,
+
+    answer
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitChecklist(){
+
+  const title =
+    document.getElementById("fChecklistTitle")
+      .value.trim();
+
+  if(!title){
+    return;
+  }
+
+  data.checklists.push({
+
+    id:uid(),
+
+    title
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitCheckItem(listId){
+
+  const text =
+    document.getElementById("fCheckItemText")
+      .value.trim();
+
+  if(!text){
+    return;
+  }
+
+  data.checklistItems.push({
+
+    id:uid(),
+
+    listId,
+
+    text,
+
+    done:false
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+function submitSubstitution(){
+
+  const text =
+    document.getElementById("fSubText")
+      .value.trim();
+
+  if(!text){
+    return;
+  }
+
+  data.substitutions.push({
+
+    id:uid(),
+
+    date:
+      document.getElementById("fSubDate").value,
+
+    lesson:
+      document.getElementById("fSubLesson").value.trim(),
+
+    text
+
+  });
+
+  save();
+  closeModal();
+  render();
+
+}
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+function deleteItem(collection,id){
+
+  if(!confirm("Eintrag wirklich löschen?")){
+    return;
+  }
+
+  data[collection] =
+    data[collection].filter(x=>x.id!==id);
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   QUICK MENU
+========================================================= */
+
+function toggleQuickMenu(){
+
+  document
+    .getElementById("quickMenu")
+    .classList.toggle("show");
+
+}
+
 
 /* =========================================================
    SEARCH
 ========================================================= */
 
-function globalSearch(value) {
-  searchTerm=value;
+function openSearch(){
 
-  if(value.trim()) {
-    currentPage="notes";
+  const query =
+    prompt("Was möchtest du suchen?");
+
+  if(!query){
+    return;
   }
 
-  render();
+  const q =
+    query.toLowerCase();
+
+  const results = [];
+
+  data.notes.forEach(x=>{
+
+    if(
+      x.title.toLowerCase().includes(q) ||
+      x.text.toLowerCase().includes(q)
+    ){
+
+      results.push({
+        type:"Notiz",
+        title:x.title
+      });
+
+    }
+
+  });
+
+  data.homework.forEach(x=>{
+
+    if(x.title.toLowerCase().includes(q)){
+
+      results.push({
+        type:"Hausaufgabe",
+        title:x.title
+      });
+
+    }
+
+  });
+
+  data.tasks.forEach(x=>{
+
+    if(x.title.toLowerCase().includes(q)){
+
+      results.push({
+        type:"Aufgabe",
+        title:x.title
+      });
+
+    }
+
+  });
+
+  alert(
+    results.length
+      ? results
+          .slice(0,10)
+          .map(x=>`${x.type}: ${x.title}`)
+          .join("\n")
+      : "Nichts gefunden."
+  );
+
 }
+
 
 /* =========================================================
    IMPORT / EXPORT
 ========================================================= */
 
-function exportData() {
-  const blob=new Blob(
-    [JSON.stringify(data,null,2)],
-    {type:"application/json"}
-  );
+function exportData(){
 
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=`klassenboard-backup-${todayISO()}.json`;
+  const blob =
+    new Blob(
+      [JSON.stringify(data,null,2)],
+      {type:"application/json"}
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+
+  a.download =
+    "KlassenBoard-Backup.json";
+
   a.click();
 
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  URL.revokeObjectURL(url);
+
 }
 
-function openImport() {
-  modal={type:"import"};
-  render();
-}
 
-function importModal() {
-  return `
-    ${modalHeader("Backup importieren","Wähle eine zuvor exportierte JSON-Datei.")}
+function importData(event){
 
-    <input
-      class="input"
-      type="file"
-      accept=".json,application/json"
-      onchange="importFile(event)"
-    >
+  const file =
+    event.target.files[0];
 
-    <div class="text-xs text-gray-500 mt-4">
-      Beim Import werden die aktuellen Daten ersetzt.
-    </div>
-  `;
-}
+  if(!file){
+    return;
+  }
 
-const oldModalContent = modalContent;
+  const reader =
+    new FileReader();
 
-modalContent = function() {
-  if(modal?.type==="settings") return settingsModal();
-  if(modal?.type==="import") return importModal();
-  if(modal?.type==="scheduleEdit") return editScheduleModal(modal.item);
-  return oldModalContent();
-};
+  reader.onload = () => {
 
-function importFile(e) {
-  const file=e.target.files[0];
-  if(!file) return;
+    try{
 
-  const reader=new FileReader();
+      const imported =
+        JSON.parse(reader.result);
 
-  reader.onload=()=>{
-    try {
-      const imported=JSON.parse(reader.result);
-
-      if(!imported.settings || !imported.subjects) {
-        throw new Error("Ungültiges KlassenBoard-Backup");
-      }
-
-      data={
+      data = {
         ...structuredClone(defaultData),
-        ...imported,
-        settings:{
-          ...defaultData.settings,
-          ...(imported.settings||{})
-        }
+        ...imported
       };
 
       save();
-      modal=null;
+
+      applyTheme();
+
       render();
 
-    } catch {
-      alert("Die Datei konnte nicht importiert werden.");
+      alert("Import erfolgreich.");
+
+    }catch{
+
+      alert("Die Datei konnte nicht gelesen werden.");
+
     }
+
   };
 
   reader.readAsText(file);
+
 }
 
-function resetData() {
-  if(!confirm("Wirklich ALLE KlassenBoard-Daten löschen?")) return;
+
+function resetAll(){
+
+  if(!confirm(
+    "Wirklich ALLE KlassenBoard-Daten löschen?"
+  )){
+    return;
+  }
 
   localStorage.removeItem(STORAGE_KEY);
-  data=structuredClone(defaultData);
-  modal=null;
-  render();
+
+  data =
+    structuredClone(defaultData);
+
+  applyTheme();
+
+  updateProfile();
+
+  navigate("dashboard");
+
 }
+
 
 /* =========================================================
-   EDIT SCHEDULE
+   LIVE LESSON UPDATE
 ========================================================= */
 
-function editScheduleModal(x) {
-  return `
-    ${modalHeader("Stunde bearbeiten","Ändere deine Unterrichtsstunde.")}
+function updateCurrentLessonUI(){
 
-    <form onsubmit="updateSchedule(event,'${x.id}')">
-      <div class="grid md:grid-cols-2 gap-4">
-        ${field("Wochentag",`
-          <select class="input" name="day">
-            ${[0,1,2,3,4].map(d=>`
-              <option value="${d}" ${Number(x.day)===d?"selected":""}>${dayName(d)}</option>
-            `).join("")}
-          </select>
-        `)}
+  const current =
+    getCurrentLesson();
 
-        ${field("Stunde",`
-          <input class="input" type="number" name="period" value="${x.period}" min="1" max="12">
-        `)}
-
-        ${field("Fach",subjectSelect("subject",x.subject))}
-        ${field("Raum",`<input class="input" name="room" value="${esc(x.room||"")}">`)}
-        ${field("Von",`<input class="input" type="time" name="from" value="${x.from}">`)}
-        ${field("Bis",`<input class="input" type="time" name="to" value="${x.to}">`)}
-        ${field("Lehrer",`<input class="input" name="teacher" value="${esc(x.teacher||"")}">`)}
-      </div>
-
-      ${modalButtons()}
-    </form>
-
-    <button class="btn btn-danger w-full mt-2"
-      onclick="deleteItem('schedule','${x.id}');modal=null;render()">
-      Stunde löschen
-    </button>
-  `;
-}
-
-function updateSchedule(e,id) {
-  const f=formData(e);
-  const x=data.schedule.find(x=>x.id===id);
-
-  if(!x) return;
-
-  Object.assign(x,{
-    day:Number(f.day),
-    period:Number(f.period),
-    subject:f.subject,
-    room:f.room,
-    from:f.from,
-    to:f.to,
-    teacher:f.teacher
-  });
-
-  save();
-  modal=null;
-  render();
-}
-
-/* =========================================================
-   MOBILE NAV
-========================================================= */
-
-function toggleMobileNav() {
-  const el=document.getElementById("mobileNav");
-
-  if(el) {
-    el.classList.toggle("hidden");
+  if(!current){
+    return;
   }
+
+  const now = new Date();
+
+  const [sh,sm] =
+    current.from.split(":").map(Number);
+
+  const [eh,em] =
+    current.to.split(":").map(Number);
+
+  const start =
+    sh*60+sm;
+
+  const end =
+    eh*60+em;
+
+  const currentMinutes =
+    now.getHours()*60 +
+    now.getMinutes() +
+    now.getSeconds()/60;
+
+  const percent =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        ((currentMinutes-start)/(end-start))*100
+      )
+    );
+
+  const progress =
+    document.getElementById("lessonProgress");
+
+  if(progress){
+    progress.style.width =
+      percent + "%";
+  }
+
+  const progress2 =
+    document.getElementById("nowProgress");
+
+  if(progress2){
+    progress2.style.width =
+      percent + "%";
+  }
+
+  const remaining =
+    Math.max(
+      0,
+      Math.ceil(end-currentMinutes)
+    );
+
+  const remainingText =
+    remaining >= 60
+      ? `${Math.floor(remaining/60)}h ${remaining%60}m`
+      : `${remaining} min`;
+
+  const r1 =
+    document.getElementById("remainingTime");
+
+  const r2 =
+    document.getElementById("nowRemaining");
+
+  if(r1){
+    r1.textContent =
+      `${remainingText} übrig`;
+  }
+
+  if(r2){
+    r2.textContent =
+      `${remainingText} übrig`;
+  }
+
 }
 
+
+setInterval(updateCurrentLessonUI,1000);
+
+
 /* =========================================================
-   LIVE UPDATE
+   RENDER
 ========================================================= */
 
-setInterval(()=>{
-  if(!modal) {
-    const status=currentStatus();
+function render(){
 
-    const remaining=document.getElementById("liveRemaining");
-    const progress=document.getElementById("liveProgress");
+  const page =
+    document.getElementById("page");
 
-    if(status.type==="lesson" && remaining) {
-      remaining.textContent=formatRemaining(status.remaining);
+  switch(currentPage){
 
-      if(progress) {
-        progress.style.width=
-          Math.max(0,Math.min(100,(status.elapsed/status.total)*100))+"%";
-      }
-    }
+    case "dashboard":
+      page.innerHTML = renderDashboard();
+      break;
+
+    case "now":
+      page.innerHTML = renderNow();
+      break;
+
+    case "schedule":
+      page.innerHTML = renderSchedule();
+      break;
+
+    case "tasks":
+      page.innerHTML = renderTasks();
+      break;
+
+    case "backpack":
+      page.innerHTML = renderBackpack();
+      break;
+
+    case "calendar":
+      page.innerHTML = renderCalendar();
+      break;
+
+    case "grades":
+      page.innerHTML = renderGrades();
+      break;
+
+    case "learning":
+      page.innerHTML = renderLearning();
+      break;
+
+    case "notes":
+      page.innerHTML = renderNotes();
+      break;
+
+    case "checklists":
+      page.innerHTML = renderChecklists();
+      break;
+
+    case "subjects":
+      page.innerHTML = renderSubjects();
+      break;
+
+    case "teachers":
+      page.innerHTML = renderTeachers();
+      break;
+
+    case "substitutions":
+      page.innerHTML = renderSubstitutions();
+      break;
+
+    case "settings":
+      page.innerHTML = renderSettings();
+      break;
+
+    default:
+      page.innerHTML = renderDashboard();
+
   }
-},1000);
 
-/* =========================================================
-   INITIAL
-========================================================= */
+  updateCurrentLessonUI();
+
+}
+
 
 render();
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+document.addEventListener("keydown",e=>{
+
+  if(e.key === "Escape"){
+    closeModal();
+
+    document
+      .getElementById("quickMenu")
+      .classList.remove("show");
+  }
+
+});
+
+
+/* =========================================================
+   CLOSE QUICK MENU OUTSIDE
+========================================================= */
+
+document.addEventListener("click",e=>{
+
+  const menu =
+    document.getElementById("quickMenu");
+
+  const fab =
+    document.getElementById("fab");
+
+  if(
+    menu.classList.contains("show") &&
+    !menu.contains(e.target) &&
+    !fab.contains(e.target)
+  ){
+
+    menu.classList.remove("show");
+
+  }
+
+});
+
 </script>
 
 </body>
