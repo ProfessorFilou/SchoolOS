@@ -1,4086 +1,2923 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta name="theme-color" content="#0f172a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-
-  <title>Klassen-Board</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#3b82f6"
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    body {
-      font-family: Inter, system-ui, sans-serif;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .nav-btn.active {
-      background: #2563eb;
-      color: white;
-    }
-
-    input,
-    select,
-    textarea {
-      color-scheme: dark;
-    }
-
-    .glass {
-      background: rgba(15, 23, 42, .82);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    .fab {
-      box-shadow:
-        0 10px 30px rgba(0,0,0,.35),
-        0 0 0 1px rgba(255,255,255,.05);
-    }
-
-    .progress {
-      transition: width .5s linear;
-    }
-
-    .lesson-current {
-      border-color: #3b82f6 !important;
-      box-shadow: 0 0 0 1px rgba(59,130,246,.25);
-    }
-
-    .lesson-finished {
-      opacity: .45;
-    }
-  </style>
-</head>
-
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-28">
-
-<!-- ========================================================= -->
-<!-- HEADER -->
-<!-- ========================================================= -->
-
-<header class="sticky top-0 z-40 glass border-b border-slate-800 px-4 py-3">
-
-  <div class="max-w-lg mx-auto flex items-center justify-between">
-
-    <div>
-      <h1 id="classNameDisplay"
-          class="font-bold text-lg">
-        Klassen-Board
-      </h1>
-
-      <p id="dateDisplay"
-         class="text-xs text-slate-400">
-      </p>
-    </div>
-
-    <button
-      onclick="toggleAdmin()"
-      id="adminBtn"
-      class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-full text-xs transition">
-      Einstellungen
-    </button>
-
-  </div>
-
-</header>
-
-
-<!-- ========================================================= -->
-<!-- MAIN -->
-<!-- ========================================================= -->
-
-<main class="max-w-lg mx-auto px-4 pt-4">
-
-
-<!-- ========================================================= -->
-<!-- DASHBOARD -->
-<!-- ========================================================= -->
-
-<section id="tab-dashboard"
-         class="tab-content active space-y-4">
-
-  <!-- Welcome -->
-
-  <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-5 shadow-xl">
-
-    <p class="text-blue-100 text-sm">
-      Willkommen zurück
-    </p>
-
-    <h2 id="greeting"
-        class="text-2xl font-bold mt-1">
-      Hey!
-    </h2>
-
-    <p id="todaySummary"
-       class="text-blue-100 text-sm mt-2">
-      Lade...
-    </p>
-
-  </div>
-
-
-  <!-- ======================================================= -->
-  <!-- LIVE LESSON -->
-  <!-- ======================================================= -->
-
-  <div id="liveCard"
-       class="bg-slate-900 rounded-2xl p-5 border border-slate-800">
-
-    <div class="flex justify-between items-center">
-
-      <div>
-        <p id="liveStatus"
-           class="text-xs text-slate-400">
-          Schulstatus
-        </p>
-
-        <h3 id="liveTitle"
-            class="text-xl font-bold mt-1">
-          Keine aktuelle Stunde
-        </h3>
-
-        <p id="liveDetails"
-           class="text-sm text-slate-400 mt-1">
-          -
-        </p>
-      </div>
-
-      <div class="text-right">
-
-        <p id="liveRemaining"
-           class="text-2xl font-bold text-blue-400">
-          --
-        </p>
-
-        <p class="text-xs text-slate-500">
-          verbleibend
-        </p>
-
-      </div>
-
-    </div>
-
-
-    <div class="mt-4 h-2 bg-slate-800 rounded-full overflow-hidden">
-
-      <div id="lessonProgress"
-           class="progress h-full bg-blue-500 rounded-full"
-           style="width:0%">
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ======================================================= -->
-  <!-- NEXT LESSON -->
-  <!-- ======================================================= -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-    <div class="flex justify-between items-center">
-
-      <div>
-
-        <p class="text-xs text-slate-500">
-          Als Nächstes
-        </p>
-
-        <h3 id="nextLesson"
-            class="font-semibold mt-1">
-          -
-        </h3>
-
-        <p id="nextLessonDetails"
-           class="text-xs text-slate-500 mt-1">
-        </p>
-
-      </div>
-
-      <div class="text-right">
-
-        <p id="nextCountdown"
-           class="text-blue-400 font-bold">
-          --
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ======================================================= -->
-  <!-- QUICK STATS -->
-  <!-- ======================================================= -->
-
-  <div class="grid grid-cols-2 gap-3">
-
-    <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-      <p class="text-xs text-slate-400">
-        Offene Aufgaben
-      </p>
-
-      <p id="openHomework"
-         class="text-2xl font-bold mt-1">
-        0
-      </p>
-
-    </div>
-
-
-    <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-      <p class="text-xs text-slate-400">
-        Notendurchschnitt
-      </p>
-
-      <p id="dashboardAverage"
-         class="text-2xl font-bold mt-1">
-        -
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <!-- ======================================================= -->
-  <!-- TODAY -->
-  <!-- ======================================================= -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-    <div class="flex justify-between items-center mb-3">
-
-      <h3 class="font-semibold">
-        Heute
-      </h3>
-
-      <button
-        onclick="showTab('schedule')"
-        class="text-xs text-blue-400">
-        Stundenplan →
-      </button>
-
-    </div>
-
-    <div id="todaySchedule"
-         class="space-y-2">
-    </div>
-
-  </div>
-
-
-  <!-- ======================================================= -->
-  <!-- BAG -->
-  <!-- ======================================================= -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-    <div class="flex justify-between items-center mb-3">
-
-      <h3 class="font-semibold">
-        🎒 Schultasche
-      </h3>
-
-      <button
-        onclick="showTab('checklists')"
-        class="text-xs text-blue-400">
-        Checkliste →
-      </button>
-
-    </div>
-
-    <div id="bagPreview"
-         class="space-y-2">
-    </div>
-
-  </div>
-
-
-  <!-- ======================================================= -->
-  <!-- ANNOUNCEMENTS -->
-  <!-- ======================================================= -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-    <h3 class="font-semibold mb-3">
-      Ankündigungen
-    </h3>
-
-    <div id="announcementsList"
-         class="space-y-3">
-    </div>
-
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- NOTEN -->
-<!-- ========================================================= -->
-
-<section id="tab-grades"
-         class="tab-content space-y-4">
-
-  <div class="flex justify-between items-center">
-
-    <h2 class="text-xl font-bold">
-      Noten
-    </h2>
-
-    <span id="overallAverage"
-          class="text-blue-400 font-semibold">
-      Ø –
-    </span>
-
-  </div>
-
-  <div id="gradesList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- HAUSAUFGABEN -->
-<!-- ========================================================= -->
-
-<section id="tab-homework"
-         class="tab-content space-y-4">
-
-  <div class="flex justify-between items-center">
-
-    <h2 class="text-xl font-bold">
-      Hausaufgaben
-    </h2>
-
-    <button
-      onclick="toggleCompletedHomework()"
-      id="toggleHwBtn"
-      class="text-xs text-slate-400">
-      Erledigte anzeigen
-    </button>
-
-  </div>
-
-  <div id="homeworkList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- STUNDENPLAN -->
-<!-- ========================================================= -->
-
-<section id="tab-schedule"
-         class="tab-content space-y-4">
-
-  <div class="flex justify-between items-center">
-
-    <h2 class="text-xl font-bold">
-      Stundenplan
-    </h2>
-
-    <button
-      onclick="showTab('today')"
-      class="text-xs text-blue-400">
-      Heute
-    </button>
-
-  </div>
-
-  <div id="daySelector"
-       class="flex gap-2 overflow-x-auto pb-2">
-  </div>
-
-  <div id="scheduleList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- TODAY / TIMER -->
-<!-- ========================================================= -->
-
-<section id="tab-today"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Mein Schultag
-  </h2>
-
-  <div id="fullDayTimeline"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- TERMINE -->
-<!-- ========================================================= -->
-
-<section id="tab-events"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Termine
-  </h2>
-
-  <div id="eventsList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- CHECKLISTEN -->
-<!-- ========================================================= -->
-
-<section id="tab-checklists"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Checklisten
-  </h2>
-
-
-  <!-- Schoolbag -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-    <div class="flex justify-between items-center mb-3">
-
-      <h3 class="font-semibold">
-        🎒 Schultasche
-      </h3>
-
-      <span id="bagCount"
-            class="text-xs text-slate-500">
-      </span>
-
-    </div>
-
-    <div id="bagList"
-         class="space-y-2">
-    </div>
-
-  </div>
-
-
-  <!-- General checklist -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-
-    <h3 class="font-semibold mb-3">
-      📋 Meine Checkliste
-    </h3>
-
-    <div id="checklistList"
-         class="space-y-2">
-    </div>
-
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- FÄCHER -->
-<!-- ========================================================= -->
-
-<section id="tab-subjects"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Fächer & Lehrer
-  </h2>
-
-  <div id="subjectsList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- NOTIZEN -->
-<!-- ========================================================= -->
-
-<section id="tab-notes"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Schnelle Notizen
-  </h2>
-
-  <div id="notesList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- VERTRETUNG -->
-<!-- ========================================================= -->
-
-<section id="tab-substitutions"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Vertretungsplan
-  </h2>
-
-  <div id="substitutionList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- ABSENZEN -->
-<!-- ========================================================= -->
-
-<section id="tab-absences"
-         class="tab-content space-y-4">
-
-  <h2 class="text-xl font-bold">
-    Absenzen
-  </h2>
-
-  <div id="absencesList"
-       class="space-y-3">
-  </div>
-
-</section>
-
-
-
-<!-- ========================================================= -->
-<!-- ADMIN -->
-<!-- ========================================================= -->
-
-<section id="tab-admin"
-         class="tab-content space-y-5">
-
-  <h2 class="text-xl font-bold">
-    Einstellungen
-  </h2>
-
-
-  <!-- PROFILE -->
-
-  <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
-
-    <h3 class="font-semibold">
-      Profil
-    </h3>
-
-    <input
-      id="inputUserName"
-      type="text"
-      placeholder="Dein Name"
-      class="field">
-
-    <input
-      id="inputClassName"
-      type="text"
-      placeholder="Klasse, z.B. 9b"
-      class="field">
-
-    <button
-      onclick="saveProfile()"
-      class="primaryBtn">
-      Profil speichern
-    </button>
-
-  </div>
-
-
-  <!-- ADD GRADE -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Note hinzufügen
-    </h3>
-
-    <input id="gradeSubject"
-           class="field"
-           placeholder="Fach">
-
-    <div class="grid grid-cols-2 gap-2">
-
-      <input id="gradeValue"
-             class="field"
-             placeholder="Note">
-
-      <input id="gradeWeight"
-             class="field"
-             value="1"
-             placeholder="Gewichtung">
-
-    </div>
-
-    <input id="gradeDate"
-           type="date"
-           class="field">
-
-    <input id="gradeType"
-           class="field"
-           placeholder="Art, z.B. Klausur">
-
-    <button
-      onclick="addGrade()"
-      class="primaryBtn">
-      Note speichern
-    </button>
-
-  </div>
-
-
-  <!-- HOMEWORK -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Hausaufgabe
-    </h3>
-
-    <input id="hwSubject"
-           class="field"
-           placeholder="Fach">
-
-    <textarea id="hwTask"
-              class="field"
-              rows="3"
-              placeholder="Aufgabe"></textarea>
-
-    <input id="hwDue"
-           type="date"
-           class="field">
-
-    <button
-      onclick="addHomework()"
-      class="primaryBtn">
-      Hausaufgabe speichern
-    </button>
-
-  </div>
-
-
-  <!-- SCHEDULE -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Stunde hinzufügen
-    </h3>
-
-    <select id="schedDay"
-            class="field">
-      <option value="0">Montag</option>
-      <option value="1">Dienstag</option>
-      <option value="2">Mittwoch</option>
-      <option value="3">Donnerstag</option>
-      <option value="4">Freitag</option>
-    </select>
-
-    <div class="grid grid-cols-2 gap-2">
-
-      <input id="schedPeriod"
-             type="number"
-             min="1"
-             max="12"
-             class="field"
-             placeholder="Stunde">
-
-      <input id="schedSubject"
-             class="field"
-             placeholder="Fach">
-
-    </div>
-
-    <div class="grid grid-cols-2 gap-2">
-
-      <input id="schedFrom"
-             type="time"
-             class="field">
-
-      <input id="schedTo"
-             type="time"
-             class="field">
-
-    </div>
-
-    <input id="schedRoom"
-           class="field"
-           placeholder="Raum">
-
-    <button
-      onclick="addSchedule()"
-      class="primaryBtn">
-      Stunde speichern
-    </button>
-
-  </div>
-
-
-  <!-- BREAK -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Pause hinzufügen
-    </h3>
-
-    <select id="breakDay"
-            class="field">
-      <option value="0">Montag</option>
-      <option value="1">Dienstag</option>
-      <option value="2">Mittwoch</option>
-      <option value="3">Donnerstag</option>
-      <option value="4">Freitag</option>
-    </select>
-
-    <input id="breakName"
-           class="field"
-           placeholder="z.B. Große Pause">
-
-    <div class="grid grid-cols-2 gap-2">
-
-      <input id="breakFrom"
-             type="time"
-             class="field">
-
-      <input id="breakTo"
-             type="time"
-             class="field">
-
-    </div>
-
-    <button
-      onclick="addBreak()"
-      class="primaryBtn">
-      Pause speichern
-    </button>
-
-  </div>
-
-
-  <!-- EVENT -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Termin / Klausur
-    </h3>
-
-    <input id="eventTitle"
-           class="field"
-           placeholder="Titel">
-
-    <input id="eventDate"
-           type="date"
-           class="field">
-
-    <input id="eventTime"
-           type="time"
-           class="field">
-
-    <input id="eventType"
-           class="field"
-           placeholder="Typ, z.B. Klausur">
-
-    <button
-      onclick="addEvent()"
-      class="primaryBtn">
-      Termin speichern
-    </button>
-
-  </div>
-
-
-  <!-- SUBJECT -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Fach / Lehrer
-    </h3>
-
-    <input id="subjectName"
-           class="field"
-           placeholder="Fach">
-
-    <input id="subjectTeacher"
-           class="field"
-           placeholder="Lehrer">
-
-    <input id="subjectRoom"
-           class="field"
-           placeholder="Standardraum">
-
-    <button
-      onclick="addSubject()"
-      class="primaryBtn">
-      Fach speichern
-    </button>
-
-  </div>
-
-
-  <!-- NOTE -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Schnelle Notiz
-    </h3>
-
-    <input id="noteTitle"
-           class="field"
-           placeholder="Titel">
-
-    <textarea id="noteText"
-              class="field"
-              rows="3"
-              placeholder="Notiz"></textarea>
-
-    <button
-      onclick="addNote()"
-      class="primaryBtn">
-      Notiz speichern
-    </button>
-
-  </div>
-
-
-  <!-- BAG ITEM -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      🎒 Sache zur Tasche hinzufügen
-    </h3>
-
-    <input id="bagItem"
-           class="field"
-           placeholder="z.B. Mathebuch">
-
-    <button
-      onclick="addBagItem()"
-      class="primaryBtn">
-      Hinzufügen
-    </button>
-
-  </div>
-
-
-  <!-- CHECKLIST -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      📋 Checklisten-Punkt
-    </h3>
-
-    <input id="checkItem"
-           class="field"
-           placeholder="z.B. Hausaufgaben kontrollieren">
-
-    <button
-      onclick="addCheckItem()"
-      class="primaryBtn">
-      Hinzufügen
-    </button>
-
-  </div>
-
-
-  <!-- SUBSTITUTION -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      🔄 Vertretung
-    </h3>
-
-    <select id="subDay"
-            class="field">
-      <option value="0">Montag</option>
-      <option value="1">Dienstag</option>
-      <option value="2">Mittwoch</option>
-      <option value="3">Donnerstag</option>
-      <option value="4">Freitag</option>
-    </select>
-
-    <input id="subPeriod"
-           type="number"
-           class="field"
-           placeholder="Stunde">
-
-    <input id="subOld"
-           class="field"
-           placeholder="Entfällt / ursprüngliches Fach">
-
-    <input id="subNew"
-           class="field"
-           placeholder="Vertretung">
-
-    <input id="subRoom"
-           class="field"
-           placeholder="Raum">
-
-    <button
-      onclick="addSubstitution()"
-      class="primaryBtn">
-      Vertretung speichern
-    </button>
-
-  </div>
-
-
-  <!-- ANNOUNCEMENT -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      📢 Ankündigung
-    </h3>
-
-    <textarea id="annText"
-              class="field"
-              rows="3"
-              placeholder="Text"></textarea>
-
-    <button
-      onclick="addAnnouncement()"
-      class="primaryBtn">
-      Speichern
-    </button>
-
-  </div>
-
-
-  <!-- ABSENCE -->
-
-  <div class="adminBox">
-
-    <h3 class="adminTitle">
-      Absenz
-    </h3>
-
-    <input id="absName"
-           class="field"
-           placeholder="Name">
-
-    <input id="absDate"
-           type="date"
-           class="field">
-
-    <input id="absReason"
-           class="field"
-           placeholder="Grund">
-
-    <button
-      onclick="addAbsence()"
-      class="primaryBtn">
-      Absenz speichern
-    </button>
-
-  </div>
-
-
-  <!-- BACKUP -->
-
-  <div class="bg-red-950/40 border border-red-900 rounded-2xl p-4 space-y-3">
-
-    <h3 class="font-semibold text-red-400">
-      Daten
-    </h3>
-
-    <button
-      onclick="exportData()"
-      class="secondaryBtn">
-      Daten exportieren
-    </button>
-
-    <button
-      onclick="importData()"
-      class="secondaryBtn">
-      Daten importieren
-    </button>
-
-    <button
-      onclick="clearAllData()"
-      class="w-full bg-red-900/50 hover:bg-red-900 py-2 rounded-xl text-sm">
-      Alles löschen
-    </button>
-
-  </div>
-
-</section>
-
-</main>
-
-
-
-<!-- ========================================================= -->
-<!-- FAB -->
-<!-- ========================================================= -->
-
-<div class="fixed bottom-20 right-5 z-50">
-
-  <div id="fabMenu"
-       class="hidden flex-col items-end gap-2 mb-3">
-
-    <button onclick="openQuick('homework')"
-            class="quickBtn">
-      📝 Hausaufgabe
-    </button>
-
-    <button onclick="openQuick('note')"
-            class="quickBtn">
-      💬 Notiz
-    </button>
-
-    <button onclick="openQuick('event')"
-            class="quickBtn">
-      📅 Termin
-    </button>
-
-    <button onclick="openQuick('grade')"
-            class="quickBtn">
-      📊 Note
-    </button>
-
-    <button onclick="openQuick('schedule')"
-            class="quickBtn">
-      🕐 Stunde
-    </button>
-
-    <button onclick="openQuick('bag')"
-            class="quickBtn">
-      🎒 Tasche
-    </button>
-
-  </div>
-
-
-  <button
-    onclick="toggleFab()"
-    id="fab"
-    class="fab w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-3xl transition">
-    +
-  </button>
-
-</div>
-
-
-
-<!-- ========================================================= -->
-<!-- BOTTOM NAV -->
-<!-- ========================================================= -->
-
-<nav class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-800">
-
-  <div class="max-w-lg mx-auto flex justify-around px-2 py-2">
-
-    <button onclick="showTab('dashboard')"
-            data-tab="dashboard"
-            class="nav-btn active navItem">
-      🏠
-      <span>Home</span>
-    </button>
-
-    <button onclick="showTab('grades')"
-            data-tab="grades"
-            class="nav-btn navItem">
-      📊
-      <span>Noten</span>
-    </button>
-
-    <button onclick="showTab('homework')"
-            data-tab="homework"
-            class="nav-btn navItem">
-      📝
-      <span>Aufgaben</span>
-    </button>
-
-    <button onclick="showTab('schedule')"
-            data-tab="schedule"
-            class="nav-btn navItem">
-      🗓️
-      <span>Plan</span>
-    </button>
-
-    <button onclick="showTab('checklists')"
-            data-tab="checklists"
-            class="nav-btn navItem">
-      🎒
-      <span>Tasche</span>
-    </button>
-
-  </div>
-
-</nav>
-
-
-
-<!-- ========================================================= -->
-<!-- STYLES -->
-<!-- ========================================================= -->
-
-<style>
-
-.field {
-  width: 100%;
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 14px;
-  outline: none;
-}
-
-.field:focus {
-  border-color: #3b82f6;
-}
-
-.primaryBtn {
-  width: 100%;
-  background: #2563eb;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.primaryBtn:hover {
-  background: #3b82f6;
-}
-
-.secondaryBtn {
-  width: 100%;
-  background: #1e293b;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-}
-
-.adminBox {
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.adminTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #cbd5e1;
-}
-
-.navItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 7px 13px;
-  border-radius: 12px;
-  font-size: 11px;
-  min-width: 58px;
-}
-
-.quickBtn {
-  background: #1e293b;
-  border: 1px solid #334155;
-  padding: 9px 13px;
-  border-radius: 12px;
-  font-size: 13px;
-  box-shadow: 0 5px 20px rgba(0,0,0,.3);
-}
-
-.quickBtn:hover {
-  background: #334155;
-}
-
-</style>
-
-
-
-<!-- ========================================================= -->
-<!-- JAVASCRIPT -->
-<!-- ========================================================= -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f19">
+<title>KlassenBoard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
 
 <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
 
-/* ============================================================
-   DATA
-============================================================ */
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(80,110,255,.14), transparent 28%),
+    radial-gradient(circle at 90% 10%, rgba(0,200,255,.08), transparent 25%),
+    #080b12;
+  color: #f5f7fb;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glass {
+  background: rgba(17, 22, 34, .78);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 15px 45px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.025);
+  backdrop-filter: blur(22px);
+}
+
+.card {
+  border-radius: 22px;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(255,255,255,.045);
+  color: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+  transition: .2s;
+}
+
+.input:focus {
+  border-color: rgba(100,140,255,.7);
+  background: rgba(255,255,255,.065);
+  box-shadow: 0 0 0 3px rgba(80,110,255,.12);
+}
+
+.input option {
+  background: #111622;
+}
+
+textarea.input {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.btn {
+  border-radius: 13px;
+  padding: 10px 14px;
+  font-weight: 600;
+  transition: .18s;
+  cursor: pointer;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: scale(.98);
+}
+
+.btn-primary {
+  background: #5875ff;
+  color: white;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.btn-danger {
+  background: rgba(255,70,80,.12);
+  color: #ff8b92;
+  border: 1px solid rgba(255,70,80,.15);
+}
+
+.nav-btn {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: #aeb6c8;
+  transition: .18s;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,.055);
+  color: white;
+}
+
+.nav-btn.active {
+  background: rgba(88,117,255,.16);
+  color: white;
+  border: 1px solid rgba(88,117,255,.22);
+}
+
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.page {
+  width: min(1500px, calc(100vw - 40px));
+  margin: auto;
+}
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.grid-wide {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  gap: 18px;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 110px repeat(5, minmax(150px, 1fr));
+  gap: 8px;
+  min-width: 850px;
+}
+
+.schedule-cell {
+  min-height: 74px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.06);
+  padding: 10px;
+}
+
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal {
+  width: min(650px, 100%);
+  max-height: min(90vh, 900px);
+  overflow-y: auto;
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.fab {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #5875ff;
+  color: white;
+  font-size: 30px;
+  line-height: 1;
+  box-shadow: 0 15px 40px rgba(65,90,255,.4);
+  z-index: 80;
+  transition: .2s;
+}
+
+.fab:hover {
+  transform: scale(1.06) rotate(90deg);
+}
+
+.fab-menu {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: calc(max(24px, env(safe-area-inset-bottom)) + 75px);
+  width: min(330px, calc(100vw - 32px));
+  z-index: 79;
+}
+
+.fab-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 15px;
+  background: rgba(20,25,38,.94);
+  border: 1px solid rgba(255,255,255,.08);
+  margin-top: 7px;
+  color: white;
+  text-align: left;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.progress > div {
+  height: 100%;
+  border-radius: inherit;
+  background: #5875ff;
+  transition: width .5s linear;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 12px;
+  background: rgba(255,255,255,.07);
+  color: #b8c0d2;
+}
+
+.empty {
+  padding: 35px 15px;
+  text-align: center;
+  color: #778198;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+}
+
+@media(max-width: 1000px) {
+  .sidebar {
+    width: 210px;
+  }
+
+  .grid-wide {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media(max-width: 760px) {
+  .sidebar {
+    display: none;
+  }
+
+  .page {
+    width: calc(100vw - 24px);
+  }
+
+  .mobile-nav {
+    display: flex !important;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .grid-auto {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .modal {
+    padding: 17px;
+    border-radius: 20px;
+  }
+}
+
+@media(max-width: 480px) {
+  .grid-auto {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    width: calc(100vw - 16px);
+  }
+
+  .fab {
+    width: 58px;
+    height: 58px;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .fab-menu {
+    right: 16px;
+    bottom: 82px;
+  }
+}
+
+.mobile-nav {
+  display: none;
+}
+
+.light {
+  background: #eef2f8;
+  color: #101522;
+}
+
+.light .glass {
+  background: rgba(255,255,255,.82);
+  border-color: rgba(0,0,0,.07);
+  box-shadow: 0 15px 40px rgba(0,0,0,.07);
+}
+
+.light .input {
+  background: rgba(0,0,0,.035);
+  color: #111827;
+  border-color: rgba(0,0,0,.08);
+}
+
+.light .nav-btn {
+  color: #657084;
+}
+
+.light .nav-btn.active {
+  color: #172033;
+}
+
+.light .btn-secondary {
+  background: rgba(0,0,0,.045);
+  border-color: rgba(0,0,0,.07);
+}
+
+.light .schedule-cell {
+  background: rgba(0,0,0,.025);
+  border-color: rgba(0,0,0,.06);
+}
+
+.light .fab-item {
+  background: rgba(255,255,255,.96);
+  color: #111827;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   KLASSENBOARD SCHOOL OS
+   Alles lokal im Browser
+========================================================= */
+
+const STORAGE_KEY = "klassenboard_v3";
 
 const defaultData = {
+  settings: {
+    name: "",
+    className: "Meine Klasse",
+    theme: "dark"
+  },
 
-  className: "Meine Klasse",
+  subjects: [
+    {id:"mathe", name:"Mathematik", teacher:"", room:"", color:"#5875ff"},
+    {id:"deutsch", name:"Deutsch", teacher:"", room:"", color:"#8b5cf6"},
+    {id:"englisch", name:"Englisch", teacher:"", room:"", color:"#06b6d4"}
+  ],
 
-  userName: "",
-
-  grades: [],
-
-  homework: [],
+  teachers: [],
 
   schedule: [],
-
   breaks: [],
-
-  events: [],
-
-  announcements: [],
-
-  absences: [],
-
-  subjects: [],
-
+  homework: [],
+  tasks: [],
   notes: [],
+  events: [],
+  grades: [],
+  backpack: [],
+  checklists: [],
+  checklistItems: [],
+  flashcards: [],
+  goals: [],
+  substitutions: [],
+  reminders: [],
 
-  bag: [],
-
-  checklist: [],
-
-  substitutions: []
-
+  deleted: []
 };
 
+let data = loadData();
+let currentPage = "dashboard";
+let modal = null;
+let searchTerm = "";
+let fabOpen = false;
+let selectedCalendarDate = new Date().toISOString().slice(0,10);
 
-let stored = localStorage.getItem("klassenBoard");
-
-let data;
-
-try {
-
-  data = stored
-    ? JSON.parse(stored)
-    : structuredClone(defaultData);
-
-} catch {
-
-  data = structuredClone(defaultData);
-
+function uid(prefix="id") {
+  return prefix + "_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
 }
 
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(defaultData);
 
-/* Alte Daten automatisch erweitern */
+    const saved = JSON.parse(raw);
 
-Object.keys(defaultData).forEach(key => {
-
-  if (!Array.isArray(defaultData[key])) {
-
-    if (data[key] === undefined) {
-      data[key] = defaultData[key];
-    }
-
-  } else {
-
-    if (!Array.isArray(data[key])) {
-      data[key] = [];
-    }
-
+    return {
+      ...structuredClone(defaultData),
+      ...saved,
+      settings: {...defaultData.settings, ...(saved.settings || {})}
+    };
+  } catch {
+    return structuredClone(defaultData);
   }
-
-});
-
-
-let currentDay =
-  new Date().getDay() === 0
-    ? 0
-    : Math.min(4, new Date().getDay() - 1);
-
-
-let showCompletedHw = false;
-
-
-/* ============================================================
-   SAVE
-============================================================ */
+}
 
 function save() {
-
-  localStorage.setItem(
-    "klassenBoard",
-    JSON.stringify(data)
-  );
-
-  renderAll();
-
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  render();
 }
 
-
-/* ============================================================
-   NAVIGATION
-============================================================ */
-
-function showTab(tab) {
-
-  document
-    .querySelectorAll(".tab-content")
-    .forEach(el => el.classList.remove("active"));
-
-  document
-    .querySelectorAll(".nav-btn")
-    .forEach(el => el.classList.remove("active"));
-
-  const section =
-    document.getElementById("tab-" + tab);
-
-  if (section) {
-    section.classList.add("active");
-  }
-
-  const button =
-    document.querySelector(`[data-tab="${tab}"]`);
-
-  if (button) {
-    button.classList.add("active");
-  }
-
-  if (tab === "schedule") {
-    renderSchedule();
-  }
-
-  if (tab === "today") {
-    renderFullTimeline();
-  }
-
+function esc(value="") {
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
-
-
-function toggleAdmin() {
-
-  const admin =
-    document.getElementById("tab-admin");
-
-  if (admin.classList.contains("active")) {
-
-    showTab("dashboard");
-
-    document.getElementById("adminBtn")
-      .textContent = "Einstellungen";
-
-  } else {
-
-    showTab("admin");
-
-    document.getElementById("adminBtn")
-      .textContent = "Zurück";
-
-  }
-
-}
-
-
-/* ============================================================
-   FAB
-============================================================ */
-
-function toggleFab() {
-
-  const menu =
-    document.getElementById("fabMenu");
-
-  const fab =
-    document.getElementById("fab");
-
-  menu.classList.toggle("hidden");
-
-  fab.style.transform =
-    menu.classList.contains("hidden")
-      ? "rotate(0deg)"
-      : "rotate(45deg)";
-
-}
-
-
-function openQuick(type) {
-
-  toggleFab();
-
-  showTab("admin");
-
-  setTimeout(() => {
-
-    if (type === "homework") {
-      document.getElementById("hwSubject").focus();
-    }
-
-    if (type === "note") {
-      document.getElementById("noteTitle").focus();
-    }
-
-    if (type === "event") {
-      document.getElementById("eventTitle").focus();
-    }
-
-    if (type === "grade") {
-      document.getElementById("gradeSubject").focus();
-    }
-
-    if (type === "schedule") {
-      document.getElementById("schedSubject").focus();
-    }
-
-    if (type === "bag") {
-      document.getElementById("bagItem").focus();
-    }
-
-  }, 100);
-
-}
-
-
-/* ============================================================
-   DATE / TIME
-============================================================ */
-
-function formatDate(date) {
-
-  if (!date) return "";
-
-  return new Date(date).toLocaleDateString(
-    "de-DE",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    }
-  );
-
-}
-
 
 function todayISO() {
-
-  return new Date()
-    .toISOString()
-    .slice(0,10);
-
+  return new Date().toISOString().slice(0,10);
 }
 
-
-function getDayName(day) {
-
-  return [
-    "Montag",
-    "Dienstag",
-    "Mittwoch",
-    "Donnerstag",
-    "Freitag"
-  ][day] || "";
-
+function formatDate(date) {
+  if (!date) return "";
+  return new Date(date + "T12:00:00").toLocaleDateString("de-DE", {
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric"
+  });
 }
 
+function dayName(index) {
+  return ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag"][index] || "";
+}
+
+function weekdayIndex(date = new Date()) {
+  let n = date.getDay();
+  return n === 0 ? 6 : n - 1;
+}
 
 function timeToMinutes(time) {
-
-  if (!time) return null;
-
-  const parts = time.split(":");
-
-  return (
-    parseInt(parts[0]) * 60 +
-    parseInt(parts[1])
-  );
-
+  if (!time) return 0;
+  const [h,m] = time.split(":").map(Number);
+  return h * 60 + m;
 }
 
-
-function currentMinutes() {
-
-  const now = new Date();
-
-  return now.getHours() * 60 +
-         now.getMinutes() +
-         now.getSeconds() / 60;
-
+function nowMinutes() {
+  const d = new Date();
+  return d.getHours()*60 + d.getMinutes() + d.getSeconds()/60;
 }
-
-
-/* ============================================================
-   PROFILE
-============================================================ */
-
-function saveProfile() {
-
-  data.userName =
-    document.getElementById("inputUserName")
-      .value.trim();
-
-  data.className =
-    document.getElementById("inputClassName")
-      .value.trim() || "Meine Klasse";
-
-  save();
-
-  alert("Profil gespeichert!");
-
-}
-
-
-/* ============================================================
-   MAIN RENDER
-============================================================ */
-
-function renderAll() {
-
-  document.getElementById("classNameDisplay")
-    .textContent =
-      data.className || "Klassen-Board";
-
-  document.getElementById("inputClassName")
-    .value =
-      data.className || "";
-
-  document.getElementById("inputUserName")
-    .value =
-      data.userName || "";
-
-
-  const now = new Date();
-
-  document.getElementById("dateDisplay")
-    .textContent =
-      now.toLocaleDateString(
-        "de-DE",
-        {
-          weekday: "long",
-          day: "numeric",
-          month: "long"
-        }
-      );
-
-
-  let greeting = "Hey";
-
-  if (now.getHours() < 12)
-    greeting = "Guten Morgen";
-
-  else if (now.getHours() < 18)
-    greeting = "Guten Tag";
-
-  else
-    greeting = "Guten Abend";
-
-
-  if (data.userName) {
-
-    greeting += ", " + data.userName;
-
-  }
-
-
-  document.getElementById("greeting")
-    .textContent = greeting;
-
-
-  renderDashboard();
-  renderGrades();
-  renderHomework();
-  renderDaySelector();
-  renderEvents();
-  renderAbsences();
-  renderBag();
-  renderChecklist();
-  renderSubjects();
-  renderNotes();
-  renderSubstitutions();
-  renderFullTimeline();
-
-}
-
-
-/* ============================================================
-   DASHBOARD
-============================================================ */
-
-function renderDashboard() {
-
-  const today =
-    new Date().getDay() === 0
-      ? 6
-      : new Date().getDay() - 1;
-
-
-  const lessons =
-    data.schedule
-      .filter(s => s.day === today)
-      .sort(
-        (a,b) =>
-          timeToMinutes(a.from || "00:00") -
-          timeToMinutes(b.from || "00:00")
-      );
-
-
-  const container =
-    document.getElementById("todaySchedule");
-
-
-  if (!lessons.length) {
-
-    container.innerHTML =
-      `<p class="text-sm text-slate-500">
-        Kein Stundenplan für heute.
-      </p>`;
-
-  } else {
-
-    container.innerHTML =
-      lessons.map(l => {
-
-        return `
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-sm font-bold text-blue-400">
-              ${l.period}.
-            </div>
-
-            <div class="flex-1">
-
-              <p class="font-medium text-sm">
-                ${escapeHTML(l.subject)}
-              </p>
-
-              <p class="text-xs text-slate-500">
-                ${l.from || "--"} – ${l.to || "--"}
-                ${l.room ? " · " + escapeHTML(l.room) : ""}
-              </p>
-
-            </div>
-
-          </div>
-        `;
-
-      }).join("");
-
-  }
-
-
-  const open =
-    data.homework.filter(h => !h.done).length;
-
-  document.getElementById("openHomework")
-    .textContent = open;
-
-
-  const avg =
-    calculateAverage();
-
-  document.getElementById("dashboardAverage")
-    .textContent =
-      avg === null ? "-" : avg.toFixed(2);
-
-
-  const upcoming =
-    data.events
-      .filter(e =>
-        new Date(e.date) >=
-        new Date().setHours(0,0,0,0)
-      )
-      .sort(
-        (a,b) =>
-          new Date(a.date) -
-          new Date(b.date)
-      );
-
-
-  let summary =
-    `${open} offene Aufgabe${open === 1 ? "" : "n"}`;
-
-  if (upcoming[0]) {
-
-    summary +=
-      ` · Nächster Termin: ${upcoming[0].title}`;
-
-  }
-
-
-  document.getElementById("todaySummary")
-    .textContent = summary;
-
-
-  const ann =
-    document.getElementById("announcementsList");
-
-
-  if (!data.announcements.length) {
-
-    ann.innerHTML =
-      `<p class="text-slate-500 text-sm">
-        Keine neuen Ankündigungen.
-      </p>`;
-
-  } else {
-
-    ann.innerHTML =
-      data.announcements
-        .slice()
-        .reverse()
-        .slice(0,5)
-        .map(a => `
-
-          <div class="border-l-2 border-blue-500 pl-3">
-
-            <p class="text-sm">
-              ${escapeHTML(a.text)}
-            </p>
-
-            <p class="text-xs text-slate-500 mt-1">
-              ${formatDate(a.date)}
-            </p>
-
-          </div>
-
-        `)
-        .join("");
-
-  }
-
-}
-
-
-/* ============================================================
-   LIVE LESSON
-============================================================ */
-
-function updateLiveLesson() {
-
-  const today =
-    new Date().getDay() === 0
-      ? 6
-      : new Date().getDay() - 1;
-
-
-  if (today < 0 || today > 4) {
-
-    setNoLesson("Wochenende");
-
-    return;
-
-  }
-
-
-  const now =
-    currentMinutes();
-
-
-  const lessons =
-    data.schedule
-      .filter(s =>
-        s.day === today &&
-        s.from &&
-        s.to
-      )
-      .sort(
-        (a,b) =>
-          timeToMinutes(a.from) -
-          timeToMinutes(b.from)
-      );
-
-
-  const breaks =
-    data.breaks
-      .filter(b =>
-        b.day === today &&
-        b.from &&
-        b.to
-      );
-
-
-  let current = null;
-
-
-  for (const lesson of lessons) {
-
-    const start =
-      timeToMinutes(lesson.from);
-
-    const end =
-      timeToMinutes(lesson.to);
-
-    if (now >= start && now < end) {
-
-      current = lesson;
-      break;
-
-    }
-
-  }
-
-
-  const currentBreak =
-    breaks.find(b => {
-
-      const start =
-        timeToMinutes(b.from);
-
-      const end =
-        timeToMinutes(b.to);
-
-      return now >= start && now < end;
-
-    });
-
-
-  if (currentBreak) {
-
-    const end =
-      timeToMinutes(currentBreak.to);
-
-    const remaining =
-      end - now;
-
-    document.getElementById("liveStatus")
-      .textContent = "☕ Pause";
-
-    document.getElementById("liveTitle")
-      .textContent =
-        currentBreak.name || "Pause";
-
-    document.getElementById("liveDetails")
-      .textContent =
-        `${currentBreak.from} – ${currentBreak.to}`;
-
-    document.getElementById("liveRemaining")
-      .textContent =
-        formatRemaining(remaining);
-
-    document.getElementById("lessonProgress")
-      .style.width = "0%";
-
-    return;
-
-  }
-
-
-  if (current) {
-
-    const start =
-      timeToMinutes(current.from);
-
-    const end =
-      timeToMinutes(current.to);
-
-    const duration = end - start;
-
-    const passed = now - start;
-
-    const remaining = end - now;
-
-    const percent =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          (passed / duration) * 100
-        )
-      );
-
-
-    document.getElementById("liveStatus")
-      .textContent =
-        `${current.period}. Stunde · läuft`;
-
-    document.getElementById("liveTitle")
-      .textContent =
-        current.subject;
-
-    document.getElementById("liveDetails")
-      .textContent =
-        `${current.from} – ${current.to}` +
-        (current.room
-          ? ` · Raum ${current.room}`
-          : "");
-
-    document.getElementById("liveRemaining")
-      .textContent =
-        formatRemaining(remaining);
-
-    document.getElementById("lessonProgress")
-      .style.width =
-        percent + "%";
-
-  } else {
-
-    const next =
-      lessons.find(
-        l => timeToMinutes(l.from) > now
-      );
-
-
-    if (next) {
-
-      const diff =
-        timeToMinutes(next.from) - now;
-
-      document.getElementById("liveStatus")
-        .textContent = "🔜 Nächste Stunde";
-
-      document.getElementById("liveTitle")
-        .textContent = next.subject;
-
-      document.getElementById("liveDetails")
-        .textContent =
-          `${next.from} – ${next.to}`;
-
-      document.getElementById("liveRemaining")
-        .textContent =
-          "in " + formatRemaining(diff);
-
-      document.getElementById("lessonProgress")
-        .style.width = "0%";
-
-    } else {
-
-      setNoLesson("Schule vorbei");
-
-    }
-
-  }
-
-
-  renderNextLesson(lessons, now);
-
-}
-
-
-function setNoLesson(text) {
-
-  document.getElementById("liveStatus")
-    .textContent = text;
-
-  document.getElementById("liveTitle")
-    .textContent = "Keine aktuelle Stunde";
-
-  document.getElementById("liveDetails")
-    .textContent = "";
-
-  document.getElementById("liveRemaining")
-    .textContent = "--";
-
-  document.getElementById("lessonProgress")
-    .style.width = "0%";
-
-}
-
-
-function renderNextLesson(lessons, now) {
-
-  const next =
-    lessons.find(
-      l => timeToMinutes(l.from) > now
-    );
-
-
-  if (!next) {
-
-    document.getElementById("nextLesson")
-      .textContent =
-        "Keine weitere Stunde";
-
-    document.getElementById("nextLessonDetails")
-      .textContent = "";
-
-    document.getElementById("nextCountdown")
-      .textContent = "";
-
-    return;
-
-  }
-
-
-  const diff =
-    timeToMinutes(next.from) - now;
-
-
-  document.getElementById("nextLesson")
-    .textContent =
-      `${next.period}. Stunde · ${next.subject}`;
-
-  document.getElementById("nextLessonDetails")
-    .textContent =
-      `${next.from} – ${next.to}` +
-      (next.room
-        ? ` · Raum ${next.room}`
-        : "");
-
-  document.getElementById("nextCountdown")
-    .textContent =
-      "in " + formatRemaining(diff);
-
-}
-
 
 function formatRemaining(minutes) {
-
-  if (minutes < 0) minutes = 0;
-
-  const totalSeconds =
-    Math.floor(minutes * 60);
-
-  const h =
-    Math.floor(totalSeconds / 3600);
-
-  const m =
-    Math.floor(
-      (totalSeconds % 3600) / 60
-    );
-
-  const s =
-    totalSeconds % 60;
-
-
-  if (h > 0) {
-
-    return `${h}h ${m}m`;
-
-  }
-
-  return `${m}:${String(s).padStart(2,"0")}`;
-
+  if (minutes <= 0) return "0 Min.";
+  const m = Math.floor(minutes);
+  if (m < 60) return `${m} Min.`;
+  const h = Math.floor(m/60);
+  const rest = m % 60;
+  return `${h} Std. ${rest} Min.`;
 }
 
+function subjectName(id) {
+  return data.subjects.find(s => s.id === id)?.name || id || "Ohne Fach";
+}
 
-/* ============================================================
-   FULL TIMELINE
-============================================================ */
+function subjectColor(id) {
+  return data.subjects.find(s => s.id === id)?.color || "#5875ff";
+}
 
-function renderFullTimeline() {
+/* =========================================================
+   CURRENT LESSON
+========================================================= */
 
-  const container =
-    document.getElementById("fullDayTimeline");
+function currentStatus() {
+  const day = weekdayIndex();
+  const now = nowMinutes();
 
-  if (!container) return;
+  if (day > 4) {
+    return {type:"free", title:"Wochenende", subtitle:"Kein Unterricht heute"};
+  }
 
+  const lessons = data.schedule
+    .filter(x => Number(x.day) === day)
+    .sort((a,b) => timeToMinutes(a.from)-timeToMinutes(b.from));
 
-  const today =
-    new Date().getDay() === 0
-      ? 6
-      : new Date().getDay() - 1;
+  const breaks = data.breaks
+    .filter(x => Number(x.day) === day)
+    .sort((a,b) => timeToMinutes(a.from)-timeToMinutes(b.from));
 
+  for (const b of breaks) {
+    if (now >= timeToMinutes(b.from) && now < timeToMinutes(b.to)) {
+      return {
+        type:"break",
+        title:b.name || "Pause",
+        subtitle:`Bis ${b.to}`,
+        item:b,
+        remaining:timeToMinutes(b.to)-now
+      };
+    }
+  }
 
-  const lessons =
-    data.schedule
-      .filter(s => s.day === today)
-      .sort(
-        (a,b) =>
-          timeToMinutes(a.from || "00:00") -
-          timeToMinutes(b.from || "00:00")
-      );
+  for (const l of lessons) {
+    const from = timeToMinutes(l.from);
+    const to = timeToMinutes(l.to);
 
+    if (now >= from && now < to) {
+      return {
+        type:"lesson",
+        title:subjectName(l.subject),
+        subtitle:`Bis ${l.to}`,
+        item:l,
+        remaining:to-now,
+        total:to-from,
+        elapsed:now-from
+      };
+    }
+  }
 
-  const breaks =
-    data.breaks
-      .filter(b => b.day === today)
-      .sort(
-        (a,b) =>
-          timeToMinutes(a.from) -
-          timeToMinutes(b.from)
-      );
+  const next = lessons.find(x => timeToMinutes(x.from) > now);
 
+  if (next) {
+    return {
+      type:"next",
+      title:`Als Nächstes: ${subjectName(next.subject)}`,
+      subtitle:`Um ${next.from}`,
+      item:next,
+      remaining:timeToMinutes(next.from)-now
+    };
+  }
 
-  const items = [];
+  return {
+    type:"done",
+    title:"Schule vorbei",
+    subtitle:"Für heute ist nichts mehr eingetragen."
+  };
+}
 
+/* =========================================================
+   LAYOUT
+========================================================= */
 
-  lessons.forEach(l => {
+function render() {
+  document.body.className = data.settings.theme === "light" ? "light" : "";
 
-    items.push({
-      type: "lesson",
-      time: timeToMinutes(l.from),
-      html: `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div class="flex gap-3">
+  document.getElementById("app").innerHTML = `
+    <div class="min-h-screen flex">
 
-            <div class="text-blue-400 font-bold">
-              ${l.period}.
+      <aside class="sidebar glass min-h-screen p-4 hidden md:block">
+        ${sidebar()}
+      </aside>
+
+      <main class="flex-1 min-w-0">
+        <header class="topbar glass m-2 md:m-4 rounded-2xl">
+          <div class="px-4 md:px-6 py-4 flex items-center gap-3">
+            <button class="md:hidden btn btn-secondary" onclick="toggleMobileNav()">☰</button>
+
+            <div class="flex-1 min-w-0">
+              <div class="text-lg font-bold truncate">KlassenBoard</div>
+              <div class="text-xs text-gray-400 truncate">
+                ${esc(data.settings.className)}
+              </div>
             </div>
 
-            <div class="flex-1">
-
-              <p class="font-semibold">
-                ${escapeHTML(l.subject)}
-              </p>
-
-              <p class="text-xs text-slate-500 mt-1">
-                ${l.from} – ${l.to}
-                ${l.room ? " · Raum " + escapeHTML(l.room) : ""}
-              </p>
-
+            <div class="hidden sm:flex relative w-56">
+              <input
+                class="input"
+                placeholder="Suchen..."
+                value="${esc(searchTerm)}"
+                oninput="globalSearch(this.value)"
+              >
             </div>
 
+            <button class="btn btn-secondary" onclick="openSettings()">⚙️</button>
+          </div>
+        </header>
+
+        <div id="mobileNav" class="mobile-nav glass m-2 rounded-2xl p-2 gap-1 overflow-x-auto">
+          ${mobileNavigation()}
+        </div>
+
+        <div class="page py-3 md:py-5 pb-28">
+          ${pageContent()}
+        </div>
+      </main>
+    </div>
+
+    ${fab()}
+    ${modal ? renderModal() : ""}
+  `;
+
+  if (modal) {
+    setTimeout(() => {
+      const first = document.querySelector("#modalContent input, #modalContent textarea, #modalContent select");
+      if (first) first.focus();
+    }, 50);
+  }
+}
+
+function sidebar() {
+  return `
+    <div class="px-3 pt-3 pb-5">
+      <div class="text-2xl font-black tracking-tight">KlassenBoard</div>
+      <div class="text-xs text-gray-500 mt-1">School OS</div>
+    </div>
+
+    <nav class="space-y-1">
+      ${nav("dashboard","⌂","Dashboard")}
+      ${nav("today","◷","Jetzt")}
+      ${nav("schedule","▦","Stundenplan")}
+      ${nav("homework","✓","Aufgaben")}
+      ${nav("backpack","▣","Mitnehmen")}
+      ${nav("calendar","□","Kalender")}
+      ${nav("grades","◇","Noten")}
+      ${nav("learning","✦","Lernen")}
+      ${nav("notes","✎","Notizen")}
+      ${nav("checklists","☑","Checklisten")}
+      ${nav("subjects","●","Fächer")}
+      ${nav("teachers","♙","Lehrer")}
+      ${nav("substitutions","↻","Vertretung")}
+    </nav>
+
+    <div class="mt-8 pt-4 border-t border-white/5">
+      <button class="nav-btn" onclick="openSettings()">⚙️ Einstellungen</button>
+      <button class="nav-btn" onclick="exportData()">💾 Backup exportieren</button>
+      <button class="nav-btn" onclick="openImport()">📥 Backup importieren</button>
+    </div>
+  `;
+}
+
+function nav(id, icon, text) {
+  return `
+    <button class="nav-btn ${currentPage===id ? "active":""}"
+      onclick="navigate('${id}')">
+      <span class="inline-block w-7">${icon}</span>${text}
+    </button>
+  `;
+}
+
+function mobileNavigation() {
+  return [
+    ["dashboard","⌂"],
+    ["today","◷"],
+    ["schedule","▦"],
+    ["homework","✓"],
+    ["backpack","▣"],
+    ["calendar","□"],
+    ["grades","◇"],
+    ["learning","✦"],
+    ["notes","✎"]
+  ].map(x => `
+    <button
+      onclick="navigate('${x[0]}')"
+      class="px-4 py-2 rounded-xl whitespace-nowrap ${currentPage===x[0]?"bg-white/10":"text-gray-400"}">
+      ${x[1]}
+    </button>
+  `).join("");
+}
+
+function navigate(page) {
+  currentPage = page;
+  fabOpen = false;
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* =========================================================
+   PAGES
+========================================================= */
+
+function pageContent() {
+  switch(currentPage) {
+    case "today": return todayPage();
+    case "schedule": return schedulePage();
+    case "homework": return homeworkPage();
+    case "backpack": return backpackPage();
+    case "calendar": return calendarPage();
+    case "grades": return gradesPage();
+    case "learning": return learningPage();
+    case "notes": return notesPage();
+    case "checklists": return checklistsPage();
+    case "subjects": return subjectsPage();
+    case "teachers": return teachersPage();
+    case "substitutions": return substitutionsPage();
+    default: return dashboardPage();
+  }
+}
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function dashboardPage() {
+  const status = currentStatus();
+
+  const openTasks = data.tasks.filter(x=>!x.done).length +
+                    data.homework.filter(x=>!x.done).length;
+
+  const avg = gradeAverage();
+
+  return `
+    <section class="mb-6">
+      <div class="text-sm text-gray-400">${greeting()}</div>
+      <h1 class="text-3xl md:text-5xl font-black mt-1">
+        ${esc(data.settings.name ? data.settings.name : "Willkommen")}
+      </h1>
+      <p class="text-gray-500 mt-2">
+        ${new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}
+      </p>
+    </section>
+
+    <div class="grid-auto mb-5">
+      ${statCard("◷","Jetzt",status.title,status.type==="lesson" ? formatRemaining(status.remaining) : "")}
+      ${statCard("✓","Offene Aufgaben",openTasks,"")}
+      ${statCard("◇","Notendurchschnitt",avg ?? "—","")}
+      ${statCard("▣","Mitnehmen",data.backpack.filter(x=>x.active!==false).length,"")}
+    </div>
+
+    <div class="grid-wide">
+      <div class="space-y-4">
+        ${currentCard(status)}
+        ${nextLessonsCard()}
+      </div>
+
+      <div class="space-y-4">
+        ${todayTasksCard()}
+        ${tomorrowCard()}
+      </div>
+    </div>
+  `;
+}
+
+function statCard(icon,label,value,small) {
+  return `
+    <div class="glass card p-5">
+      <div class="flex items-center justify-between">
+        <span class="text-gray-400">${icon} ${label}</span>
+        ${small ? `<span class="badge">${small}</span>` : ""}
+      </div>
+      <div class="text-2xl font-black mt-4 truncate">${esc(value)}</div>
+    </div>
+  `;
+}
+
+function currentCard(status) {
+  let color = status.type==="lesson" ? subjectColor(status.item.subject) : "#5875ff";
+
+  if (status.type === "lesson") {
+    const percent = Math.max(0,Math.min(100,(status.elapsed/status.total)*100));
+
+    return `
+      <div class="glass card p-5 md:p-7">
+        <div class="flex justify-between gap-4">
+          <div>
+            <div class="text-sm text-gray-400">GERADE</div>
+            <div class="text-3xl font-black mt-1">${esc(status.title)}</div>
+            <div class="text-gray-400 mt-2">
+              ${esc(status.item.room || "Kein Raum")}
+              · ${status.item.from} – ${status.item.to}
+            </div>
+          </div>
+
+          <div class="text-right">
+            <div class="text-sm text-gray-400">NOCH</div>
+            <div id="liveRemaining" class="text-2xl font-black mt-1">
+              ${formatRemaining(status.remaining)}
+            </div>
           </div>
         </div>
-      `
-    });
 
-  });
-
-
-  breaks.forEach(b => {
-
-    items.push({
-      type: "break",
-      time: timeToMinutes(b.from),
-      html: `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-          ☕ ${escapeHTML(b.name || "Pause")}
-          <span class="text-xs text-slate-500 ml-2">
-            ${b.from} – ${b.to}
-          </span>
+        <div class="progress mt-6">
+          <div id="liveProgress" style="width:${percent}%;background:${color}"></div>
         </div>
-      `
-    });
 
-  });
-
-
-  items.sort((a,b) => a.time - b.time);
-
-
-  container.innerHTML =
-    items.length
-      ? items.map(x => x.html).join("")
-      : `<p class="text-slate-500 text-center py-8">
-          Kein Stundenplan für heute.
-        </p>`;
-
-}
-
-
-/* ============================================================
-   GRADES
-============================================================ */
-
-function parseGrade(value) {
-
-  const val =
-    String(value)
-      .trim()
-      .replace(",", ".");
-
-
-  const match =
-    val.match(/^(\d)([+-])?$/);
-
-
-  if (!match) {
-
-    const num =
-      parseFloat(val);
-
-    return isNaN(num)
-      ? null
-      : num;
-
+        <div class="flex justify-between text-xs text-gray-500 mt-2">
+          <span>${status.item.from}</span>
+          <span>${status.item.to}</span>
+        </div>
+      </div>
+    `;
   }
 
-
-  let num =
-    parseInt(match[1]);
-
-
-  if (match[2] === "+")
-    num -= .3;
-
-  if (match[2] === "-")
-    num += .3;
-
-
-  return num;
-
+  return `
+    <div class="glass card p-6">
+      <div class="text-sm text-gray-400">AKTUELL</div>
+      <div class="text-3xl font-black mt-1">${esc(status.title)}</div>
+      <div class="text-gray-400 mt-2">${esc(status.subtitle)}</div>
+    </div>
+  `;
 }
 
+function nextLessonsCard() {
+  const day = weekdayIndex();
+  const now = nowMinutes();
 
-function calculateAverage() {
+  const next = data.schedule
+    .filter(x=>Number(x.day)===day && timeToMinutes(x.from)>now)
+    .sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from))
+    .slice(0,4);
 
-  let sum = 0;
-  let weight = 0;
+  return `
+    <div class="glass card p-5">
+      <div class="flex justify-between mb-4">
+        <div>
+          <div class="text-sm text-gray-400">WEITER</div>
+          <h2 class="text-xl font-bold">Nächste Stunden</h2>
+        </div>
+        <button class="btn btn-secondary" onclick="navigate('schedule')">Alle</button>
+      </div>
 
-
-  data.grades.forEach(g => {
-
-    const n =
-      parseGrade(g.value);
-
-    if (n !== null) {
-
-      const w =
-        parseFloat(g.weight) || 1;
-
-      sum += n * w;
-      weight += w;
-
-    }
-
-  });
-
-
-  return weight
-    ? sum / weight
-    : null;
-
+      ${
+        next.length
+        ? next.map(lessonRow).join("")
+        : `<div class="empty">Keine weiteren Stunden heute.</div>`
+      }
+    </div>
+  `;
 }
 
+function lessonRow(l) {
+  return `
+    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.035] mb-2">
+      <div class="w-1 h-11 rounded-full" style="background:${subjectColor(l.subject)}"></div>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold truncate">${esc(subjectName(l.subject))}</div>
+        <div class="text-xs text-gray-500">
+          ${l.from} – ${l.to}${l.room ? ` · ${esc(l.room)}`:""}
+        </div>
+      </div>
+    </div>
+  `;
+}
 
-function renderGrades() {
+function todayTasksCard() {
+  const tasks = [
+    ...data.homework.map(x=>({...x,_type:"Hausaufgabe"})),
+    ...data.tasks.map(x=>({...x,_type:"Aufgabe"}))
+  ].filter(x=>!x.done).slice(0,5);
 
-  const list =
-    document.getElementById("gradesList");
+  return `
+    <div class="glass card p-5">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-xl font-bold">Heute erledigen</h2>
+        <button class="btn btn-secondary" onclick="navigate('homework')">Alle</button>
+      </div>
+      ${tasks.length ? tasks.map(taskMini).join("") : `<div class="empty">Alles erledigt 🎉</div>`}
+    </div>
+  `;
+}
 
+function taskMini(t) {
+  return `
+    <div class="flex gap-3 items-center p-3 rounded-xl bg-white/[.035] mb-2">
+      <button onclick="toggleTask('${t.id}','${t._type}')"
+        class="w-6 h-6 rounded-full border border-white/20 flex-shrink-0">
+        ${t.done ? "✓":""}
+      </button>
+      <div class="flex-1 min-w-0">
+        <div class="${t.done?"line-through text-gray-500":""} truncate">
+          ${esc(t.title || t.text)}
+        </div>
+        <div class="text-xs text-gray-500">${esc(t._type)}</div>
+      </div>
+    </div>
+  `;
+}
 
-  if (!data.grades.length) {
+function tomorrowCard() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate()+1);
+  const day = weekdayIndex(tomorrow);
 
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Noch keine Noten.
-      </p>`;
-
-    document.getElementById("overallAverage")
-      .textContent = "Ø –";
-
-    return;
-
+  if(day > 4) {
+    return `
+      <div class="glass card p-5">
+        <div class="text-sm text-gray-400">MORGEN</div>
+        <div class="text-xl font-bold mt-1">Wochenende</div>
+      </div>
+    `;
   }
 
+  const lessons = data.schedule
+    .filter(x=>Number(x.day)===day)
+    .sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from))
+    .slice(0,4);
 
-  const groups = {};
+  return `
+    <div class="glass card p-5">
+      <div class="text-sm text-gray-400">MORGEN</div>
+      <div class="text-xl font-bold mt-1">${dayName(day)}</div>
+      <div class="mt-4">
+        ${lessons.length ? lessons.map(lessonRow).join("") : `<div class="empty">Noch kein Stundenplan.</div>`}
+      </div>
+    </div>
+  `;
+}
 
+function greeting() {
+  const h = new Date().getHours();
+  if(h < 11) return "Guten Morgen";
+  if(h < 17) return "Guten Tag";
+  return "Guten Abend";
+}
 
-  data.grades.forEach(g => {
+/* =========================================================
+   TODAY
+========================================================= */
 
-    if (!groups[g.subject])
-      groups[g.subject] = [];
+function todayPage() {
+  const status = currentStatus();
 
-    groups[g.subject].push(g);
+  return `
+    <section class="mb-6">
+      <div class="text-sm text-gray-400">LIVE</div>
+      <h1 class="text-3xl md:text-4xl font-black">Jetzt</h1>
+      <p class="text-gray-500 mt-1">Dein aktueller Schultag in Echtzeit.</p>
+    </section>
 
-  });
+    ${currentCard(status)}
 
+    <div class="grid-auto mt-5">
+      ${remainingLessonsCard()}
+      ${schoolEndCard()}
+      ${nextBreakCard()}
+    </div>
 
-  let html = "";
+    <div class="glass card p-5 mt-5">
+      <h2 class="text-xl font-bold mb-4">Heutiger Ablauf</h2>
+      ${todayTimeline()}
+    </div>
+  `;
+}
 
+function remainingLessonsCard() {
+  const day=weekdayIndex();
+  const now=nowMinutes();
+  const count=data.schedule.filter(x=>Number(x.day)===day && timeToMinutes(x.to)>now).length;
 
-  Object.entries(groups)
-    .forEach(([subject, grades]) => {
+  return `
+    <div class="glass card p-5">
+      <div class="text-gray-400 text-sm">NOCH</div>
+      <div class="text-3xl font-black mt-2">${count}</div>
+      <div class="text-gray-500">Stunden heute</div>
+    </div>
+  `;
+}
 
-      let sum = 0;
-      let weight = 0;
+function schoolEndCard() {
+  const day=weekdayIndex();
+  const lessons=data.schedule
+    .filter(x=>Number(x.day)===day)
+    .sort((a,b)=>timeToMinutes(b.to)-timeToMinutes(a.to));
 
+  if(!lessons.length) {
+    return `<div class="glass card p-5"><div class="text-gray-400">Schulschluss</div><div class="text-xl font-bold mt-2">—</div></div>`;
+  }
 
-      grades.forEach(g => {
+  const end=lessons[0].to;
+  const remaining=timeToMinutes(end)-nowMinutes();
 
-        const n =
-          parseGrade(g.value);
+  return `
+    <div class="glass card p-5">
+      <div class="text-gray-400 text-sm">SCHULSCHLUSS</div>
+      <div class="text-3xl font-black mt-2">${remaining>0 ? formatRemaining(remaining) : "Fertig"}</div>
+      <div class="text-gray-500">${end} Uhr</div>
+    </div>
+  `;
+}
 
-        if (n !== null) {
+function nextBreakCard() {
+  const day=weekdayIndex();
+  const now=nowMinutes();
 
-          const w =
-            parseFloat(g.weight) || 1;
+  const b=data.breaks
+    .filter(x=>Number(x.day)===day && timeToMinutes(x.from)>now)
+    .sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from))[0];
 
-          sum += n * w;
-          weight += w;
+  return `
+    <div class="glass card p-5">
+      <div class="text-gray-400 text-sm">NÄCHSTE PAUSE</div>
+      ${
+        b
+        ? `<div class="text-xl font-bold mt-2">${esc(b.name)}</div>
+           <div class="text-gray-500">${b.from} – ${b.to}</div>`
+        : `<div class="text-xl font-bold mt-2">Keine</div>`
+      }
+    </div>
+  `;
+}
 
-        }
+function todayTimeline() {
+  const day=weekdayIndex();
 
-      });
+  const entries = [
+    ...data.schedule.filter(x=>Number(x.day)===day).map(x=>({...x,type:"lesson"})),
+    ...data.breaks.filter(x=>Number(x.day)===day).map(x=>({...x,type:"break"}))
+  ].sort((a,b)=>timeToMinutes(a.from)-timeToMinutes(b.from));
 
+  if(!entries.length) return `<div class="empty">Noch nichts eingetragen.</div>`;
 
-      const avg =
-        weight
-          ? (sum / weight).toFixed(2)
-          : "–";
+  return entries.map(x=>`
+    <div class="flex gap-4 items-center py-3 border-b border-white/5 last:border-0">
+      <div class="w-20 text-sm text-gray-500">${x.from}</div>
+      <div class="w-1 h-10 rounded-full" style="background:${x.type==="lesson"?subjectColor(x.subject):"#64748b"}"></div>
+      <div class="flex-1">
+        <div class="font-semibold">${esc(x.type==="lesson"?subjectName(x.subject):x.name)}</div>
+        <div class="text-xs text-gray-500">${x.from} – ${x.to}</div>
+      </div>
+    </div>
+  `).join("");
+}
 
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+function schedulePage() {
+  const days=[0,1,2,3,4];
+
+  return `
+    <section class="mb-6 flex flex-wrap gap-3 items-end justify-between">
+      <div>
+        <div class="text-sm text-gray-400">PLAN</div>
+        <h1 class="text-3xl md:text-4xl font-black">Stundenplan</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('schedule')">＋ Stunde</button>
+    </section>
+
+    <div class="glass card p-4 overflow-x-auto">
+      <div class="schedule-grid">
+        <div class="schedule-cell font-bold">Zeit</div>
+        ${days.map(d=>`<div class="schedule-cell font-bold">${dayName(d)}</div>`).join("")}
+
+        ${scheduleRows()}
+      </div>
+    </div>
+
+    <div class="grid-auto mt-5">
+      <div class="glass card p-5">
+        <h2 class="font-bold text-xl">Pausen</h2>
+        <div class="mt-4">${data.breaks.length ? data.breaks.map(breakRow).join("") : `<div class="empty">Keine Pausen.</div>`}</div>
+      </div>
+
+      <div class="glass card p-5">
+        <h2 class="font-bold text-xl">Schnell hinzufügen</h2>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+          <button class="btn btn-secondary" onclick="openModal('schedule')">Stunde</button>
+          <button class="btn btn-secondary" onclick="openModal('break')">Pause</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function scheduleRows() {
+  const max=12;
+  let html="";
+
+  for(let period=1;period<=max;period++) {
+    html += `<div class="schedule-cell text-gray-500">${period}. Stunde</div>`;
+
+    for(let day=0;day<5;day++) {
+      const l=data.schedule.find(x=>Number(x.day)===day && Number(x.period)===period);
 
       html += `
+        <div class="schedule-cell relative">
+          ${
+            l
+            ? `<button onclick="editItem('schedule','${l.id}')" class="w-full text-left">
+                 <div class="font-bold">${esc(subjectName(l.subject))}</div>
+                 <div class="text-xs text-gray-500 mt-1">
+                   ${l.from}–${l.to}${l.room ? ` · ${esc(l.room)}`:""}
+                 </div>
+               </button>`
+            : `<button onclick="openScheduleFor(${day},${period})" class="text-gray-600 hover:text-white w-full h-full">＋</button>`
+          }
+        </div>
+      `;
+    }
+  }
 
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+  return html;
+}
 
-          <div class="px-4 py-3 border-b border-slate-800 flex justify-between">
+function openScheduleFor(day,period) {
+  modal={type:"schedule",preset:{day,period}};
+  render();
+}
 
-            <span class="font-semibold">
-              ${escapeHTML(subject)}
-            </span>
+function breakRow(b) {
+  return `
+    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.035] mb-2">
+      <div class="flex-1">
+        <div class="font-semibold">${esc(b.name)}</div>
+        <div class="text-xs text-gray-500">${dayName(Number(b.day))} · ${b.from}–${b.to}</div>
+      </div>
+      <button class="btn btn-danger" onclick="deleteItem('break','${b.id}')">×</button>
+    </div>
+  `;
+}
 
-            <span class="text-blue-400">
-              Ø ${avg}
-            </span>
+/* =========================================================
+   HOMEWORK / TASKS
+========================================================= */
 
+function homeworkPage() {
+  const all = [
+    ...data.homework.map(x=>({...x,_type:"homework"})),
+    ...data.tasks.map(x=>({...x,_type:"task"}))
+  ];
+
+  return `
+    <section class="mb-6 flex justify-between gap-3 flex-wrap">
+      <div>
+        <div class="text-sm text-gray-400">ORGANISATION</div>
+        <h1 class="text-3xl md:text-4xl font-black">Aufgaben</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('task')">＋ Aufgabe</button>
+    </section>
+
+    <div class="grid-wide">
+      <div class="glass card p-5">
+        <div class="flex gap-2 mb-5">
+          <button class="btn btn-secondary" onclick="openModal('homework')">📚 Hausaufgabe</button>
+          <button class="btn btn-secondary" onclick="openModal('task')">✓ Aufgabe</button>
+        </div>
+
+        ${
+          all.length
+          ? all.sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(taskLarge).join("")
+          : `<div class="empty">Noch keine Aufgaben.</div>`
+        }
+      </div>
+
+      <div class="glass card p-5">
+        <h2 class="text-xl font-bold">Übersicht</h2>
+        <div class="mt-5 space-y-3">
+          ${taskStat("Offen",all.filter(x=>!x.done).length)}
+          ${taskStat("Erledigt",all.filter(x=>x.done).length)}
+          ${taskStat("Heute",all.filter(x=>x.date===todayISO()&&!x.done).length)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function taskStat(a,b) {
+  return `
+    <div class="flex justify-between p-3 rounded-xl bg-white/[.035]">
+      <span class="text-gray-400">${a}</span>
+      <b>${b}</b>
+    </div>
+  `;
+}
+
+function taskLarge(t) {
+  const overdue = t.date && t.date < todayISO() && !t.done;
+
+  return `
+    <div class="p-4 rounded-2xl bg-white/[.035] border border-white/5 mb-3">
+      <div class="flex gap-3">
+        <button onclick="toggleTask('${t.id}','${t._type}')"
+          class="w-7 h-7 rounded-full border border-white/20 flex-shrink-0">
+          ${t.done?"✓":""}
+        </button>
+
+        <div class="flex-1 min-w-0">
+          <div class="font-bold ${t.done?"line-through text-gray-500":""}">
+            ${esc(t.title || t.text)}
           </div>
 
+          <div class="text-sm text-gray-500 mt-1">
+            ${t.subject ? esc(subjectName(t.subject))+" · ":""}
+            ${t.date ? formatDate(t.date):"Kein Datum"}
+            ${overdue ? " · ⚠️ überfällig":""}
+          </div>
 
-          <div class="divide-y divide-slate-800">
+          ${t.description ? `<div class="text-sm text-gray-400 mt-2">${esc(t.description)}</div>`:""}
 
-            ${grades.map(g => `
+          <div class="flex flex-wrap gap-2 mt-3">
+            ${t.priority ? `<span class="badge">${priorityLabel(t.priority)}</span>`:""}
+            ${t.bring ? `<span class="badge">🎒 Mitnehmen</span>`:""}
+          </div>
+        </div>
 
-              <div class="px-4 py-3 flex justify-between items-center">
+        <button class="btn btn-danger h-fit" onclick="deleteItem('${t._type}','${t.id}')">×</button>
+      </div>
+    </div>
+  `;
+}
 
-                <div>
+function priorityLabel(p) {
+  return p==="high" ? "🔴 Hoch" : p==="medium" ? "🟡 Mittel" : "🟢 Niedrig";
+}
 
-                  <span class="font-bold">
-                    ${escapeHTML(g.value)}
-                  </span>
+function toggleTask(id,type) {
+  const arr=type==="homework" ? data.homework : data.tasks;
+  const item=arr.find(x=>x.id===id);
+  if(item) item.done=!item.done;
+  save();
+}
 
-                  <span class="text-xs text-slate-500 ml-2">
-                    ${escapeHTML(g.type || "")}
-                  </span>
+/* =========================================================
+   BACKPACK
+========================================================= */
 
-                </div>
+function backpackPage() {
+  const active=data.backpack.filter(x=>x.active!==false);
 
-                <div class="flex items-center gap-3">
+  return `
+    <section class="mb-6 flex justify-between flex-wrap gap-3">
+      <div>
+        <div class="text-sm text-gray-400">VORBEREITUNG</div>
+        <h1 class="text-3xl md:text-4xl font-black">Mitnehmen</h1>
+        <p class="text-gray-500 mt-1">Alles, was du für die Schule brauchst.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('backpack')">＋ Gegenstand</button>
+    </section>
 
-                  <span class="text-xs text-slate-500">
-                    ${formatDate(g.date)}
-                  </span>
+    <div class="grid-wide">
+      <div class="glass card p-5">
+        <div class="flex justify-between items-center mb-5">
+          <h2 class="text-xl font-bold">Rucksack</h2>
+          <span class="badge">${active.length} Dinge</span>
+        </div>
 
-                  <button
-                    onclick="deleteGrade('${g.id}')"
-                    class="text-red-400">
-                    ×
-                  </button>
+        ${
+          active.length
+          ? active.map(backpackItem).join("")
+          : `<div class="empty">Noch nichts eingetragen.</div>`
+        }
+      </div>
 
-                </div>
+      <div class="space-y-4">
+        ${tomorrowPackCard()}
+        ${subjectPackCard()}
+      </div>
+    </div>
+  `;
+}
 
+function backpackItem(x) {
+  return `
+    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.035] mb-2">
+      <input
+        type="checkbox"
+        ${x.packed?"checked":""}
+        onchange="togglePacked('${x.id}')"
+        class="w-5 h-5"
+      >
+
+      <div class="flex-1">
+        <div class="${x.packed?"line-through text-gray-500":""}">
+          ${esc(x.name)}
+        </div>
+        ${x.subject ? `<div class="text-xs text-gray-500">${esc(subjectName(x.subject))}</div>`:""}
+      </div>
+
+      <button class="btn btn-danger" onclick="deleteItem('backpack','${x.id}')">×</button>
+    </div>
+  `;
+}
+
+function togglePacked(id) {
+  const x=data.backpack.find(x=>x.id===id);
+  if(x) x.packed=!x.packed;
+  save();
+}
+
+function tomorrowPackCard() {
+  const d=new Date();
+  d.setDate(d.getDate()+1);
+  const day=weekdayIndex(d);
+
+  const subjects=[
+    ...new Set(
+      data.schedule
+      .filter(x=>Number(x.day)===day)
+      .map(x=>x.subject)
+    )
+  ];
+
+  return `
+    <div class="glass card p-5">
+      <div class="text-sm text-gray-400">MORGEN</div>
+      <h2 class="text-xl font-bold mt-1">Was brauchst du?</h2>
+
+      <div class="mt-4 space-y-2">
+        ${
+          subjects.length
+          ? subjects.map(s=>`
+              <div class="p-3 rounded-xl bg-white/[.035]">
+                <b>${esc(subjectName(s))}</b>
+                ${
+                  data.backpack.filter(x=>x.subject===s).length
+                  ? `<div class="text-xs text-gray-500 mt-1">
+                      ${data.backpack.filter(x=>x.subject===s).map(x=>esc(x.name)).join(", ")}
+                     </div>`
+                  : ""
+                }
               </div>
-
-            `).join("")}
-
-          </div>
-
-        </div>
-
-      `;
-
-    });
-
-
-  list.innerHTML = html;
-
-
-  const avg =
-    calculateAverage();
-
-  document.getElementById("overallAverage")
-    .textContent =
-      avg === null
-        ? "Ø –"
-        : `Ø ${avg.toFixed(2)}`;
-
+            `).join("")
+          : `<div class="empty">Kein Stundenplan für morgen.</div>`
+        }
+      </div>
+    </div>
+  `;
 }
 
-
-function addGrade() {
-
-  const subject =
-    document.getElementById("gradeSubject")
-      .value.trim();
-
-  const value =
-    document.getElementById("gradeValue")
-      .value.trim();
-
-
-  if (!subject || !value) {
-
-    alert("Fach und Note eingeben.");
-
-    return;
-
-  }
-
-
-  data.grades.push({
-
-    id: crypto.randomUUID(),
-
-    subject,
-
-    value,
-
-    weight:
-      document.getElementById("gradeWeight")
-        .value || "1",
-
-    date:
-      document.getElementById("gradeDate")
-        .value || todayISO(),
-
-    type:
-      document.getElementById("gradeType")
-        .value.trim()
-
-  });
-
-
-  save();
-
-  clearFields([
-    "gradeSubject",
-    "gradeValue",
-    "gradeType"
-  ]);
-
+function subjectPackCard() {
+  return `
+    <div class="glass card p-5">
+      <h2 class="text-xl font-bold">Schnell hinzufügen</h2>
+      <div class="grid grid-cols-2 gap-2 mt-4">
+        <button class="btn btn-secondary" onclick="openModal('backpack')">📚 Buch</button>
+        <button class="btn btn-secondary" onclick="openModal('backpack')">✏️ Material</button>
+      </div>
+    </div>
+  `;
 }
 
-
-function deleteGrade(id) {
-
-  data.grades =
-    data.grades.filter(
-      g => g.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   HOMEWORK
-============================================================ */
-
-function renderHomework() {
-
-  const list =
-    document.getElementById("homeworkList");
-
-
-  let items =
-    data.homework.slice();
-
-
-  if (!showCompletedHw) {
-
-    items =
-      items.filter(
-        h => !h.done
-      );
-
-  }
-
-
-  items.sort(
-    (a,b) =>
-      new Date(a.due) -
-      new Date(b.due)
-  );
-
-
-  if (!items.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Keine offenen Hausaufgaben.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    items.map(h => {
-
-      const overdue =
-        !h.done &&
-        new Date(h.due) <
-        new Date().setHours(0,0,0,0);
-
-
-      return `
-
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-3">
-
-          <button
-            onclick="toggleHomework('${h.id}')"
-            class="w-6 h-6 rounded-full border-2 flex items-center justify-center
-            ${h.done
-              ? "bg-green-500 border-green-500"
-              : "border-slate-600"}">
-
-            ${h.done ? "✓" : ""}
-
-          </button>
-
-
-          <div class="flex-1">
-
-            <div class="flex justify-between gap-2">
-
-              <span class="font-semibold text-sm">
-                ${escapeHTML(h.subject)}
-              </span>
-
-              <span class="text-xs ${
-                overdue
-                  ? "text-red-400"
-                  : "text-slate-500"
-              }">
-
-                ${formatDate(h.due)}
-
-              </span>
-
-            </div>
-
-            <p class="text-sm text-slate-300 mt-1">
-              ${escapeHTML(h.task)}
-            </p>
-
-          </div>
-
-
-          <button
-            onclick="deleteHomework('${h.id}')"
-            class="text-red-400">
-            ×
-          </button>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function addHomework() {
-
-  const subject =
-    document.getElementById("hwSubject")
-      .value.trim();
-
-  const task =
-    document.getElementById("hwTask")
-      .value.trim();
-
-
-  if (!subject || !task) {
-
-    alert("Fach und Aufgabe eingeben.");
-
-    return;
-
-  }
-
-
-  data.homework.push({
-
-    id: crypto.randomUUID(),
-
-    subject,
-
-    task,
-
-    due:
-      document.getElementById("hwDue")
-        .value || todayISO(),
-
-    done: false
-
-  });
-
-
-  save();
-
-  clearFields([
-    "hwSubject",
-    "hwTask"
-  ]);
-
-}
-
-
-function toggleHomework(id) {
-
-  const item =
-    data.homework.find(
-      h => h.id === id
-    );
-
-  if (item)
-    item.done = !item.done;
-
-  save();
-
-}
-
-
-function deleteHomework(id) {
-
-  data.homework =
-    data.homework.filter(
-      h => h.id !== id
-    );
-
-  save();
-
-}
-
-
-function toggleCompletedHomework() {
-
-  showCompletedHw =
-    !showCompletedHw;
-
-  document.getElementById("toggleHwBtn")
-    .textContent =
-      showCompletedHw
-        ? "Erledigte ausblenden"
-        : "Erledigte anzeigen";
-
-  renderHomework();
-
-}
-
-
-/* ============================================================
-   SCHEDULE
-============================================================ */
-
-function renderDaySelector() {
-
-  const days =
-    ["Mo","Di","Mi","Do","Fr"];
-
-
-  document.getElementById("daySelector")
-    .innerHTML =
-      days.map((day,i) => `
-
-        <button
-          onclick="selectDay(${i})"
-          class="px-4 py-2 rounded-full text-sm whitespace-nowrap ${
-            currentDay === i
-              ? "bg-blue-600 text-white"
-              : "bg-slate-800 text-slate-300"
-          }">
-
-          ${day}
-
-        </button>
-
-      `).join("");
-
-
-  renderSchedule();
-
-}
-
-
-function selectDay(day) {
-
-  currentDay = day;
-
-  renderDaySelector();
-
-}
-
-
-function renderSchedule() {
-
-  const list =
-    document.getElementById("scheduleList");
-
-
-  const lessons =
-    data.schedule
-      .filter(s => s.day === currentDay)
-      .sort(
-        (a,b) =>
-          (a.period || 0) -
-          (b.period || 0)
-      );
-
-
-  if (!lessons.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Kein Stundenplan für ${getDayName(currentDay)}.
-      </p>`;
-
-    return;
-
-  }
-
-
-  const now =
-    currentMinutes();
-
-  const today =
-    new Date().getDay() - 1;
-
-
-  list.innerHTML =
-    lessons.map(l => {
-
-      let state = "";
-
-      if (
-        today === currentDay &&
-        l.from &&
-        l.to
-      ) {
-
-        const start =
-          timeToMinutes(l.from);
-
-        const end =
-          timeToMinutes(l.to);
-
-
-        if (now >= start && now < end)
-          state = "lesson-current";
-
-        else if (now >= end)
-          state = "lesson-finished";
-
+/* =========================================================
+   CALENDAR
+========================================================= */
+
+function calendarPage() {
+  const date=new Date(selectedCalendarDate+"T12:00:00");
+  const month=date.getMonth();
+  const year=date.getFullYear();
+
+  const first=new Date(year,month,1);
+  const last=new Date(year,month+1,0);
+
+  let start=first.getDay();
+  start=start===0?6:start-1;
+
+  let days=[];
+
+  for(let i=0;i<start;i++) days.push(null);
+  for(let i=1;i<=last.getDate();i++) days.push(i);
+
+  return `
+    <section class="mb-6 flex justify-between flex-wrap gap-3">
+      <div>
+        <div class="text-sm text-gray-400">PLANUNG</div>
+        <h1 class="text-3xl md:text-4xl font-black">Kalender</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('event')">＋ Termin</button>
+    </section>
+
+    <div class="glass card p-5">
+      <div class="flex justify-between items-center mb-5">
+        <button class="btn btn-secondary" onclick="changeMonth(-1)">←</button>
+        <h2 class="text-xl font-bold">
+          ${date.toLocaleDateString("de-DE",{month:"long",year:"numeric"})}
+        </h2>
+        <button class="btn btn-secondary" onclick="changeMonth(1)">→</button>
+      </div>
+
+      <div class="grid grid-cols-7 gap-2 text-center text-xs text-gray-500 mb-2">
+        ${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div>${x}</div>`).join("")}
+      </div>
+
+      <div class="grid grid-cols-7 gap-2">
+        ${days.map(day=>calendarDay(day,month,year)).join("")}
+      </div>
+    </div>
+
+    <div class="glass card p-5 mt-5">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-xl font-bold">Termine</h2>
+        <button class="btn btn-secondary" onclick="openModal('event')">＋</button>
+      </div>
+      ${
+        data.events.length
+        ? data.events.sort((a,b)=>a.date.localeCompare(b.date)).map(eventRow).join("")
+        : `<div class="empty">Keine Termine.</div>`
       }
-
-
-      return `
-
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 ${state}">
-
-          <div class="flex items-center gap-4">
-
-            <div class="w-11 h-11 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-blue-400">
-              ${l.period}.
-            </div>
-
-
-            <div class="flex-1">
-
-              <p class="font-semibold">
-                ${escapeHTML(l.subject)}
-              </p>
-
-              <p class="text-xs text-slate-400 mt-1">
-
-                ${l.from || "--"} – ${l.to || "--"}
-
-                ${l.room
-                  ? " · Raum " + escapeHTML(l.room)
-                  : ""}
-
-              </p>
-
-            </div>
-
-
-            <button
-              onclick="deleteSchedule('${l.id}')"
-              class="text-red-400">
-              ×
-            </button>
-
-          </div>
-
-        </div>
-
-      `;
-
-    }).join("");
-
+    </div>
+  `;
 }
 
-
-function addSchedule() {
-
-  const subject =
-    document.getElementById("schedSubject")
-      .value.trim();
-
-  const period =
-    parseInt(
-      document.getElementById("schedPeriod")
-        .value
-    );
-
-
-  if (!subject || !period) {
-
-    alert("Stunde und Fach eingeben.");
-
-    return;
-
-  }
-
-
-  data.schedule.push({
-
-    id: crypto.randomUUID(),
-
-    day:
-      parseInt(
-        document.getElementById("schedDay")
-          .value
-      ),
-
-    period,
-
-    subject,
-
-    room:
-      document.getElementById("schedRoom")
-        .value.trim(),
-
-    from:
-      document.getElementById("schedFrom")
-        .value,
-
-    to:
-      document.getElementById("schedTo")
-        .value
-
-  });
-
-
-  save();
-
-  clearFields([
-    "schedSubject",
-    "schedRoom",
-    "schedFrom",
-    "schedTo",
-    "schedPeriod"
-  ]);
-
-}
-
-
-function deleteSchedule(id) {
-
-  data.schedule =
-    data.schedule.filter(
-      s => s.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   BREAKS
-============================================================ */
-
-function addBreak() {
-
-  const name =
-    document.getElementById("breakName")
-      .value.trim();
-
-
-  const from =
-    document.getElementById("breakFrom")
-      .value;
-
-  const to =
-    document.getElementById("breakTo")
-      .value;
-
-
-  if (!from || !to) {
-
-    alert("Start und Ende der Pause eingeben.");
-
-    return;
-
-  }
-
-
-  data.breaks.push({
-
-    id: crypto.randomUUID(),
-
-    day:
-      parseInt(
-        document.getElementById("breakDay")
-          .value
-      ),
-
-    name: name || "Pause",
-
-    from,
-
-    to
-
-  });
-
-
-  save();
-
-  clearFields([
-    "breakName",
-    "breakFrom",
-    "breakTo"
-  ]);
-
-}
-
-
-/* ============================================================
-   EVENTS
-============================================================ */
-
-function renderEvents() {
-
-  const list =
-    document.getElementById("eventsList");
-
-
-  const events =
-    data.events
-      .slice()
-      .sort(
-        (a,b) =>
-          new Date(a.date) -
-          new Date(b.date)
-      );
-
-
-  if (!events.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Keine Termine.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    events.map(e => `
-
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-4">
-
-        <div class="text-center min-w-[55px]">
-
-          <p class="text-2xl font-bold text-blue-400">
-            ${new Date(e.date).getDate()}
-          </p>
-
-          <p class="text-xs text-slate-500">
-            ${new Date(e.date)
-              .toLocaleDateString(
-                "de-DE",
-                {month:"short"}
-              )}
-          </p>
-
-        </div>
-
-
-        <div class="flex-1">
-
-          <p class="font-semibold">
-            ${escapeHTML(e.title)}
-          </p>
-
-          <p class="text-xs text-slate-500 mt-1">
-            ${escapeHTML(e.type || "Termin")}
-            ${e.time ? " · " + e.time : ""}
-          </p>
-
-        </div>
-
-
-        <button
-          onclick="deleteEvent('${e.id}')"
-          class="text-red-400">
-          ×
-        </button>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-function addEvent() {
-
-  const title =
-    document.getElementById("eventTitle")
-      .value.trim();
-
-
-  if (!title) {
-
-    alert("Titel eingeben.");
-
-    return;
-
-  }
-
-
-  data.events.push({
-
-    id: crypto.randomUUID(),
-
-    title,
-
-    date:
-      document.getElementById("eventDate")
-        .value || todayISO(),
-
-    time:
-      document.getElementById("eventTime")
-        .value,
-
-    type:
-      document.getElementById("eventType")
-        .value.trim()
-
-  });
-
-
-  save();
-
-  clearFields([
-    "eventTitle",
-    "eventTime",
-    "eventType"
-  ]);
-
-}
-
-
-function deleteEvent(id) {
-
-  data.events =
-    data.events.filter(
-      e => e.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   BAG
-============================================================ */
-
-function renderBag() {
-
-  const list =
-    document.getElementById("bagList");
-
-  const preview =
-    document.getElementById("bagPreview");
-
-  const count =
-    document.getElementById("bagCount");
-
-
-  const items =
-    data.bag;
-
-
-  const checked =
-    items.filter(
-      x => x.done
-    ).length;
-
-
-  count.textContent =
-    `${checked}/${items.length}`;
-
-
-  if (!items.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-sm">
-        Noch nichts eingetragen.
-      </p>`;
-
-    preview.innerHTML =
-      `<p class="text-slate-500 text-sm">
-        Tasche ist leer.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    items.map(item => `
-
-      <div class="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
-
-        <button
-          onclick="toggleBag('${item.id}')"
-          class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-            item.done
-              ? "bg-green-500 border-green-500"
-              : "border-slate-600"
-          }">
-
-          ${item.done ? "✓" : ""}
-
-        </button>
-
-        <span class="flex-1 ${
-          item.done
-            ? "line-through text-slate-500"
-            : ""
-        }">
-
-          ${escapeHTML(item.name)}
-
-        </span>
-
-        <button
-          onclick="deleteBag('${item.id}')"
-          class="text-red-400">
-          ×
-        </button>
-
-      </div>
-
-    `).join("");
-
-
-  preview.innerHTML =
-    items.slice(0,5).map(item => `
-
-      <div class="flex items-center gap-2 text-sm">
-
-        <span class="${
-          item.done
-            ? "text-green-400"
-            : "text-slate-500"
-        }">
-
-          ${item.done ? "✓" : "○"}
-
-        </span>
-
-        <span class="${
-          item.done
-            ? "line-through text-slate-500"
-            : ""
-        }">
-
-          ${escapeHTML(item.name)}
-
-        </span>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-function addBagItem() {
-
-  const name =
-    document.getElementById("bagItem")
-      .value.trim();
-
-
-  if (!name) return;
-
-
-  data.bag.push({
-
-    id: crypto.randomUUID(),
-
-    name,
-
-    done: false
-
-  });
-
-
-  save();
-
-  clearFields(["bagItem"]);
-
-}
-
-
-function toggleBag(id) {
-
-  const item =
-    data.bag.find(
-      x => x.id === id
-    );
-
-  if (item)
-    item.done = !item.done;
-
-  save();
-
-}
-
-
-function deleteBag(id) {
-
-  data.bag =
-    data.bag.filter(
-      x => x.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   CHECKLIST
-============================================================ */
-
-function renderChecklist() {
-
-  const list =
-    document.getElementById("checklistList");
-
-
-  if (!data.checklist.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-sm">
-        Keine Punkte.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    data.checklist.map(item => `
-
-      <div class="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
-
-        <button
-          onclick="toggleCheck('${item.id}')"
-          class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-            item.done
-              ? "bg-green-500 border-green-500"
-              : "border-slate-600"
-          }">
-
-          ${item.done ? "✓" : ""}
-
-        </button>
-
-        <span class="flex-1 ${
-          item.done
-            ? "line-through text-slate-500"
-            : ""
-        }">
-
-          ${escapeHTML(item.name)}
-
-        </span>
-
-        <button
-          onclick="deleteCheck('${item.id}')"
-          class="text-red-400">
-          ×
-        </button>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-function addCheckItem() {
-
-  const name =
-    document.getElementById("checkItem")
-      .value.trim();
-
-
-  if (!name) return;
-
-
-  data.checklist.push({
-
-    id: crypto.randomUUID(),
-
-    name,
-
-    done: false
-
-  });
-
-
-  save();
-
-  clearFields(["checkItem"]);
-
-}
-
-
-function toggleCheck(id) {
-
-  const item =
-    data.checklist.find(
-      x => x.id === id
-    );
-
-  if (item)
-    item.done = !item.done;
-
-  save();
-
-}
-
-
-function deleteCheck(id) {
-
-  data.checklist =
-    data.checklist.filter(
-      x => x.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   SUBJECTS
-============================================================ */
-
-function renderSubjects() {
-
-  const list =
-    document.getElementById("subjectsList");
-
-
-  if (!data.subjects.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Noch keine Fächer eingetragen.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    data.subjects.map(s => `
-
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
-
-        <div class="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center">
-          📚
-        </div>
-
-        <div class="flex-1">
-
-          <p class="font-semibold">
-            ${escapeHTML(s.name)}
-          </p>
-
-          <p class="text-xs text-slate-500">
-
-            ${s.teacher
-              ? escapeHTML(s.teacher)
-              : "Kein Lehrer"}
-
-            ${s.room
-              ? " · Raum " + escapeHTML(s.room)
-              : ""}
-
-          </p>
-
-        </div>
-
-        <button
-          onclick="deleteSubject('${s.id}')"
-          class="text-red-400">
-          ×
-        </button>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-function addSubject() {
-
-  const name =
-    document.getElementById("subjectName")
-      .value.trim();
-
-
-  if (!name) return;
-
-
-  data.subjects.push({
-
-    id: crypto.randomUUID(),
-
-    name,
-
-    teacher:
-      document.getElementById("subjectTeacher")
-        .value.trim(),
-
-    room:
-      document.getElementById("subjectRoom")
-        .value.trim()
-
-  });
-
-
-  save();
-
-  clearFields([
-    "subjectName",
-    "subjectTeacher",
-    "subjectRoom"
-  ]);
-
-}
-
-
-function deleteSubject(id) {
-
-  data.subjects =
-    data.subjects.filter(
-      x => x.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   NOTES
-============================================================ */
-
-function renderNotes() {
-
-  const list =
-    document.getElementById("notesList");
-
-
-  if (!data.notes.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Keine Notizen.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    data.notes
-      .slice()
-      .reverse()
-      .map(n => `
-
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-
-          <div class="flex justify-between">
-
-            <p class="font-semibold">
-              ${escapeHTML(n.title || "Notiz")}
-            </p>
-
-            <button
-              onclick="deleteNote('${n.id}')"
-              class="text-red-400">
-              ×
-            </button>
-
-          </div>
-
-          <p class="text-sm text-slate-300 mt-2 whitespace-pre-wrap">
-            ${escapeHTML(n.text)}
-          </p>
-
-          <p class="text-xs text-slate-500 mt-2">
-            ${formatDate(n.date)}
-          </p>
-
-        </div>
-
-      `).join("");
-
-}
-
-
-function addNote() {
-
-  const title =
-    document.getElementById("noteTitle")
-      .value.trim();
-
-  const text =
-    document.getElementById("noteText")
-      .value.trim();
-
-
-  if (!text) return;
-
-
-  data.notes.push({
-
-    id: crypto.randomUUID(),
-
-    title,
-
-    text,
-
-    date: todayISO()
-
-  });
-
-
-  save();
-
-  clearFields([
-    "noteTitle",
-    "noteText"
-  ]);
-
-}
-
-
-function deleteNote(id) {
-
-  data.notes =
-    data.notes.filter(
-      x => x.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   SUBSTITUTIONS
-============================================================ */
-
-function renderSubstitutions() {
-
-  const list =
-    document.getElementById("substitutionList");
-
-
-  if (!data.substitutions.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Keine Vertretungen.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    data.substitutions.map(s => `
-
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-
-        <div class="flex items-center gap-3">
-
-          <div class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-            ${s.period}.
-          </div>
-
-          <div class="flex-1">
-
-            <p class="font-semibold">
-              ${escapeHTML(s.newSubject || "Vertretung")}
-            </p>
-
-            <p class="text-xs text-slate-500">
-
-              ${getDayName(s.day)}
-
-              · vorher:
-              ${escapeHTML(s.oldSubject || "-")}
-
-              ${s.room
-                ? " · Raum " + escapeHTML(s.room)
-                : ""}
-
-            </p>
-
-          </div>
-
-          <button
-            onclick="deleteSubstitution('${s.id}')"
-            class="text-red-400">
-            ×
-          </button>
-
-        </div>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-function addSubstitution() {
-
-  const period =
-    parseInt(
-      document.getElementById("subPeriod")
-        .value
-    );
-
-
-  if (!period) return;
-
-
-  data.substitutions.push({
-
-    id: crypto.randomUUID(),
-
-    day:
-      parseInt(
-        document.getElementById("subDay")
-          .value
-      ),
-
-    period,
-
-    oldSubject:
-      document.getElementById("subOld")
-        .value.trim(),
-
-    newSubject:
-      document.getElementById("subNew")
-        .value.trim(),
-
-    room:
-      document.getElementById("subRoom")
-        .value.trim()
-
-  });
-
-
-  save();
-
-  clearFields([
-    "subPeriod",
-    "subOld",
-    "subNew",
-    "subRoom"
-  ]);
-
-}
-
-
-function deleteSubstitution(id) {
-
-  data.substitutions =
-    data.substitutions.filter(
-      x => x.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   ANNOUNCEMENTS
-============================================================ */
-
-function addAnnouncement() {
-
-  const text =
-    document.getElementById("annText")
-      .value.trim();
-
-
-  if (!text) return;
-
-
-  data.announcements.push({
-
-    id: crypto.randomUUID(),
-
-    text,
-
-    date: todayISO()
-
-  });
-
-
-  save();
-
-  clearFields(["annText"]);
-
-}
-
-
-/* ============================================================
-   ABSENCES
-============================================================ */
-
-function renderAbsences() {
-
-  const list =
-    document.getElementById("absencesList");
-
-
-  if (!data.absences.length) {
-
-    list.innerHTML =
-      `<p class="text-slate-500 text-center py-8">
-        Keine Absenzen.
-      </p>`;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    data.absences
-      .slice()
-      .reverse()
-      .map(a => `
-
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between">
-
-          <div>
-
-            <p class="font-semibold">
-              ${escapeHTML(a.name)}
-            </p>
-
-            <p class="text-xs text-slate-500 mt-1">
-              ${formatDate(a.date)}
-              ${a.reason
-                ? " · " + escapeHTML(a.reason)
-                : ""}
-            </p>
-
-          </div>
-
-          <button
-            onclick="deleteAbsence('${a.id}')"
-            class="text-red-400">
-            ×
-          </button>
-
-        </div>
-
-      `).join("");
-
-}
-
-
-function addAbsence() {
-
-  const name =
-    document.getElementById("absName")
-      .value.trim();
-
-
-  if (!name) return;
-
-
-  data.absences.push({
-
-    id: crypto.randomUUID(),
-
-    name,
-
-    date:
-      document.getElementById("absDate")
-        .value || todayISO(),
-
-    reason:
-      document.getElementById("absReason")
-        .value.trim()
-
-  });
-
-
-  save();
-
-  clearFields([
-    "absName",
-    "absReason"
-  ]);
-
-}
-
-
-function deleteAbsence(id) {
-
-  data.absences =
-    data.absences.filter(
-      x => x.id !== id
-    );
-
-  save();
-
-}
-
-
-/* ============================================================
-   BACKUP
-============================================================ */
-
-function exportData() {
-
-  const blob =
-    new Blob(
-      [
-        JSON.stringify(
-          data,
-          null,
-          2
-        )
-      ],
-      {
-        type: "application/json"
+function calendarDay(day,month,year) {
+  if(!day) return `<div></div>`;
+
+  const iso=new Date(year,month,day).toISOString().slice(0,10);
+  const events=data.events.filter(x=>x.date===iso);
+
+  return `
+    <button onclick="selectCalendarDate('${iso}')"
+      class="min-h-16 md:min-h-20 rounded-xl p-2 text-left border
+      ${iso===selectedCalendarDate?"border-blue-400 bg-blue-500/10":"border-white/5 bg-white/[.025]"}">
+      <div class="font-semibold">${day}</div>
+      ${
+        events.slice(0,2).map(e=>`
+          <div class="text-[10px] truncate text-blue-300 mt-1">${esc(e.title)}</div>
+        `).join("")
       }
-    );
-
-
-  const url =
-    URL.createObjectURL(blob);
-
-
-  const a =
-    document.createElement("a");
-
-  a.href = url;
-
-  a.download =
-    `klassenboard-${data.className || "backup"}.json`;
-
-  a.click();
-
-  URL.revokeObjectURL(url);
-
+    </button>
+  `;
 }
 
+function changeMonth(delta) {
+  const d=new Date(selectedCalendarDate+"T12:00:00");
+  d.setMonth(d.getMonth()+delta);
+  selectedCalendarDate=d.toISOString().slice(0,10);
+  render();
+}
 
-function importData() {
+function selectCalendarDate(iso) {
+  selectedCalendarDate=iso;
+  openModal("event");
+}
 
-  const input =
-    document.createElement("input");
+/* =========================================================
+   GRADES
+========================================================= */
 
-  input.type = "file";
+function gradeAverage() {
+  if(!data.grades.length) return null;
 
-  input.accept = ".json";
+  const values=data.grades
+    .map(x=>Number(x.grade))
+    .filter(x=>Number.isFinite(x));
 
+  if(!values.length) return null;
 
-  input.onchange = e => {
+  return (values.reduce((a,b)=>a+b,0)/values.length).toFixed(2);
+}
 
-    const file =
-      e.target.files[0];
+function subjectAverage(subject) {
+  const g=data.grades.filter(x=>x.subject===subject);
+  if(!g.length) return null;
 
-    if (!file) return;
+  return (g.reduce((a,b)=>a+Number(b.grade),0)/g.length).toFixed(2);
+}
 
+function gradesPage() {
+  return `
+    <section class="mb-6 flex justify-between flex-wrap gap-3">
+      <div>
+        <div class="text-sm text-gray-400">ÜBERSICHT</div>
+        <h1 class="text-3xl md:text-4xl font-black">Noten</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('grade')">＋ Note</button>
+    </section>
 
-    const reader =
-      new FileReader();
+    <div class="grid-auto mb-5">
+      ${statCard("◇","Gesamtschnitt",gradeAverage() ?? "—","")}
+      ${statCard("●","Anzahl Noten",data.grades.length,"")}
+      ${statCard("📚","Fächer",data.subjects.length,"")}
+    </div>
 
+    <div class="glass card p-5">
+      <h2 class="text-xl font-bold mb-4">Nach Fächern</h2>
 
-    reader.onload = event => {
-
-      try {
-
-        const imported =
-          JSON.parse(
-            event.target.result
-          );
-
-
-        data = {
-          ...structuredClone(defaultData),
-          ...imported
-        };
-
-
-        save();
-
-        alert("Daten importiert.");
-
-      } catch {
-
-        alert("Ungültige JSON-Datei.");
-
+      ${
+        data.subjects.map(s=>`
+          <div class="p-4 rounded-xl bg-white/[.035] mb-2 flex justify-between">
+            <div>
+              <b>${esc(s.name)}</b>
+              <div class="text-xs text-gray-500 mt-1">
+                ${data.grades.filter(x=>x.subject===s.id).length} Noten
+              </div>
+            </div>
+            <div class="text-xl font-black">${subjectAverage(s.id) ?? "—"}</div>
+          </div>
+        `).join("")
       }
+    </div>
 
-    };
+    <div class="glass card p-5 mt-5">
+      <h2 class="text-xl font-bold mb-4">Alle Noten</h2>
+      ${
+        data.grades.length
+        ? data.grades.map(gradeRow).join("")
+        : `<div class="empty">Noch keine Noten eingetragen.</div>`
+      }
+    </div>
+  `;
+}
 
+function gradeRow(g) {
+  return `
+    <div class="flex gap-3 items-center p-3 rounded-xl bg-white/[.035] mb-2">
+      <div class="text-2xl font-black w-12">${esc(g.grade)}</div>
+      <div class="flex-1">
+        <b>${esc(subjectName(g.subject))}</b>
+        <div class="text-xs text-gray-500">${esc(g.title||"Leistung")} · ${formatDate(g.date||todayISO())}</div>
+      </div>
+      <button class="btn btn-danger" onclick="deleteItem('grade','${g.id}')">×</button>
+    </div>
+  `;
+}
 
-    reader.readAsText(file);
+/* =========================================================
+   LEARNING
+========================================================= */
 
+function learningPage() {
+  return `
+    <section class="mb-6">
+      <div class="text-sm text-gray-400">LERNEN</div>
+      <h1 class="text-3xl md:text-4xl font-black">Lernbereich</h1>
+      <p class="text-gray-500 mt-1">Lernen, Ziele und Karteikarten an einem Ort.</p>
+    </section>
+
+    <div class="grid-auto">
+      <div class="glass card p-5">
+        <div class="text-3xl">⏱️</div>
+        <h2 class="text-xl font-bold mt-3">Lern-Timer</h2>
+        <p class="text-gray-500 text-sm mt-1">Fokussiert lernen.</p>
+        <button class="btn btn-primary mt-4" onclick="startStudyTimer()">25 Min starten</button>
+      </div>
+
+      <div class="glass card p-5">
+        <div class="text-3xl">🃏</div>
+        <h2 class="text-xl font-bold mt-3">Karteikarten</h2>
+        <p class="text-gray-500 text-sm mt-1">${data.flashcards.length} Karten</p>
+        <button class="btn btn-secondary mt-4" onclick="openModal('flashcard')">＋ Karte</button>
+      </div>
+
+      <div class="glass card p-5">
+        <div class="text-3xl">🎯</div>
+        <h2 class="text-xl font-bold mt-3">Lernziele</h2>
+        <p class="text-gray-500 text-sm mt-1">${data.goals.filter(x=>!x.done).length} offen</p>
+        <button class="btn btn-secondary mt-4" onclick="openModal('goal')">＋ Ziel</button>
+      </div>
+    </div>
+
+    <div class="glass card p-5 mt-5">
+      <h2 class="text-xl font-bold mb-4">Lernziele</h2>
+      ${
+        data.goals.length
+        ? data.goals.map(goalRow).join("")
+        : `<div class="empty">Noch keine Lernziele.</div>`
+      }
+    </div>
+
+    <div class="glass card p-5 mt-5">
+      <h2 class="text-xl font-bold mb-4">Karteikarten</h2>
+      ${
+        data.flashcards.length
+        ? data.flashcards.map(flashcardRow).join("")
+        : `<div class="empty">Noch keine Karteikarten.</div>`
+      }
+    </div>
+  `;
+}
+
+function goalRow(g) {
+  return `
+    <div class="flex gap-3 items-center p-3 rounded-xl bg-white/[.035] mb-2">
+      <input type="checkbox" ${g.done?"checked":""} onchange="toggleGoal('${g.id}')">
+      <div class="flex-1 ${g.done?"line-through text-gray-500":""}">
+        ${esc(g.title)}
+      </div>
+      <button class="btn btn-danger" onclick="deleteItem('goal','${g.id}')">×</button>
+    </div>
+  `;
+}
+
+function toggleGoal(id) {
+  const g=data.goals.find(x=>x.id===id);
+  if(g) g.done=!g.done;
+  save();
+}
+
+function flashcardRow(f) {
+  return `
+    <div class="p-4 rounded-xl bg-white/[.035] mb-2">
+      <div class="font-bold">${esc(f.question)}</div>
+      <details class="mt-2">
+        <summary class="text-sm text-blue-300 cursor-pointer">Antwort anzeigen</summary>
+        <div class="text-gray-400 mt-2">${esc(f.answer)}</div>
+      </details>
+      <button class="btn btn-danger mt-3" onclick="deleteItem('flashcard','${f.id}')">Löschen</button>
+    </div>
+  `;
+}
+
+function startStudyTimer() {
+  let seconds=25*60;
+
+  modal={
+    type:"timer",
+    seconds
   };
 
+  render();
 
-  input.click();
+  const interval=setInterval(()=>{
+    if(!modal || modal.type!=="timer") {
+      clearInterval(interval);
+      return;
+    }
 
+    modal.seconds--;
+
+    if(modal.seconds<=0) {
+      clearInterval(interval);
+      modal=null;
+      alert("Lernzeit beendet!");
+      render();
+      return;
+    }
+
+    const el=document.getElementById("studyTimer");
+    if(el) el.textContent=formatSeconds(modal.seconds);
+  },1000);
 }
 
+function formatSeconds(s) {
+  const m=Math.floor(s/60);
+  const sec=s%60;
+  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
 
-function clearAllData() {
+/* =========================================================
+   NOTES
+========================================================= */
 
-  if (
-    !confirm(
-      "Wirklich alle Daten löschen?"
-    )
-  ) return;
-
-
-  data =
-    structuredClone(defaultData);
-
-
-  localStorage.removeItem(
-    "klassenBoard"
+function notesPage() {
+  const notes=data.notes.filter(x=>
+    !searchTerm ||
+    (x.title+" "+x.text).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  return `
+    <section class="mb-6 flex justify-between flex-wrap gap-3">
+      <div>
+        <div class="text-sm text-gray-400">NOTIZEN</div>
+        <h1 class="text-3xl md:text-4xl font-black">Notizen</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('note')">＋ Notiz</button>
+    </section>
 
-  save();
-
+    <div class="grid-auto">
+      ${
+        notes.length
+        ? notes.map(noteCard).join("")
+        : `<div class="glass card empty">Keine Notizen.</div>`
+      }
+    </div>
+  `;
 }
 
+function noteCard(n) {
+  return `
+    <div class="glass card p-5">
+      <div class="flex justify-between gap-3">
+        <h2 class="font-bold text-lg">${esc(n.title)}</h2>
+        <button class="text-gray-500" onclick="deleteItem('note','${n.id}')">×</button>
+      </div>
+      <div class="text-gray-400 mt-3 whitespace-pre-wrap">${esc(n.text)}</div>
+      <div class="text-xs text-gray-600 mt-4">${formatDate(n.date||todayISO())}</div>
+    </div>
+  `;
+}
 
-/* ============================================================
-   HELPERS
-============================================================ */
+/* =========================================================
+   CHECKLISTS
+========================================================= */
 
-function clearFields(ids) {
+function checklistsPage() {
+  return `
+    <section class="mb-6 flex justify-between flex-wrap gap-3">
+      <div>
+        <div class="text-sm text-gray-400">CHECKLISTEN</div>
+        <h1 class="text-3xl md:text-4xl font-black">Checklisten</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('checklist')">＋ Checkliste</button>
+    </section>
 
-  ids.forEach(id => {
+    <div class="grid-auto">
+      ${
+        data.checklists.length
+        ? data.checklists.map(checklistCard).join("")
+        : `<div class="glass card empty">Noch keine Checklisten.</div>`
+      }
+    </div>
+  `;
+}
 
-    const el =
-      document.getElementById(id);
+function checklistCard(c) {
+  const items=data.checklistItems.filter(x=>x.listId===c.id);
+  const done=items.filter(x=>x.done).length;
 
-    if (el)
-      el.value = "";
+  return `
+    <div class="glass card p-5">
+      <div class="flex justify-between">
+        <div>
+          <h2 class="text-xl font-bold">${esc(c.title)}</h2>
+          <div class="text-xs text-gray-500 mt-1">${done}/${items.length} erledigt</div>
+        </div>
+        <button onclick="deleteChecklist('${c.id}')" class="text-gray-500">×</button>
+      </div>
 
+      <div class="progress mt-4">
+        <div style="width:${items.length?done/items.length*100:0}%"></div>
+      </div>
+
+      <div class="mt-4">
+        ${items.map(i=>`
+          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer">
+            <input type="checkbox" ${i.done?"checked":""}
+              onchange="toggleChecklistItem('${i.id}')">
+            <span class="${i.done?"line-through text-gray-500":""}">
+              ${esc(i.text)}
+            </span>
+          </label>
+        `).join("")}
+      </div>
+
+      <button class="btn btn-secondary mt-3 w-full"
+        onclick="addChecklistItem('${c.id}')">
+        ＋ Eintrag
+      </button>
+    </div>
+  `;
+}
+
+function addChecklistItem(id) {
+  const text=prompt("Was soll auf die Checkliste?");
+  if(!text) return;
+
+  data.checklistItems.push({
+    id:uid("check"),
+    listId:id,
+    text,
+    done:false
   });
 
+  save();
 }
 
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
+function toggleChecklistItem(id) {
+  const i=data.checklistItems.find(x=>x.id===id);
+  if(i) i.done=!i.done;
+  save();
 }
 
+function deleteChecklist(id) {
+  data.checklists=data.checklists.filter(x=>x.id!==id);
+  data.checklistItems=data.checklistItems.filter(x=>x.listId!==id);
+  save();
+}
 
-/* ============================================================
-   START
-============================================================ */
+/* =========================================================
+   SUBJECTS
+========================================================= */
 
-renderAll();
+function subjectsPage() {
+  return `
+    <section class="mb-6 flex justify-between">
+      <div>
+        <div class="text-sm text-gray-400">VERWALTUNG</div>
+        <h1 class="text-3xl md:text-4xl font-black">Fächer</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('subject')">＋ Fach</button>
+    </section>
 
+    <div class="grid-auto">
+      ${
+        data.subjects.length
+        ? data.subjects.map(subjectCard).join("")
+        : `<div class="glass card empty">Keine Fächer.</div>`
+      }
+    </div>
+  `;
+}
 
-/* Live Uhr */
+function subjectCard(s) {
+  const count=data.grades.filter(x=>x.subject===s.id).length;
 
-setInterval(() => {
+  return `
+    <div class="glass card p-5">
+      <div class="flex items-start justify-between">
+        <div class="flex gap-3 items-center">
+          <div class="w-4 h-12 rounded-full" style="background:${s.color}"></div>
+          <div>
+            <h2 class="font-bold text-lg">${esc(s.name)}</h2>
+            <div class="text-xs text-gray-500">${esc(s.teacher||"Kein Lehrer")}</div>
+          </div>
+        </div>
+        <button onclick="deleteItem('subject','${s.id}')" class="text-gray-500">×</button>
+      </div>
 
-  updateLiveLesson();
+      <div class="text-sm text-gray-500 mt-4">
+        Raum: ${esc(s.room||"—")} · ${count} Noten
+      </div>
+    </div>
+  `;
+}
 
-}, 1000);
+/* =========================================================
+   TEACHERS
+========================================================= */
 
+function teachersPage() {
+  return `
+    <section class="mb-6 flex justify-between">
+      <div>
+        <div class="text-sm text-gray-400">VERWALTUNG</div>
+        <h1 class="text-3xl md:text-4xl font-black">Lehrer</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('teacher')">＋ Lehrer</button>
+    </section>
 
-/* Alle paar Sekunden UI aktualisieren */
+    <div class="grid-auto">
+      ${
+        data.teachers.length
+        ? data.teachers.map(t=>`
+          <div class="glass card p-5">
+            <div class="flex justify-between">
+              <h2 class="font-bold">${esc(t.name)}</h2>
+              <button onclick="deleteItem('teacher','${t.id}')" class="text-gray-500">×</button>
+            </div>
+            <div class="text-sm text-gray-500 mt-2">${esc(t.subject||"")}</div>
+            ${t.room?`<div class="text-xs text-gray-600 mt-1">Raum ${esc(t.room)}</div>`:""}
+          </div>
+        `).join("")
+        : `<div class="glass card empty">Keine Lehrer eingetragen.</div>`
+      }
+    </div>
+  `;
+}
 
-setInterval(() => {
+/* =========================================================
+   SUBSTITUTIONS
+========================================================= */
 
-  renderDashboard();
+function substitutionsPage() {
+  return `
+    <section class="mb-6 flex justify-between">
+      <div>
+        <div class="text-sm text-gray-400">SCHULE</div>
+        <h1 class="text-3xl md:text-4xl font-black">Vertretungsplan</h1>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('substitution')">＋ Vertretung</button>
+    </section>
 
-}, 5000);
+    <div class="glass card p-5">
+      ${
+        data.substitutions.length
+        ? data.substitutions.map(x=>`
+          <div class="p-4 rounded-xl bg-white/[.035] mb-2">
+            <div class="flex justify-between">
+              <div>
+                <b>${formatDate(x.date)} · ${x.period}. Stunde</b>
+                <div class="mt-1">
+                  ${esc(subjectName(x.subject))}
+                  ${x.replacement ? ` → ${esc(x.replacement)}`:""}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">${esc(x.note||"")}</div>
+              </div>
+              <button onclick="deleteItem('substitution','${x.id}')" class="text-gray-500">×</button>
+            </div>
+          </div>
+        `).join("")
+        : `<div class="empty">Keine Vertretungen.</div>`
+      }
+    </div>
+  `;
+}
 
+/* =========================================================
+   FAB
+========================================================= */
 
-updateLiveLesson();
+function fab() {
+  return `
+    ${
+      fabOpen
+      ? `<div class="fab-menu">
+          ${fabItem("📚","Hausaufgabe","homework")}
+          ${fabItem("✓","Aufgabe","task")}
+          ${fabItem("▦","Stunde","schedule")}
+          ${fabItem("☕","Pause","break")}
+          ${fabItem("🎒","Mitnehmen","backpack")}
+          ${fabItem("□","Termin","event")}
+          ${fabItem("✎","Notiz","note")}
+          ${fabItem("◇","Note","grade")}
+          ${fabItem("☑","Checkliste","checklist")}
+          ${fabItem("🃏","Karteikarte","flashcard")}
+          ${fabItem("🎯","Lernziel","goal")}
+        </div>`
+      : ""
+    }
 
+    <button class="fab" onclick="fabOpen=!fabOpen;render()">
+      ${fabOpen ? "×":"+"}
+    </button>
+  `;
+}
+
+function fabItem(icon,text,type) {
+  return `
+    <button class="fab-item" onclick="openModal('${type}')">
+      <span class="text-xl">${icon}</span>
+      <span>${text}</span>
+    </button>
+  `;
+}
+
+/* =========================================================
+   MODALS / EINTRAGEN
+========================================================= */
+
+function openModal(type) {
+  modal={type};
+  render();
+}
+
+function closeModal() {
+  modal=null;
+  render();
+}
+
+function renderModal() {
+  return `
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal glass" id="modalContent">
+        ${modalContent()}
+      </div>
+    </div>
+  `;
+}
+
+function modalHeader(title,subtitle="") {
+  return `
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <h2 class="text-2xl font-black">${title}</h2>
+        ${subtitle ? `<p class="text-sm text-gray-500 mt-1">${subtitle}</p>`:""}
+      </div>
+      <button onclick="closeModal()" class="text-2xl text-gray-500">×</button>
+    </div>
+  `;
+}
+
+function field(label,content) {
+  return `
+    <label class="block">
+      <div class="text-sm font-semibold text-gray-400 mb-2">${label}</div>
+      ${content}
+    </label>
+  `;
+}
+
+function subjectSelect(name="subject",selected="") {
+  return `
+    <select class="input" name="${name}">
+      <option value="">Fach auswählen</option>
+      ${data.subjects.map(s=>`
+        <option value="${s.id}" ${s.id===selected?"selected":""}>
+          ${esc(s.name)}
+        </option>
+      `).join("")}
+    </select>
+  `;
+}
+
+function modalButtons(saveFunction) {
+  return `
+    <div class="flex gap-2 justify-end mt-7">
+      <button type="button" class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+      <button type="submit" class="btn btn-primary">Speichern</button>
+    </div>
+  `;
+}
+
+function modalContent() {
+  const type=modal.type;
+
+  if(type==="timer") {
+    return `
+      ${modalHeader("Lern-Timer","Fokuszeit")}
+      <div class="text-center py-8">
+        <div id="studyTimer" class="text-7xl font-black tracking-tight">
+          ${formatSeconds(modal.seconds)}
+        </div>
+        <p class="text-gray-500 mt-3">Konzentriert bleiben.</p>
+      </div>
+      <button class="btn btn-secondary w-full" onclick="closeModal()">Beenden</button>
+    `;
+  }
+
+  if(type==="schedule") {
+    const p=modal.preset||{};
+    return `
+      ${modalHeader("Unterricht eintragen","Nur die Angaben, die du brauchst.")}
+
+      <form onsubmit="submitSchedule(event)">
+        <div class="grid md:grid-cols-2 gap-4">
+          ${field("Wochentag",`
+            <select class="input" name="day">
+              ${[0,1,2,3,4].map(d=>`
+                <option value="${d}" ${p.day===d?"selected":""}>${dayName(d)}</option>
+              `).join("")}
+            </select>
+          `)}
+
+          ${field("Stunde",`
+            <input class="input" type="number" min="1" max="12"
+              name="period" value="${p.period||1}" required>
+          `)}
+
+          ${field("Fach",subjectSelect("subject"))}
+
+          ${field("Raum",`<input class="input" name="room" placeholder="z. B. 204">`)}
+
+          ${field("Von",`<input class="input" type="time" name="from" required>`)}
+
+          ${field("Bis",`<input class="input" type="time" name="to" required>`)}
+
+          ${field("Lehrer",`<input class="input" name="teacher" placeholder="Optional">`)}
+
+          ${field("Wiederholung",`
+            <select class="input" name="repeat">
+              <option value="once">Nur diese Stunde</option>
+              <option value="weekly">Wöchentlich</option>
+            </select>
+          `)}
+        </div>
+
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="break") {
+    return `
+      ${modalHeader("Pause eintragen","Pausen werden automatisch im Live-Timer berücksichtigt.")}
+
+      <form onsubmit="submitBreak(event)">
+        <div class="grid md:grid-cols-2 gap-4">
+          ${field("Wochentag",`
+            <select class="input" name="day">
+              ${[0,1,2,3,4].map(d=>`<option value="${d}">${dayName(d)}</option>`).join("")}
+            </select>
+          `)}
+
+          ${field("Name",`
+            <input class="input" name="name" placeholder="Große Pause" required>
+          `)}
+
+          ${field("Von",`<input class="input" type="time" name="from" required>`)}
+
+          ${field("Bis",`<input class="input" type="time" name="to" required>`)}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="homework") {
+    return `
+      ${modalHeader("Hausaufgabe","Schnell und übersichtlich eintragen.")}
+
+      <form onsubmit="submitHomework(event)">
+        <div class="space-y-4">
+          ${field("Fach",subjectSelect())}
+          ${field("Aufgabe",`<input class="input" name="title" placeholder="Was musst du machen?" required>`)}
+          ${field("Beschreibung",`<textarea class="input" name="description" placeholder="Details (optional)"></textarea>`)}
+          ${field("Fällig am",`<input class="input" type="date" name="date" value="${todayISO()}">`)}
+
+          ${field("Priorität",`
+            <select class="input" name="priority">
+              <option value="low">🟢 Niedrig</option>
+              <option value="medium" selected>🟡 Mittel</option>
+              <option value="high">🔴 Hoch</option>
+            </select>
+          `)}
+
+          <label class="flex gap-3 items-center">
+            <input type="checkbox" name="bring">
+            <span>🎒 Dafür muss ich etwas mitnehmen</span>
+          </label>
+        </div>
+
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="task") {
+    return `
+      ${modalHeader("Aufgabe","Für alles, was du erledigen möchtest.")}
+
+      <form onsubmit="submitTask(event)">
+        <div class="space-y-4">
+          ${field("Aufgabe",`<input class="input" name="title" placeholder="z. B. Referat vorbereiten" required>`)}
+          ${field("Datum",`<input class="input" type="date" name="date" value="${todayISO()}">`)}
+          ${field("Priorität",`
+            <select class="input" name="priority">
+              <option value="low">🟢 Niedrig</option>
+              <option value="medium" selected>🟡 Mittel</option>
+              <option value="high">🔴 Hoch</option>
+            </select>
+          `)}
+        </div>
+
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="backpack") {
+    return `
+      ${modalHeader("Mitnehmen","Einmal eintragen und später einfach abhaken.")}
+
+      <form onsubmit="submitBackpack(event)">
+        <div class="space-y-4">
+          ${field("Gegenstand",`<input class="input" name="name" placeholder="Mathebuch" required>`)}
+          ${field("Fach",subjectSelect())}
+          <label class="flex gap-3 items-center">
+            <input type="checkbox" name="packed">
+            <span>Ist bereits eingepackt</span>
+          </label>
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="event") {
+    return `
+      ${modalHeader("Termin","Arbeiten, Tests, Ausflüge und wichtige Termine.")}
+
+      <form onsubmit="submitEvent(event)">
+        <div class="space-y-4">
+          ${field("Titel",`<input class="input" name="title" placeholder="Mathearbeit" required>`)}
+          ${field("Datum",`<input class="input" type="date" name="date" value="${selectedCalendarDate}" required>`)}
+          ${field("Uhrzeit",`<input class="input" type="time" name="time">`)}
+          ${field("Beschreibung",`<textarea class="input" name="description" placeholder="Optional"></textarea>`)}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="note") {
+    return `
+      ${modalHeader("Notiz","Alles lokal gespeichert.")}
+
+      <form onsubmit="submitNote(event)">
+        <div class="space-y-4">
+          ${field("Titel",`<input class="input" name="title" placeholder="Titel" required>`)}
+          ${field("Notiz",`<textarea class="input" name="text" placeholder="Deine Notiz..." required></textarea>`)}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="grade") {
+    return `
+      ${modalHeader("Note","Notenübersicht automatisch aktualisieren.")}
+
+      <form onsubmit="submitGrade(event)">
+        <div class="grid md:grid-cols-2 gap-4">
+          ${field("Fach",subjectSelect())}
+          ${field("Note",`
+            <input class="input" type="number" min="1" max="6" step=".1"
+              name="grade" placeholder="1.0" required>
+          `)}
+          ${field("Art",`<input class="input" name="title" placeholder="Klassenarbeit">`)}
+          ${field("Datum",`<input class="input" type="date" name="date" value="${todayISO()}">`)}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="checklist") {
+    return `
+      ${modalHeader("Checkliste","Zum Beispiel Rucksack, Schulsachen oder Projekt.")}
+
+      <form onsubmit="submitChecklist(event)">
+        ${field("Name",`<input class="input" name="title" placeholder="Schulrucksack" required>`)}
+        ${field("Erste Einträge",`
+          <textarea class="input mt-4" name="items"
+            placeholder="Mathebuch&#10;Federmappe&#10;iPad&#10;Hausaufgaben"></textarea>
+        `)}
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="flashcard") {
+    return `
+      ${modalHeader("Karteikarte","Frage und Antwort.")}
+
+      <form onsubmit="submitFlashcard(event)">
+        <div class="space-y-4">
+          ${field("Frage",`<textarea class="input" name="question" placeholder="Was ist ...?" required></textarea>`)}
+          ${field("Antwort",`<textarea class="input" name="answer" placeholder="Die Antwort..." required></textarea>`)}
+          ${field("Fach",subjectSelect())}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="goal") {
+    return `
+      ${modalHeader("Lernziel","Ein Ziel für dein Lernen.")}
+
+      <form onsubmit="submitGoal(event)">
+        ${field("Lernziel",`<input class="input" name="title" placeholder="Ich kann..." required>`)}
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="subject") {
+    return `
+      ${modalHeader("Fach","Fächer werden auch in Stundenplan und Noten verwendet.")}
+
+      <form onsubmit="submitSubject(event)">
+        <div class="space-y-4">
+          ${field("Name",`<input class="input" name="name" placeholder="Physik" required>`)}
+          ${field("Lehrer",`<input class="input" name="teacher" placeholder="Optional">`)}
+          ${field("Raum",`<input class="input" name="room" placeholder="Optional">`)}
+          ${field("Farbe",`<input class="input w-full h-12" type="color" name="color" value="#5875ff">`)}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="teacher") {
+    return `
+      ${modalHeader("Lehrer","Lehrer zentral verwalten.")}
+
+      <form onsubmit="submitTeacher(event)">
+        <div class="space-y-4">
+          ${field("Name",`<input class="input" name="name" placeholder="Herr Müller" required>`)}
+          ${field("Fach",`<input class="input" name="subject" placeholder="Mathematik">`)}
+          ${field("Raum",`<input class="input" name="room" placeholder="204">`)}
+        </div>
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  if(type==="substitution") {
+    return `
+      ${modalHeader("Vertretung","Änderungen am normalen Stundenplan.")}
+
+      <form onsubmit="submitSubstitution(event)">
+        <div class="grid md:grid-cols-2 gap-4">
+          ${field("Datum",`<input class="input" type="date" name="date" value="${todayISO()}" required>`)}
+          ${field("Stunde",`<input class="input" type="number" name="period" min="1" max="12" required>`)}
+          ${field("Fach",subjectSelect())}
+          ${field("Vertretung durch",`<input class="input" name="replacement" placeholder="Lehrer / Fach">`)}
+        </div>
+        ${field("Notiz",`<textarea class="input mt-4" name="note" placeholder="Raumänderung, Ausfall ..."></textarea>`)}
+        ${modalButtons()}
+      </form>
+    `;
+  }
+
+  return "";
+}
+
+/* =========================================================
+   FORM SUBMITS
+========================================================= */
+
+function formData(e) {
+  e.preventDefault();
+  return Object.fromEntries(new FormData(e.target).entries());
+}
+
+function submitSchedule(e) {
+  const f=formData(e);
+
+  if(timeToMinutes(f.to)<=timeToMinutes(f.from)) {
+    alert("Die Bis-Zeit muss nach der Von-Zeit liegen.");
+    return;
+  }
+
+  data.schedule.push({
+    id:uid("lesson"),
+    day:Number(f.day),
+    period:Number(f.period),
+    subject:f.subject,
+    room:f.room,
+    from:f.from,
+    to:f.to,
+    teacher:f.teacher,
+    repeat:f.repeat
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitBreak(e) {
+  const f=formData(e);
+
+  if(timeToMinutes(f.to)<=timeToMinutes(f.from)) {
+    alert("Die Bis-Zeit muss nach der Von-Zeit liegen.");
+    return;
+  }
+
+  data.breaks.push({
+    id:uid("break"),
+    day:Number(f.day),
+    name:f.name,
+    from:f.from,
+    to:f.to
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitHomework(e) {
+  const f=formData(e);
+
+  data.homework.push({
+    id:uid("hw"),
+    subject:f.subject,
+    title:f.title,
+    description:f.description,
+    date:f.date,
+    priority:f.priority,
+    bring:e.target.bring.checked,
+    done:false
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitTask(e) {
+  const f=formData(e);
+
+  data.tasks.push({
+    id:uid("task"),
+    title:f.title,
+    date:f.date,
+    priority:f.priority,
+    done:false
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitBackpack(e) {
+  const f=formData(e);
+
+  data.backpack.push({
+    id:uid("bag"),
+    name:f.name,
+    subject:f.subject,
+    packed:e.target.packed.checked,
+    active:true
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitEvent(e) {
+  const f=formData(e);
+
+  data.events.push({
+    id:uid("event"),
+    title:f.title,
+    date:f.date,
+    time:f.time,
+    description:f.description
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitNote(e) {
+  const f=formData(e);
+
+  data.notes.unshift({
+    id:uid("note"),
+    title:f.title,
+    text:f.text,
+    date:todayISO()
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitGrade(e) {
+  const f=formData(e);
+
+  data.grades.push({
+    id:uid("grade"),
+    subject:f.subject,
+    grade:Number(f.grade),
+    title:f.title,
+    date:f.date
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitChecklist(e) {
+  const f=formData(e);
+
+  const list={
+    id:uid("list"),
+    title:f.title
+  };
+
+  data.checklists.push(list);
+
+  if(f.items) {
+    f.items.split("\n")
+      .map(x=>x.trim())
+      .filter(Boolean)
+      .forEach(text=>{
+        data.checklistItems.push({
+          id:uid("item"),
+          listId:list.id,
+          text,
+          done:false
+        });
+      });
+  }
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitFlashcard(e) {
+  const f=formData(e);
+
+  data.flashcards.push({
+    id:uid("flash"),
+    question:f.question,
+    answer:f.answer,
+    subject:f.subject
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitGoal(e) {
+  const f=formData(e);
+
+  data.goals.push({
+    id:uid("goal"),
+    title:f.title,
+    done:false
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitSubject(e) {
+  const f=formData(e);
+
+  data.subjects.push({
+    id:uid("subject"),
+    name:f.name,
+    teacher:f.teacher,
+    room:f.room,
+    color:f.color
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitTeacher(e) {
+  const f=formData(e);
+
+  data.teachers.push({
+    id:uid("teacher"),
+    name:f.name,
+    subject:f.subject,
+    room:f.room
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+function submitSubstitution(e) {
+  const f=formData(e);
+
+  data.substitutions.push({
+    id:uid("sub"),
+    date:f.date,
+    period:Number(f.period),
+    subject:f.subject,
+    replacement:f.replacement,
+    note:f.note
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function openSettings() {
+  modal={type:"settings"};
+  render();
+}
+
+function settingsModal() {
+  return `
+    ${modalHeader("Einstellungen","Deine Daten bleiben auf diesem Gerät.")}
+
+    <form onsubmit="submitSettings(event)">
+      <div class="space-y-4">
+        ${field("Dein Name",`
+          <input class="input" name="name" value="${esc(data.settings.name)}"
+            placeholder="Wie heißt du?">
+        `)}
+
+        ${field("Klasse",`
+          <input class="input" name="className" value="${esc(data.settings.className)}"
+            placeholder="9a">
+        `)}
+
+        ${field("Darstellung",`
+          <select class="input" name="theme">
+            <option value="dark" ${data.settings.theme==="dark"?"selected":""}>Dunkel</option>
+            <option value="light" ${data.settings.theme==="light"?"selected":""}>Hell</option>
+          </select>
+        `)}
+      </div>
+
+      ${modalButtons()}
+    </form>
+
+    <div class="border-t border-white/5 mt-7 pt-5">
+      <h3 class="font-bold">Daten</h3>
+
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button class="btn btn-secondary" onclick="exportData()">💾 Export</button>
+        <button class="btn btn-secondary" onclick="openImport()">📥 Import</button>
+      </div>
+
+      <button class="btn btn-danger w-full mt-2" onclick="resetData()">
+        Alles zurücksetzen
+      </button>
+
+      <div class="text-xs text-gray-600 mt-4">
+        Speicherung: LocalStorage · keine Anmeldung · kein Backend
+      </div>
+    </div>
+  `;
+}
+
+/* Inject settings into modal */
+const originalModalContent = modalContent;
+modalContent = function() {
+  if(modal?.type==="settings") return settingsModal();
+  return originalModalContent();
+};
+
+function submitSettings(e) {
+  const f=formData(e);
+
+  data.settings.name=f.name;
+  data.settings.className=f.className || "Meine Klasse";
+  data.settings.theme=f.theme;
+
+  save();
+  modal=null;
+  render();
+}
+
+/* =========================================================
+   DELETE / EDIT
+========================================================= */
+
+function deleteItem(type,id) {
+  const map={
+    schedule:"schedule",
+    break:"breaks",
+    homework:"homework",
+    task:"tasks",
+    backpack:"backpack",
+    event:"events",
+    note:"notes",
+    grade:"grades",
+    flashcard:"flashcards",
+    goal:"goals",
+    subject:"subjects",
+    teacher:"teachers",
+    substitution:"substitutions"
+  };
+
+  const key=map[type];
+  if(!key) return;
+
+  const item=data[key].find(x=>x.id===id);
+
+  if(item) {
+    data.deleted.push({
+      type,
+      item,
+      deletedAt:Date.now()
+    });
+  }
+
+  data[key]=data[key].filter(x=>x.id!==id);
+
+  save();
+}
+
+function editItem(type,id) {
+  if(type!=="schedule") return;
+
+  const x=data.schedule.find(x=>x.id===id);
+  if(!x) return;
+
+  modal={
+    type:"scheduleEdit",
+    item:x
+  };
+
+  render();
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function globalSearch(value) {
+  searchTerm=value;
+
+  if(value.trim()) {
+    currentPage="notes";
+  }
+
+  render();
+}
+
+/* =========================================================
+   IMPORT / EXPORT
+========================================================= */
+
+function exportData() {
+  const blob=new Blob(
+    [JSON.stringify(data,null,2)],
+    {type:"application/json"}
+  );
+
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`klassenboard-backup-${todayISO()}.json`;
+  a.click();
+
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function openImport() {
+  modal={type:"import"};
+  render();
+}
+
+function importModal() {
+  return `
+    ${modalHeader("Backup importieren","Wähle eine zuvor exportierte JSON-Datei.")}
+
+    <input
+      class="input"
+      type="file"
+      accept=".json,application/json"
+      onchange="importFile(event)"
+    >
+
+    <div class="text-xs text-gray-500 mt-4">
+      Beim Import werden die aktuellen Daten ersetzt.
+    </div>
+  `;
+}
+
+const oldModalContent = modalContent;
+
+modalContent = function() {
+  if(modal?.type==="settings") return settingsModal();
+  if(modal?.type==="import") return importModal();
+  if(modal?.type==="scheduleEdit") return editScheduleModal(modal.item);
+  return oldModalContent();
+};
+
+function importFile(e) {
+  const file=e.target.files[0];
+  if(!file) return;
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+    try {
+      const imported=JSON.parse(reader.result);
+
+      if(!imported.settings || !imported.subjects) {
+        throw new Error("Ungültiges KlassenBoard-Backup");
+      }
+
+      data={
+        ...structuredClone(defaultData),
+        ...imported,
+        settings:{
+          ...defaultData.settings,
+          ...(imported.settings||{})
+        }
+      };
+
+      save();
+      modal=null;
+      render();
+
+    } catch {
+      alert("Die Datei konnte nicht importiert werden.");
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function resetData() {
+  if(!confirm("Wirklich ALLE KlassenBoard-Daten löschen?")) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+  data=structuredClone(defaultData);
+  modal=null;
+  render();
+}
+
+/* =========================================================
+   EDIT SCHEDULE
+========================================================= */
+
+function editScheduleModal(x) {
+  return `
+    ${modalHeader("Stunde bearbeiten","Ändere deine Unterrichtsstunde.")}
+
+    <form onsubmit="updateSchedule(event,'${x.id}')">
+      <div class="grid md:grid-cols-2 gap-4">
+        ${field("Wochentag",`
+          <select class="input" name="day">
+            ${[0,1,2,3,4].map(d=>`
+              <option value="${d}" ${Number(x.day)===d?"selected":""}>${dayName(d)}</option>
+            `).join("")}
+          </select>
+        `)}
+
+        ${field("Stunde",`
+          <input class="input" type="number" name="period" value="${x.period}" min="1" max="12">
+        `)}
+
+        ${field("Fach",subjectSelect("subject",x.subject))}
+        ${field("Raum",`<input class="input" name="room" value="${esc(x.room||"")}">`)}
+        ${field("Von",`<input class="input" type="time" name="from" value="${x.from}">`)}
+        ${field("Bis",`<input class="input" type="time" name="to" value="${x.to}">`)}
+        ${field("Lehrer",`<input class="input" name="teacher" value="${esc(x.teacher||"")}">`)}
+      </div>
+
+      ${modalButtons()}
+    </form>
+
+    <button class="btn btn-danger w-full mt-2"
+      onclick="deleteItem('schedule','${x.id}');modal=null;render()">
+      Stunde löschen
+    </button>
+  `;
+}
+
+function updateSchedule(e,id) {
+  const f=formData(e);
+  const x=data.schedule.find(x=>x.id===id);
+
+  if(!x) return;
+
+  Object.assign(x,{
+    day:Number(f.day),
+    period:Number(f.period),
+    subject:f.subject,
+    room:f.room,
+    from:f.from,
+    to:f.to,
+    teacher:f.teacher
+  });
+
+  save();
+  modal=null;
+  render();
+}
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+function toggleMobileNav() {
+  const el=document.getElementById("mobileNav");
+
+  if(el) {
+    el.classList.toggle("hidden");
+  }
+}
+
+/* =========================================================
+   LIVE UPDATE
+========================================================= */
+
+setInterval(()=>{
+  if(!modal) {
+    const status=currentStatus();
+
+    const remaining=document.getElementById("liveRemaining");
+    const progress=document.getElementById("liveProgress");
+
+    if(status.type==="lesson" && remaining) {
+      remaining.textContent=formatRemaining(status.remaining);
+
+      if(progress) {
+        progress.style.width=
+          Math.max(0,Math.min(100,(status.elapsed/status.total)*100))+"%";
+      }
+    }
+  }
+},1000);
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+render();
 </script>
 
 </body>
