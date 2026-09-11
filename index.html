@@ -12,8 +12,12 @@
   <link rel="icon" href="ProfessorFilouLOGO.png">
   <link rel="apple-touch-icon" href="ProfessorFilouLOGO.png">
 
-  <meta name="theme-color" content="#070b14">
+  <meta name="theme-color" content="#0a0e1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -22,11 +26,15 @@
       theme: {
         extend: {
           colors: {
-            bg: "#070b14",
-            panel: "#0d1422",
-            panel2: "#111a2b",
-            line: "#1e293b",
-            accent: "#3b82f6"
+            bg: "#0a0e1a",
+            panel: "#111726",
+            panel2: "#161d2e",
+            line: "#232b3d",
+            accent: "#4f7cff",
+            accent2: "#ffb454"
+          },
+          fontFamily: {
+            display: ["'Space Grotesk'", "Inter", "sans-serif"]
           }
         }
       }
@@ -47,10 +55,11 @@
       margin: 0;
       min-height: 100vh;
       background:
-        radial-gradient(circle at 20% 0%, rgba(59,130,246,.10), transparent 30%),
-        radial-gradient(circle at 90% 10%, rgba(99,102,241,.08), transparent 25%),
-        #070b14;
-      color: #f8fafc;
+        radial-gradient(circle at 15% -5%, rgba(79,124,255,.14), transparent 32%),
+        radial-gradient(circle at 92% 8%, rgba(255,180,84,.07), transparent 28%),
+        radial-gradient(circle at 50% 100%, rgba(79,124,255,.06), transparent 40%),
+        #0a0e1a;
+      color: #f5f7fb;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
     }
@@ -66,6 +75,11 @@
       cursor: pointer;
     }
 
+    .font-display {
+      font-family: "Space Grotesk", Inter, sans-serif;
+      letter-spacing: -.01em;
+    }
+
     .app {
       min-height: 100vh;
       display: flex;
@@ -79,7 +93,7 @@
       width: 270px;
       height: 100dvh;
       padding: 18px;
-      background: rgba(9,14,25,.88);
+      background: rgba(11,15,26,.88);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border-right: 1px solid rgba(255,255,255,.07);
@@ -95,7 +109,7 @@
       overflow-x: hidden;
       padding-right: 3px;
       scrollbar-width: thin;
-      scrollbar-color: #334155 transparent;
+      scrollbar-color: #2d3a52 transparent;
     }
 
     .sidebar-scroll::-webkit-scrollbar {
@@ -103,7 +117,7 @@
     }
 
     .sidebar-scroll::-webkit-scrollbar-thumb {
-      background: #334155;
+      background: #2d3a52;
       border-radius: 99px;
     }
 
@@ -124,8 +138,9 @@
 
     .brand-title {
       font-size: 16px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -.02em;
+      font-family: "Space Grotesk", Inter, sans-serif;
     }
 
     .brand-sub {
@@ -142,7 +157,7 @@
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: .12em;
-      color: #475569;
+      color: #4b5875;
       margin: 0 9px 7px;
       font-weight: 700;
     }
@@ -153,10 +168,10 @@
       align-items: center;
       gap: 11px;
       padding: 10px 11px;
-      border-radius: 11px;
+      border-radius: 12px;
       border: 1px solid transparent;
       background: transparent;
-      color: #94a3b8;
+      color: #93a1bd;
       text-align: left;
       transition:
         background .18s ease,
@@ -168,13 +183,13 @@
 
     .nav-btn:hover {
       background: rgba(255,255,255,.045);
-      color: #e2e8f0;
+      color: #e7ecf6;
       transform: translateX(2px);
     }
 
     .nav-btn.active {
-      background: rgba(59,130,246,.14);
-      border-color: rgba(59,130,246,.20);
+      background: linear-gradient(135deg, rgba(79,124,255,.20), rgba(79,124,255,.08));
+      border-color: rgba(79,124,255,.25);
       color: #fff;
     }
 
@@ -189,6 +204,71 @@
       border-top: 1px solid rgba(255,255,255,.06);
       padding-top: 12px;
       margin-top: 10px;
+    }
+
+    /* ================= PREVIEW BANNER ================= */
+
+    .preview-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 13px;
+      margin-bottom: 12px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, rgba(255,180,84,.16), rgba(255,180,84,.05));
+      border: 1px solid rgba(255,180,84,.28);
+      flex-shrink: 0;
+    }
+
+    .preview-banner.show {
+      display: flex;
+    }
+
+    .preview-banner-text {
+      font-size: 11px;
+      color: #ffd399;
+      line-height: 1.4;
+    }
+
+    .preview-banner-text strong {
+      color: #ffe4b3;
+      display: block;
+      font-size: 12px;
+      margin-bottom: 1px;
+    }
+
+    .btn-preview-login {
+      flex-shrink: 0;
+      padding: 7px 11px;
+      border-radius: 9px;
+      background: #ffb454;
+      color: #241505;
+      font-size: 11px;
+      font-weight: 700;
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn-preview-login:hover {
+      background: #ffc57a;
+    }
+
+    #topPreviewBadge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 99px;
+      background: rgba(255,180,84,.12);
+      border: 1px solid rgba(255,180,84,.28);
+      color: #ffd399;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    #topPreviewBadge.show {
+      display: flex;
     }
 
     /* ================= MAIN ================= */
@@ -209,7 +289,7 @@
       justify-content: space-between;
       gap: 16px;
       padding: 12px 28px;
-      background: rgba(7,11,20,.74);
+      background: rgba(10,14,26,.74);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
       border-bottom: 1px solid rgba(255,255,255,.06);
@@ -244,10 +324,10 @@
     /* ================= PANELS ================= */
 
     .panel {
-      background: rgba(13,20,34,.78);
+      background: rgba(17,23,38,.78);
       border: 1px solid rgba(255,255,255,.065);
       border-radius: 18px;
-      box-shadow: 0 14px 45px rgba(0,0,0,.18);
+      box-shadow: 0 14px 45px rgba(0,0,0,.22);
     }
 
     .panel-pad {
@@ -256,8 +336,9 @@
 
     .panel-title {
       font-size: 14px;
-      font-weight: 750;
+      font-weight: 700;
       letter-spacing: -.01em;
+      font-family: "Space Grotesk", Inter, sans-serif;
     }
 
     .muted {
@@ -280,9 +361,10 @@
       padding: 28px;
       border-radius: 22px;
       background:
-        radial-gradient(circle at 90% 0%, rgba(96,165,250,.26), transparent 30%),
-        linear-gradient(135deg, rgba(37,99,235,.30), rgba(30,41,59,.55));
-      border: 1px solid rgba(96,165,250,.16);
+        radial-gradient(circle at 88% -10%, rgba(255,180,84,.16), transparent 32%),
+        radial-gradient(circle at 90% 0%, rgba(120,155,255,.28), transparent 30%),
+        linear-gradient(135deg, rgba(48,80,220,.32), rgba(24,30,48,.6));
+      border: 1px solid rgba(120,155,255,.18);
     }
 
     .hero::after {
@@ -293,7 +375,7 @@
       right: -100px;
       bottom: -130px;
       border-radius: 50%;
-      background: rgba(59,130,246,.12);
+      background: rgba(79,124,255,.14);
       filter: blur(10px);
     }
 
@@ -307,20 +389,21 @@
       min-width: 0;
       padding: 17px;
       border-radius: 16px;
-      background: rgba(13,20,34,.8);
+      background: rgba(17,23,38,.8);
       border: 1px solid rgba(255,255,255,.055);
       transition: transform .18s ease, border .18s ease;
     }
 
     .stat:hover {
       transform: translateY(-2px);
-      border-color: rgba(96,165,250,.18);
+      border-color: rgba(120,155,255,.22);
     }
 
     .stat-value {
       font-size: 25px;
-      font-weight: 800;
+      font-weight: 700;
       margin-top: 6px;
+      font-family: "Space Grotesk", Inter, sans-serif;
     }
 
     .dashboard-grid {
@@ -391,8 +474,9 @@
       background: rgba(255,255,255,.045);
       color: #e2e8f0;
       padding: 9px 13px;
-      border-radius: 10px;
+      border-radius: 11px;
       font-size: 12px;
+      font-weight: 600;
       transition: all .16s ease;
     }
 
@@ -402,13 +486,23 @@
     }
 
     .btn-primary {
-      background: #2563eb;
-      border-color: #3b82f6;
+      background: #4f7cff;
+      border-color: #6f92ff;
       color: white;
     }
 
     .btn-primary:hover {
-      background: #3b82f6;
+      background: #6288ff;
+    }
+
+    .btn-accent {
+      background: #ffb454;
+      border-color: #ffb454;
+      color: #241505;
+    }
+
+    .btn-accent:hover {
+      background: #ffc57a;
     }
 
     .btn-danger {
@@ -445,10 +539,10 @@
     .select,
     .textarea {
       width: 100%;
-      background: #0a101c;
-      border: 1px solid #1e293b;
-      color: #f8fafc;
-      border-radius: 10px;
+      background: #0d1220;
+      border: 1px solid #232b3d;
+      color: #f5f7fb;
+      border-radius: 11px;
       outline: none;
       padding: 10px 11px;
       font-size: 13px;
@@ -463,8 +557,8 @@
     .input:focus,
     .select:focus,
     .textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,.10);
+      border-color: #4f7cff;
+      box-shadow: 0 0 0 3px rgba(79,124,255,.12);
     }
 
     .form-grid {
@@ -521,8 +615,8 @@
       height: 100%;
       padding: 8px;
       border-radius: 9px;
-      background: rgba(59,130,246,.12);
-      border-left: 3px solid #3b82f6;
+      background: rgba(79,124,255,.14);
+      border-left: 3px solid #4f7cff;
     }
 
     .lesson.current {
@@ -560,7 +654,7 @@
     }
 
     .cal-day.today {
-      border-color: rgba(59,130,246,.55);
+      border-color: rgba(79,124,255,.55);
     }
 
     .cal-number {
@@ -573,7 +667,7 @@
       font-size: 9px;
       padding: 3px 4px;
       border-radius: 5px;
-      background: rgba(59,130,246,.15);
+      background: rgba(79,124,255,.16);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -589,17 +683,17 @@
       height: 58px;
       border-radius: 50%;
       border: 1px solid rgba(255,255,255,.15);
-      background: linear-gradient(145deg,#3b82f6,#2563eb);
+      background: linear-gradient(145deg,#4f7cff,#3a5fe0);
       color: white;
       font-size: 27px;
-      box-shadow: 0 12px 35px rgba(37,99,235,.35);
+      box-shadow: 0 12px 35px rgba(79,124,255,.38);
       z-index: 120;
       transition: transform .18s ease, box-shadow .18s ease;
     }
 
     .fab:hover {
       transform: scale(1.07) rotate(4deg);
-      box-shadow: 0 16px 42px rgba(37,99,235,.45);
+      box-shadow: 0 16px 42px rgba(79,124,255,.48);
     }
 
     .fab.open {
@@ -631,7 +725,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: #111a2b;
+      background: #161d2e;
       border: 1px solid #263449;
       border-radius: 11px;
       color: #e2e8f0;
@@ -648,7 +742,7 @@
       display: none;
       place-items: center;
       padding: 18px;
-      background: rgba(0,0,0,.62);
+      background: rgba(4,6,12,.66);
       backdrop-filter: blur(8px);
     }
 
@@ -661,10 +755,10 @@
       width: min(680px,100%);
       max-height: min(88dvh,850px);
       overflow-y: auto;
-      background: #0d1422;
+      background: #111726;
       border: 1px solid #263449;
       border-radius: 19px;
-      box-shadow: 0 30px 100px rgba(0,0,0,.45);
+      box-shadow: 0 30px 100px rgba(0,0,0,.5);
       animation: modalIn .2s ease;
     }
 
@@ -692,9 +786,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(13,20,34,.94);
+      background: rgba(17,23,38,.94);
       backdrop-filter: blur(15px);
       border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .modal-head .modal-head-title {
+      font-family: "Space Grotesk", Inter, sans-serif;
+      font-weight: 700;
     }
 
     .modal-body {
@@ -717,9 +816,9 @@
     .toast {
       padding: 12px 14px;
       border-radius: 12px;
-      background: #111a2b;
+      background: #161d2e;
       border: 1px solid #263449;
-      box-shadow: 0 12px 35px rgba(0,0,0,.3);
+      box-shadow: 0 12px 35px rgba(0,0,0,.35);
       font-size: 12px;
       animation: toastIn .22s ease;
     }
@@ -745,17 +844,18 @@
       place-items: center;
       padding: 20px;
       background:
-        radial-gradient(circle at 50% 0%, rgba(59,130,246,.17), transparent 40%),
-        #070b14;
+        radial-gradient(circle at 20% 0%, rgba(79,124,255,.20), transparent 42%),
+        radial-gradient(circle at 85% 90%, rgba(255,180,84,.10), transparent 36%),
+        #0a0e1a;
     }
 
     .login-card {
       width: min(430px,100%);
       padding: 26px;
       border-radius: 22px;
-      background: rgba(13,20,34,.9);
+      background: rgba(17,23,38,.9);
       border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 30px 100px rgba(0,0,0,.4);
+      box-shadow: 0 30px 100px rgba(0,0,0,.45);
     }
 
     .login-logo {
@@ -765,6 +865,178 @@
       object-fit: contain;
       margin: 0 auto 13px;
       border-radius: 18px;
+    }
+
+    .login-title {
+      font-family: "Space Grotesk", Inter, sans-serif;
+    }
+
+    .btn-testmode {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255,180,84,.20), rgba(255,180,84,.08));
+      border: 1px solid rgba(255,180,84,.32);
+      color: #ffd7a3;
+      font-weight: 700;
+      font-size: 13px;
+      transition: all .16s ease;
+    }
+
+    .btn-testmode:hover {
+      background: linear-gradient(135deg, rgba(255,180,84,.28), rgba(255,180,84,.12));
+      transform: translateY(-1px);
+    }
+
+    /* ================= TUTORIAL BUBBLES ================= */
+
+    #tutorialOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: none;
+      pointer-events: none;
+    }
+
+    #tutorialOverlay.open {
+      display: block;
+    }
+
+    #tutorialDim {
+      position: absolute;
+      inset: 0;
+      background: rgba(4,6,12,.55);
+      pointer-events: auto;
+    }
+
+    #tutorialSpot {
+      position: absolute;
+      border-radius: 16px;
+      box-shadow: 0 0 0 4000px rgba(4,6,12,.55);
+      border: 2px solid #ffb454;
+      transition: all .3s ease;
+      pointer-events: none;
+    }
+
+    .tutorial-bubble {
+      position: absolute;
+      width: min(300px, 84vw);
+      padding: 16px;
+      border-radius: 16px;
+      background: #161d2e;
+      border: 1px solid rgba(255,180,84,.35);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      pointer-events: auto;
+      animation: bubbleIn .22s ease;
+    }
+
+    @keyframes bubbleIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px) scale(.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .tutorial-bubble::before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #161d2e;
+      border-left: 1px solid rgba(255,180,84,.35);
+      border-top: 1px solid rgba(255,180,84,.35);
+    }
+
+    .tutorial-bubble.tail-top::before {
+      top: -8px;
+      left: 24px;
+      transform: rotate(45deg);
+    }
+
+    .tutorial-bubble.tail-bottom::before {
+      bottom: -8px;
+      left: 24px;
+      transform: rotate(225deg);
+    }
+
+    .tutorial-bubble.tail-left::before {
+      left: -8px;
+      top: 24px;
+      transform: rotate(-45deg);
+    }
+
+    .tutorial-eyebrow {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #ffb454;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .tutorial-text {
+      font-size: 13px;
+      color: #dbe3f2;
+      line-height: 1.5;
+    }
+
+    .tutorial-dots {
+      display: flex;
+      gap: 5px;
+      margin-top: 13px;
+    }
+
+    .tutorial-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.18);
+    }
+
+    .tutorial-dot.active {
+      background: #ffb454;
+      width: 16px;
+    }
+
+    .tutorial-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 13px;
+    }
+
+    .tutorial-skip {
+      font-size: 11px;
+      color: #64748b;
+      background: none;
+      border: none;
+      padding: 6px 2px;
+    }
+
+    .tutorial-skip:hover {
+      color: #94a3b8;
+    }
+
+    .tutorial-next {
+      padding: 8px 14px;
+      border-radius: 9px;
+      background: #ffb454;
+      color: #241505;
+      font-weight: 700;
+      font-size: 12px;
+      border: none;
+    }
+
+    .tutorial-next:hover {
+      background: #ffc57a;
     }
 
     /* ================= MOBILE ================= */
@@ -892,7 +1164,7 @@
         bottom: 0;
         height: 66px;
         z-index: 110;
-        background: rgba(9,14,25,.94);
+        background: rgba(10,14,26,.94);
         backdrop-filter: blur(20px);
         border-top: 1px solid rgba(255,255,255,.07);
       }
@@ -905,13 +1177,17 @@
       }
 
       .mobile-nav button.active {
-        color: #60a5fa;
+        color: #7ea0ff;
       }
 
       .mobile-nav span {
         display: block;
         font-size: 20px;
         margin-bottom: 2px;
+      }
+
+      #topPreviewBadge span.badge-full {
+        display: none;
       }
     }
   </style>
@@ -932,7 +1208,7 @@
       onerror="this.style.display='none'"
     >
 
-    <h1 class="text-2xl font-extrabold text-center">
+    <h1 class="text-2xl font-extrabold text-center login-title">
       KlassenBoard
     </h1>
 
@@ -982,7 +1258,7 @@
 
       <div class="relative my-4">
         <div class="border-t border-slate-800"></div>
-        <span class="absolute left-1/2 -translate-x-1/2 -top-2.5 px-3 bg-[#0d1422] text-[10px] text-slate-600">
+        <span class="absolute left-1/2 -translate-x-1/2 -top-2.5 px-3 bg-[#111726] text-[10px] text-slate-600">
           ODER
         </span>
       </div>
@@ -994,12 +1270,23 @@
         🌐 Mit Google anmelden
       </button>
 
+      <div class="relative my-4">
+        <div class="border-t border-slate-800"></div>
+        <span class="absolute left-1/2 -translate-x-1/2 -top-2.5 px-3 bg-[#111726] text-[10px] text-slate-600">
+          NOCH UNSICHER?
+        </span>
+      </div>
+
       <button
-        onclick="anonymousLogin()"
-        class="btn w-full"
+        onclick="startPreview()"
+        class="btn-testmode"
       >
-        👤 Ohne Konto fortfahren
+        🔭 Vorschau testen – ohne Konto
       </button>
+
+      <p class="text-center text-[10px] text-slate-600 -mt-1">
+        Mit Beispieldaten, geführter Tour, jederzeit beendbar.
+      </p>
 
     </div>
 
@@ -1033,6 +1320,16 @@
     </div>
 
     <div class="sidebar-scroll">
+
+      <div id="previewBanner" class="preview-banner">
+        <div class="preview-banner-text">
+          <strong>🔭 Vorschau-Modus</strong>
+          Beispieldaten, nichts wird gespeichert.
+        </div>
+        <button class="btn-preview-login" onclick="exitPreviewToLogin()">
+          Anmelden
+        </button>
+      </div>
 
       <div class="nav-group">
         <div class="nav-label">Übersicht</div>
@@ -1151,7 +1448,7 @@
 
         <div
           id="userAvatar"
-          class="w-8 h-8 rounded-full bg-blue-600 grid place-items-center text-xs font-bold"
+          class="w-8 h-8 rounded-full bg-[#4f7cff] grid place-items-center text-xs font-bold"
         >
           ?
         </div>
@@ -1195,7 +1492,7 @@
       <div>
         <div
           id="pageTitle"
-          class="font-bold text-sm"
+          class="font-bold text-sm font-display"
         >
           Dashboard
         </div>
@@ -1207,6 +1504,10 @@
       </div>
 
       <div class="flex items-center gap-2">
+
+        <div id="topPreviewBadge">
+          🔭 <span class="badge-full">Vorschau-Modus</span>
+        </div>
 
         <div
           id="connectionBadge"
@@ -1238,7 +1539,7 @@
 
       <section id="page-dashboard" class="page active">
 
-        <div class="hero">
+        <div class="hero" id="tutorialHero">
 
           <div class="relative z-10">
 
@@ -1251,7 +1552,7 @@
 
             <h1
               id="dashboardName"
-              class="text-3xl md:text-4xl font-extrabold mt-1"
+              class="text-3xl md:text-4xl font-extrabold mt-1 font-display"
             >
               KlassenBoard
             </h1>
@@ -1365,7 +1666,7 @@
       <section id="page-today" class="page">
 
         <div class="mb-5">
-          <h2 class="text-2xl font-extrabold">Jetzt</h2>
+          <h2 class="text-2xl font-extrabold font-display">Jetzt</h2>
           <p class="text-sm text-slate-500 mt-1">
             Dein aktueller Schultag in Echtzeit.
           </p>
@@ -1399,7 +1700,7 @@
         <div class="flex flex-wrap gap-3 items-center justify-between mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Stundenplan</h2>
+            <h2 class="text-2xl font-extrabold font-display">Stundenplan</h2>
             <p class="text-sm text-slate-500 mt-1">
               Fächer, Zeiten, Räume und Lehrer.
             </p>
@@ -1434,7 +1735,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Aufgaben</h2>
+            <h2 class="text-2xl font-extrabold font-display">Aufgaben</h2>
             <p class="text-sm text-slate-500 mt-1">
               Alles, was noch erledigt werden muss.
             </p>
@@ -1484,7 +1785,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Hausaufgaben</h2>
+            <h2 class="text-2xl font-extrabold font-display">Hausaufgaben</h2>
             <p class="text-sm text-slate-500 mt-1">
               Nichts mehr vergessen.
             </p>
@@ -1512,7 +1813,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Kalender</h2>
+            <h2 class="text-2xl font-extrabold font-display">Kalender</h2>
             <p class="text-sm text-slate-500 mt-1">
               Tests, Termine und Klassenarbeiten.
             </p>
@@ -1561,7 +1862,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Noten</h2>
+            <h2 class="text-2xl font-extrabold font-display">Noten</h2>
             <p class="text-sm text-slate-500 mt-1">
               Überblick über deine Leistungen.
             </p>
@@ -1601,7 +1902,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Vertretungsplan</h2>
+            <h2 class="text-2xl font-extrabold font-display">Vertretungsplan</h2>
             <p class="text-sm text-slate-500 mt-1">
               Änderungen am normalen Stundenplan.
             </p>
@@ -1629,7 +1930,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Rucksack</h2>
+            <h2 class="text-2xl font-extrabold font-display">Rucksack</h2>
             <p class="text-sm text-slate-500 mt-1">
               Was musst du morgen mitnehmen?
             </p>
@@ -1670,7 +1971,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Checklisten</h2>
+            <h2 class="text-2xl font-extrabold font-display">Checklisten</h2>
             <p class="text-sm text-slate-500 mt-1">
               Eigene Listen für Schule und Alltag.
             </p>
@@ -1696,7 +1997,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Notizen</h2>
+            <h2 class="text-2xl font-extrabold font-display">Notizen</h2>
             <p class="text-sm text-slate-500 mt-1">
               Schnelle Gedanken und Mitschriften.
             </p>
@@ -1722,7 +2023,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Erinnerungen</h2>
+            <h2 class="text-2xl font-extrabold font-display">Erinnerungen</h2>
             <p class="text-sm text-slate-500 mt-1">
               Dinge, an die du erinnert werden möchtest.
             </p>
@@ -1748,7 +2049,7 @@
       <section id="page-learning" class="page">
 
         <div class="mb-5">
-          <h2 class="text-2xl font-extrabold">Lernen</h2>
+          <h2 class="text-2xl font-extrabold font-display">Lernen</h2>
           <p class="text-sm text-slate-500 mt-1">
             Dein Lernbereich.
           </p>
@@ -1804,7 +2105,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Lernkarten</h2>
+            <h2 class="text-2xl font-extrabold font-display">Lernkarten</h2>
             <p class="text-sm text-slate-500 mt-1">
               Eigene Karteikarten-Sets.
             </p>
@@ -1830,7 +2131,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Ziele</h2>
+            <h2 class="text-2xl font-extrabold font-display">Ziele</h2>
             <p class="text-sm text-slate-500 mt-1">
               Kleine Schritte, großer Fortschritt.
             </p>
@@ -1856,7 +2157,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Fächer</h2>
+            <h2 class="text-2xl font-extrabold font-display">Fächer</h2>
             <p class="text-sm text-slate-500 mt-1">
               Deine Fächer verwalten.
             </p>
@@ -1882,7 +2183,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
 
           <div>
-            <h2 class="text-2xl font-extrabold">Lehrer</h2>
+            <h2 class="text-2xl font-extrabold font-display">Lehrer</h2>
             <p class="text-sm text-slate-500 mt-1">
               Lehrer und Fächer verwalten.
             </p>
@@ -1908,10 +2209,21 @@
       <section id="page-settings" class="page">
 
         <div class="mb-5">
-          <h2 class="text-2xl font-extrabold">Einstellungen</h2>
+          <h2 class="text-2xl font-extrabold font-display">Einstellungen</h2>
           <p class="text-sm text-slate-500 mt-1">
             KlassenBoard konfigurieren.
           </p>
+        </div>
+
+        <div id="previewSettingsCard" class="panel panel-pad mb-4" style="display:none;border-color:rgba(255,180,84,.3)">
+          <div class="panel-title mb-2">🔭 Du bist im Vorschau-Modus</div>
+          <p class="text-xs text-slate-400 mb-3">
+            Alles, was du hier änderst, bleibt nur in diesem Browser-Tab und wird nicht dauerhaft gespeichert.
+            Leg jetzt ein Konto an, damit nichts verloren geht.
+          </p>
+          <button class="btn btn-accent" onclick="exitPreviewToLogin()">
+            Jetzt anmelden
+          </button>
         </div>
 
         <div class="two-grid">
@@ -2003,6 +2315,20 @@
               onclick="requestNotifications()"
             >
               🔔 Browser-Benachrichtigungen aktivieren
+            </button>
+
+          </div>
+
+          <div class="panel panel-pad">
+
+            <div class="panel-title mb-4">Tour</div>
+
+            <p class="text-xs text-slate-500 mb-3">
+              Zeig mir die geführte Tour nochmal.
+            </p>
+
+            <button class="btn" onclick="startTutorial(true)">
+              🔭 Tutorial erneut starten
             </button>
 
           </div>
@@ -2100,6 +2426,15 @@
 </div>
 
 
+<!-- TUTORIAL BUBBLES -->
+
+<div id="tutorialOverlay">
+  <div id="tutorialDim"></div>
+  <div id="tutorialSpot"></div>
+  <div id="tutorialBubble" class="tutorial-bubble"></div>
+</div>
+
+
 <!-- TOASTS -->
 
 <div id="toasts"></div>
@@ -2119,7 +2454,6 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signInAnonymously,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -2211,6 +2545,8 @@ let data = loadLocalData();
 
 let currentUser = null;
 let firebaseListener = null;
+
+let previewMode = false;
 
 let taskFilter = "all";
 
@@ -2348,10 +2684,10 @@ function gradeNumber(value) {
 function subjectColor(name) {
 
   const colors = [
-    "#3b82f6",
+    "#4f7cff",
     "#8b5cf6",
     "#22c55e",
-    "#f59e0b",
+    "#ffb454",
     "#ef4444",
     "#06b6d4",
     "#ec4899"
@@ -2435,15 +2771,150 @@ function saveLocal() {
 
   data.meta.updatedAt = Date.now();
 
-  localStorage.setItem(
-    "klassenBoard",
-    JSON.stringify(data)
-  );
+  if (!previewMode) {
+
+    localStorage.setItem(
+      "klassenBoard",
+      JSON.stringify(data)
+    );
+  }
 
   updateSyncUI("local");
 
   renderAll();
 }
+
+
+/* ================================================================
+   PREVIEW / DEMO MODE
+================================================================ */
+
+function buildDemoData() {
+
+  const demo = structuredClone(defaultData);
+
+  demo.settings.name = "Sam";
+  demo.settings.className = "10b";
+
+  demo.subjects = [
+    { id: uid("subject"), name: "Mathematik", teacher: "Frau Keller", color: "#4f7cff" },
+    { id: uid("subject"), name: "Englisch", teacher: "Herr Brandt", color: "#8b5cf6" },
+    { id: uid("subject"), name: "Physik", teacher: "Frau Vogt", color: "#22c55e" },
+    { id: uid("subject"), name: "Kunst", teacher: "Herr Simon", color: "#ffb454" }
+  ];
+
+  demo.teachers = demo.subjects.map(s => ({
+    id: uid("teacher"),
+    name: s.teacher,
+    subject: s.name,
+    room: String(100 + Math.floor(Math.random()*100))
+  }));
+
+  const day = getDayIndex();
+
+  demo.schedule = [
+    { id: uid("lesson"), day: day, period: 1, subject: "Mathematik", from: "08:00", to: "08:45", room: "204", teacher: "Frau Keller" },
+    { id: uid("lesson"), day: day, period: 2, subject: "Englisch", from: "08:50", to: "09:35", room: "112", teacher: "Herr Brandt" },
+    { id: uid("lesson"), day: day, period: 3, subject: "Physik", from: "09:55", to: "10:40", room: "SR3", teacher: "Frau Vogt" },
+    { id: uid("lesson"), day: day, period: 4, subject: "Kunst", from: "10:45", to: "11:30", room: "K1", teacher: "Herr Simon" },
+    { id: uid("lesson"), day: (day+1)%5, period: 1, subject: "Physik", from: "08:00", to: "08:45", room: "SR3", teacher: "Frau Vogt" },
+    { id: uid("lesson"), day: (day+1)%5, period: 2, subject: "Mathematik", from: "08:50", to: "09:35", room: "204", teacher: "Frau Keller" }
+  ];
+
+  demo.tasks = [
+    { id: uid("task"), title: "Mathe-Übungsblatt fertig machen", subject: "Mathematik", date: todayISO(), priority: "high", note: "", done: false, createdAt: Date.now() },
+    { id: uid("task"), title: "Referat-Gliederung überarbeiten", subject: "Englisch", date: todayISO(), priority: "medium", note: "", done: false, createdAt: Date.now() },
+    { id: uid("task"), title: "Kunstmappe sortieren", subject: "Kunst", date: null, priority: "low", note: "", done: true, createdAt: Date.now() }
+  ];
+
+  demo.homework = [
+    { id: uid("hw"), title: "S. 42, Nr. 3-6", subject: "Mathematik", date: todayISO(), note: "", done: false, createdAt: Date.now() },
+    { id: uid("hw"), title: "Vokabeln Unit 5 lernen", subject: "Englisch", date: todayISO(), note: "", done: false, createdAt: Date.now() }
+  ];
+
+  demo.events = [
+    { id: uid("event"), title: "Physiktest: Mechanik", date: todayISO(), type: "Test", subject: "Physik", time: "09:55", note: "" },
+    { id: uid("event"), title: "Kunstprojekt Abgabe", date: todayISO(), type: "Termin", subject: "Kunst", time: "", note: "" }
+  ];
+
+  demo.grades = [
+    { id: uid("grade"), subject: "Mathematik", value: "2,0", type: "Klassenarbeit", weight: 2, date: todayISO() },
+    { id: uid("grade"), subject: "Englisch", value: "1,7", type: "Mündlich", weight: 1, date: todayISO() },
+    { id: uid("grade"), subject: "Physik", value: "2,3", type: "Test", weight: 1, date: todayISO() }
+  ];
+
+  demo.backpack = [
+    { id: uid("bag"), title: "Mathebuch", subject: "Mathematik", done: false },
+    { id: uid("bag"), title: "Taschenrechner", subject: "Mathematik", done: true },
+    { id: uid("bag"), title: "Skizzenblock", subject: "Kunst", done: false }
+  ];
+
+  demo.notes = [
+    { id: uid("note"), title: "Ideen fürs Kunstprojekt", text: "Collage mit alten Zeitschriften ausprobieren.", date: todayISO() }
+  ];
+
+  demo.flashcards = [
+    { id: uid("card"), set: "Englisch Vokabeln", front: "to achieve", back: "erreichen", createdAt: Date.now() },
+    { id: uid("card"), set: "Englisch Vokabeln", front: "reliable", back: "zuverlässig", createdAt: Date.now() },
+    { id: uid("card"), set: "Physik Formeln", front: "F = m · a", back: "Kraft = Masse × Beschleunigung", createdAt: Date.now() }
+  ];
+
+  demo.goals = [
+    { id: uid("goal"), title: "Mathe-Note verbessern", description: "Auf eine 2 im Zeugnis kommen.", progress: 55 }
+  ];
+
+  demo.learning = {
+    minutesToday: 25,
+    totalMinutes: 140,
+    sessions: []
+  };
+
+  demo.meta.updatedAt = Date.now();
+
+  return demo;
+}
+
+window.startPreview = function() {
+
+  previewMode = true;
+  currentUser = null;
+
+  data = buildDemoData();
+
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").classList.remove("hidden");
+
+  document.getElementById("userAvatar").textContent = "V";
+  document.getElementById("userName").textContent = data.settings.name + " (Vorschau)";
+
+  document.getElementById("settingsUid").textContent = "–";
+  document.getElementById("settingsFirebase").textContent = "Nicht verbunden (Vorschau)";
+
+  document.getElementById("previewBanner").classList.add("show");
+  document.getElementById("topPreviewBadge").classList.add("show");
+  document.getElementById("previewSettingsCard").style.display = "block";
+
+  updateSyncUI("local");
+
+  renderAll();
+
+  setTimeout(() => startTutorial(false), 350);
+};
+
+window.exitPreviewToLogin = function() {
+
+  previewMode = false;
+
+  data = loadLocalData();
+
+  closeTutorial();
+
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("loginScreen").style.display = "grid";
+
+  document.getElementById("previewBanner").classList.remove("show");
+  document.getElementById("topPreviewBadge").classList.remove("show");
+};
 
 
 /* ================================================================
@@ -2464,6 +2935,8 @@ function userPath() {
 
 function scheduleFirebaseSave() {
 
+  if (previewMode) return;
+
   clearTimeout(saveTimer);
 
   saveTimer = setTimeout(() => {
@@ -2474,6 +2947,11 @@ function scheduleFirebaseSave() {
 }
 
 async function saveFirebase() {
+
+  if (previewMode) {
+    updateSyncUI("local");
+    return;
+  }
 
   if (!currentUser) {
     saveLocal();
@@ -2510,10 +2988,13 @@ function save() {
 
   data.meta.updatedAt = Date.now();
 
-  localStorage.setItem(
-    "klassenBoard",
-    JSON.stringify(data)
-  );
+  if (!previewMode) {
+
+    localStorage.setItem(
+      "klassenBoard",
+      JSON.stringify(data)
+    );
+  }
 
   renderAll();
 
@@ -2696,23 +3177,16 @@ window.googleLogin = async function() {
   }
 };
 
-window.anonymousLogin = async function() {
-
-  clearLoginError();
-
-  try {
-
-    await signInAnonymously(auth);
-
-  } catch (error) {
-
-    showLoginError(
-      authErrorMessage(error)
-    );
-  }
-};
-
 window.logout = async function() {
+
+  if (previewMode) {
+
+    exitPreviewToLogin();
+
+    toast("Vorschau beendet");
+
+    return;
+  }
 
   try {
 
@@ -2758,6 +3232,8 @@ function authErrorMessage(error) {
 
 onAuthStateChanged(auth, user => {
 
+  if (previewMode) return;
+
   currentUser = user;
 
   if (!user) {
@@ -2776,6 +3252,10 @@ onAuthStateChanged(auth, user => {
 
   document.getElementById("app")
     .classList.remove("hidden");
+
+  document.getElementById("previewBanner").classList.remove("show");
+  document.getElementById("topPreviewBadge").classList.remove("show");
+  document.getElementById("previewSettingsCard").style.display = "none";
 
   setupUserUI(user);
 
@@ -2892,6 +3372,20 @@ function updateSyncUI(state) {
     document.getElementById("connectionDot");
 
   if (!status) return;
+
+  if (previewMode) {
+
+    status.textContent = "● Vorschau";
+    status.className =
+      "text-[10px] text-[#ffb454]";
+
+    badge?.classList.remove("hidden");
+
+    if (text) text.textContent = "Vorschau";
+    if (dot) dot.textContent = "●";
+
+    return;
+  }
 
   if (state === "synced") {
 
@@ -3371,7 +3865,7 @@ function renderToday() {
         Jetzt
       </div>
 
-      <div class="text-3xl font-extrabold mt-2">
+      <div class="text-3xl font-extrabold mt-2 font-display">
         ${escapeHTML(current.subject)}
       </div>
 
@@ -3398,7 +3892,7 @@ function renderToday() {
         Status
       </div>
 
-      <div class="text-2xl font-extrabold mt-2">
+      <div class="text-2xl font-extrabold mt-2 font-display">
         Gerade keine Stunde
       </div>
 
@@ -4154,7 +4648,7 @@ function renderGrades() {
               </div>
 
               <div
-                class="text-lg font-extrabold"
+                class="text-lg font-extrabold font-display"
                 style="color:${subjectColor(subject)}"
               >
                 Ø ${avg}
@@ -4166,7 +4660,7 @@ function renderGrades() {
 
               <div class="item">
 
-                <div class="text-xl font-extrabold w-10">
+                <div class="text-xl font-extrabold w-10 font-display">
                   ${escapeHTML(g.value)}
                 </div>
 
@@ -4719,7 +5213,7 @@ function renderLearning() {
   document.getElementById("learningProgress")
     .innerHTML = `
 
-      <div class="text-3xl font-extrabold">
+      <div class="text-3xl font-extrabold font-display">
         ${total}
         <span class="text-sm text-slate-500">Minuten</span>
       </div>
@@ -4906,7 +5400,7 @@ window.studySet = function(encoded) {
             Karte ${index+1}/${cards.length}
           </div>
 
-          <div class="text-2xl font-extrabold mt-5">
+          <div class="text-2xl font-extrabold mt-5 font-display">
             ${escapeHTML(
               showingBack
                 ? card.back
@@ -4994,7 +5488,7 @@ function renderGoals() {
                 <div class="mt-4 h-2 rounded-full bg-slate-800 overflow-hidden">
 
                   <div
-                    class="h-full bg-blue-500"
+                    class="h-full bg-[#4f7cff]"
                     style="width:${Math.min(100,Math.max(0,Number(x.progress)||0))}%"
                   ></div>
 
@@ -5149,6 +5643,9 @@ function renderSettings() {
   document.getElementById("settingClassName")
     .value =
     data.settings.className || "Meine Klasse";
+
+  document.getElementById("previewSettingsCard")
+    .style.display = previewMode ? "block" : "none";
 }
 
 window.saveSettings = function() {
@@ -5181,7 +5678,7 @@ function openModal(title, body) {
 
     <div class="modal-head">
 
-      <div class="font-bold">
+      <div class="font-bold modal-head-title">
         ${escapeHTML(title)}
       </div>
 
@@ -5217,6 +5714,187 @@ window.modalBackgroundClick = function(event) {
   ) {
     closeModal();
   }
+};
+
+
+/* ================================================================
+   TUTORIAL BUBBLES
+================================================================ */
+
+const tutorialSteps = [
+
+  {
+    selector: "#tutorialHero",
+    tail: "top",
+    text: "Willkommen im Vorschau-Modus! Hier siehst du dein Dashboard mit Beispieldaten. Alles ist frei erfunden – du kannst gefahrlos herumklicken."
+  },
+  {
+    selector: '.nav-btn[data-page="schedule"]',
+    tail: "left",
+    text: "Im Stundenplan trägst du deine Fächer, Räume und Zeiten ein. Ein Klick auf ein leeres Feld legt eine neue Stunde an."
+  },
+  {
+    selector: '.nav-btn[data-page="tasks"]',
+    tail: "left",
+    text: "Aufgaben und Hausaufgaben sammelst du getrennt – mit Fälligkeitsdatum und Priorität."
+  },
+  {
+    selector: '.nav-btn[data-page="grades"]',
+    tail: "left",
+    text: "Deine Noten werden automatisch gewichtet und pro Fach zu einem Schnitt zusammengerechnet."
+  },
+  {
+    selector: "#fab",
+    tail: "bottom",
+    text: "Über den großen Plus-Button legst du von überall aus schnell etwas Neues an."
+  },
+  {
+    selector: "#previewBanner",
+    tail: "top",
+    text: "Solange du testest, bleibt hier immer ein Anmelden-Button sichtbar. Klick drauf, sobald du deine echten Daten speichern willst."
+  }
+
+];
+
+let tutorialIndex = 0;
+
+window.startTutorial = function(force) {
+
+  const seenKey = "klassenBoardTutorialSeen";
+
+  if (!force && localStorage.getItem(seenKey)) {
+    return;
+  }
+
+  tutorialIndex = 0;
+
+  document.getElementById("tutorialOverlay").classList.add("open");
+
+  showTutorialStep();
+};
+
+function showTutorialStep() {
+
+  const step = tutorialSteps[tutorialIndex];
+
+  if (!step) {
+    closeTutorial();
+    return;
+  }
+
+  const target = document.querySelector(step.selector);
+
+  const spot = document.getElementById("tutorialSpot");
+  const bubble = document.getElementById("tutorialBubble");
+
+  if (!target) {
+    tutorialIndex++;
+    showTutorialStep();
+    return;
+  }
+
+  const rect = target.getBoundingClientRect();
+  const pad = 8;
+
+  spot.style.left = (rect.left - pad) + "px";
+  spot.style.top = (rect.top - pad) + "px";
+  spot.style.width = (rect.width + pad*2) + "px";
+  spot.style.height = (rect.height + pad*2) + "px";
+
+  bubble.className = "tutorial-bubble tail-" + step.tail;
+
+  let bubbleTop = rect.bottom + 16;
+  let bubbleLeft = rect.left;
+
+  if (step.tail === "left") {
+    bubbleLeft = rect.right + 16;
+    bubbleTop = Math.max(16, rect.top - 10);
+  }
+
+  if (step.tail === "top") {
+    bubbleTop = rect.bottom + 16;
+    bubbleLeft = Math.min(
+      Math.max(16, rect.left),
+      window.innerWidth - 320
+    );
+  }
+
+  if (step.tail === "bottom") {
+    bubbleTop = rect.top - 170;
+    bubbleLeft = Math.min(
+      Math.max(16, rect.left - 260),
+      window.innerWidth - 320
+    );
+  }
+
+  bubbleTop = Math.max(16, Math.min(bubbleTop, window.innerHeight - 200));
+  bubbleLeft = Math.max(16, Math.min(bubbleLeft, window.innerWidth - 316));
+
+  bubble.style.top = bubbleTop + "px";
+  bubble.style.left = bubbleLeft + "px";
+
+  bubble.innerHTML = `
+
+    <div class="tutorial-eyebrow">Tour · Schritt ${tutorialIndex+1}/${tutorialSteps.length}</div>
+
+    <div class="tutorial-text">
+      ${escapeHTML(step.text)}
+    </div>
+
+    <div class="tutorial-dots">
+      ${tutorialSteps.map((s,i) =>
+        `<div class="tutorial-dot ${i === tutorialIndex ? "active" : ""}"></div>`
+      ).join("")}
+    </div>
+
+    <div class="tutorial-actions">
+      <button class="tutorial-skip" onclick="closeTutorial()">Überspringen</button>
+      <button class="tutorial-next" onclick="nextTutorialStep()">
+        ${tutorialIndex === tutorialSteps.length-1 ? "Los geht's 🚀" : "Weiter →"}
+      </button>
+    </div>
+  `;
+
+  const page = pageForSelector(step.selector);
+
+  if (page) {
+    showPage(page);
+  }
+}
+
+function pageForSelector(selector) {
+
+  if (selector.includes('data-page="')) {
+
+    const match = selector.match(/data-page="([a-z]+)"/);
+
+    return match ? match[1] : null;
+  }
+
+  return "dashboard";
+}
+
+window.nextTutorialStep = function() {
+
+  tutorialIndex++;
+
+  if (tutorialIndex >= tutorialSteps.length) {
+
+    closeTutorial();
+
+    return;
+  }
+
+  showTutorialStep();
+};
+
+window.closeTutorial = function() {
+
+  localStorage.setItem("klassenBoardTutorialSeen","1");
+
+  document.getElementById("tutorialOverlay").classList.remove("open");
+
+  showPage("dashboard");
 };
 
 
@@ -6544,7 +7222,7 @@ window.openSubjectModal = function() {
             id="subjectColor"
             class="input"
             type="color"
-            value="#3b82f6"
+            value="#4f7cff"
           >
         </div>
 
@@ -7042,10 +7720,13 @@ window.resetLocalData = function() {
   data =
     structuredClone(defaultData);
 
-  localStorage.setItem(
-    "klassenBoard",
-    JSON.stringify(data)
-  );
+  if (!previewMode) {
+
+    localStorage.setItem(
+      "klassenBoard",
+      JSON.stringify(data)
+    );
+  }
 
   save();
 
@@ -7097,7 +7778,7 @@ function showChangelogOnce() {
       <div class="space-y-4">
 
         <div>
-          <div class="text-xl font-extrabold">
+          <div class="text-xl font-extrabold font-display">
             Willkommen bei der neuen Version!
           </div>
 
@@ -7109,7 +7790,8 @@ function showChangelogOnce() {
         <div class="space-y-2 text-sm">
 
           <div>☁️ Firebase Realtime Sync</div>
-          <div>🔐 Google / E-Mail / Anonymous Login</div>
+          <div>🔐 Google / E-Mail Login</div>
+          <div>🔭 Vorschau-Modus mit geführter Tour</div>
           <div>📊 neues Dashboard</div>
           <div>⏰ aktuelle Stunde + Schultag</div>
           <div>📚 Hausaufgaben & Aufgaben</div>
@@ -7123,12 +7805,12 @@ function showChangelogOnce() {
           <div>🗒️ Notizen</div>
           <div>🔔 Erinnerungen</div>
           <div>📱 optimiert für Handy + iPad + PC</div>
-          <div>✨ neue Animationen & UI</div>
+          <div>✨ neues Design</div>
           <div>📤 Backup Import/Export</div>
 
         </div>
 
-        <div class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/15 text-xs text-blue-200">
+        <div class="p-3 rounded-xl bg-[#4f7cff]/10 border border-[#4f7cff]/20 text-xs text-blue-200">
           Deine Daten werden unter deinem eigenen Firebase-Benutzer gespeichert.
         </div>
 
@@ -7198,7 +7880,7 @@ window.addEventListener(
 
     updateSyncUI("synced");
 
-    if (currentUser) {
+    if (currentUser && !previewMode) {
       saveFirebase();
     }
 
@@ -7221,7 +7903,12 @@ window.addEventListener(
 
 setInterval(() => {
 
-  renderToday();
+  if (
+    document.getElementById("app") &&
+    !document.getElementById("app").classList.contains("hidden")
+  ) {
+    renderToday();
+  }
 
 },1000);
 
