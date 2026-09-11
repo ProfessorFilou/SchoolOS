@@ -1582,6 +1582,11 @@
           <span>Personen</span>
         </button>
 
+        <button class="nav-btn" data-page="chats" onclick="showPage('chats')">
+          <span class="nav-icon">💬</span>
+          <span>Chats</span>
+        </button>
+
         <button class="nav-btn" data-page="settings" onclick="showPage('settings')">
           <span class="nav-icon">⚙</span>
           <span>Einstellungen</span>
@@ -2445,6 +2450,43 @@
 
 
       <!-- ========================================================
+           CHATS
+      ======================================================== -->
+
+      <section id="page-chats" class="page">
+
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
+          <div>
+            <h2 class="text-2xl font-extrabold font-display">Chats</h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Nachrichten, Anfragen und blockierte Nutzer.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button class="btn filter-chat active" data-chat-tab="inbox" onclick="setChatTab('inbox')">Posteingang</button>
+          <button class="btn filter-chat" data-chat-tab="requests" onclick="setChatTab('requests')">Anfragen <span id="chatRequestBadge" class="text-[10px] text-[#ffb454]"></span></button>
+          <button class="btn filter-chat" data-chat-tab="blocked" onclick="setChatTab('blocked')">Blockiert</button>
+        </div>
+
+        <div id="chatsList" class="panel panel-pad"></div>
+
+        <div class="panel panel-pad mt-4">
+          <div class="panel-title mb-2">Privatsphäre</div>
+          <p class="text-xs text-slate-400 mb-3">
+            Wer darf dir eine Chat-Anfrage senden?
+          </p>
+          <select id="chatPrivacy" class="select" onchange="saveChatPrivacy()">
+            <option value="public">Jeder mit öffentlichem Profil</option>
+            <option value="none">Niemand (Chats deaktiviert)</option>
+          </select>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
            SETTINGS
       ======================================================== -->
 
@@ -2782,7 +2824,11 @@ import {
   ref,
   onValue,
   set,
-  update
+  update,
+  push,
+  remove,
+  get,
+  off
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
 
@@ -2818,7 +2864,8 @@ const defaultData = {
     theme: "dark",
     avatar: "",           // dataURL or empty
     publicProfile: true,  // in Personen-finden sichtbar
-    bio: ""
+    bio: "",
+    chatPrivacy: "public" // public | none
   },
 
   schedule: [],
@@ -2914,6 +2961,7 @@ const pageNames = {
   subjects: "Fächer",
   teachers: "Lehrer",
   people: "Personen",
+  chats: "Chats",
   settings: "Einstellungen"
 };
 
@@ -3268,6 +3316,31 @@ window.startPreview = function() {
 
   updateSyncUI("local");
 
+  loadSocialLocal();
+  // demo request so Chats is not empty in preview
+  if (!Object.keys(socialState.chats || {}).length) {
+    const cid = chatIdFor("preview_me", "demo1");
+    socialState.chats[cid] = {
+      id: cid,
+      members: ["preview_me", "demo1"],
+      from: "demo1",
+      to: "preview_me",
+      status: "pending",
+      lastMessage: "Hey, können wir uns wegen Mathe schreiben?",
+      lastAt: Date.now() - 600000,
+      preview: "Hey, können wir uns wegen Mathe schreiben?",
+      muted: false
+    };
+    socialState.messages[cid] = [{
+      id: "msg_demo1",
+      chatId: cid,
+      from: "demo1",
+      text: "Hey, können wir uns wegen Mathe schreiben?",
+      at: Date.now() - 600000,
+      deleted: false
+    }];
+    saveSocialLocal();
+  }
   renderAll();
   peopleLoaded = false;
   loadPeople();
@@ -3690,9 +3763,12 @@ function setupUserUI(user) {
     save();
   }
 
-  // Public profile + visits
+  // Public profile + visits + social
   publishPublicProfile();
   recordVisit();
+  loadSocialLocal();
+  loadBlocksFromFirebase();
+  loadUserChatsFromFirebase();
 }
 
 function updateAvatarDisplay(el, avatar, fallbackName) {
@@ -3925,6 +4001,7 @@ function renderAll() {
   renderSubjects();
   renderTeachers();
   renderPeople();
+  renderChats();
   renderSettings();
 }
 
@@ -7056,7 +7133,7 @@ function renderPeople() {
 
   const q = (document.getElementById("peopleSearch")?.value || "").trim().toLowerCase();
 
-  let list = [...peopleCache];
+  let list = [...peopleCache].filter(p => !isBlocked(p.uid));
 
   if (q) {
     list = list.filter(p =>
@@ -7197,6 +7274,7 @@ window.openPersonProfile = function(uid) {
     : `<div style="width:100%;height:100%;display:grid;place-items:center;font-size:28px;font-weight:800;background:#4f7cff;border-radius:18px">${letter}</div>`;
   const liked = myLikedProfiles.has(p.uid);
   const likes = Number(p.likeCount) || 0;
+  const blocked = isBlocked(uid);
 
   openModal(
     "Profil",
@@ -7215,19 +7293,627 @@ window.openPersonProfile = function(uid) {
             ${escapeHTML(p.bio)}
           </div>
         ` : `<div class="text-xs text-slate-600">Keine Bio</div>`}
-        <div class="flex items-center gap-3 mt-2">
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
           <button
             class="btn ${liked ? "btn-accent" : "btn-primary"}"
             onclick="toggleLikeProfile('${escapeHTML(p.uid)}'); setTimeout(() => openPersonProfile('${escapeHTML(p.uid)}'), 200)"
           >
             ${liked ? "❤️ Geliked" : "🤍 Like"} · ${likes}
           </button>
+          ${blocked ? `
+            <button class="btn" onclick="unblockUser('${escapeHTML(p.uid)}'); closeModal()">Entsperren</button>
+          ` : `
+            <button class="btn btn-primary" onclick="startChatWith('${escapeHTML(p.uid)}')">💬 Schreiben</button>
+            <button class="btn btn-danger" onclick="blockUser('${escapeHTML(p.uid)}')">Blockieren</button>
+            <button class="btn" onclick="openReportModal('${escapeHTML(p.uid)}')">⚑ Melden</button>
+          `}
         </div>
       </div>
     `
   );
 };
 
+
+/* ================================================================
+   CHAT · BLOCK · REPORT · MODERATION
+================================================================ */
+
+let chatTab = "inbox";
+let socialState = {
+  chats: {},       // chatId -> { id, members:[], status, lastMessage, lastAt, muted }
+  messages: {},    // chatId -> [ {id, from, text, at, deleted} ]
+  blocks: {},      // uid -> true
+  requests: {}     // chatId -> meta for pending
+};
+let activeChatId = null;
+let chatMessagesUnsub = null;
+
+function socialStorageKey() {
+  return previewMode ? "klassenBoardSocial_preview" : ("klassenBoardSocial_" + (currentUser?.uid || "guest"));
+}
+
+function loadSocialLocal() {
+  try {
+    const raw = localStorage.getItem(socialStorageKey());
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      socialState = {
+        chats: parsed.chats || {},
+        messages: parsed.messages || {},
+        blocks: parsed.blocks || {},
+        requests: parsed.requests || {}
+      };
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+function saveSocialLocal() {
+  try {
+    localStorage.setItem(socialStorageKey(), JSON.stringify(socialState));
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+function myUid() {
+  if (previewMode) return "preview_me";
+  return currentUser?.uid || null;
+}
+
+function isBlocked(uid) {
+  return !!socialState.blocks[uid];
+}
+
+function chatIdFor(a, b) {
+  return [a, b].sort().join("__");
+}
+
+function otherMember(chat) {
+  const me = myUid();
+  return (chat.members || []).find(u => u !== me) || null;
+}
+
+function profileName(uid) {
+  if (uid === myUid()) return data.settings.name || "Du";
+  const p = peopleCache.find(x => x.uid === uid);
+  if (p) return p.name || p.username || "Nutzer";
+  if (previewMode && uid === "demo1") return "Lina";
+  if (previewMode && uid === "demo2") return "Jonas";
+  if (previewMode && uid === "demo3") return "Mira";
+  return "Nutzer";
+}
+
+function profileAvatarLetter(uid) {
+  return (profileName(uid) || "?").charAt(0).toUpperCase();
+}
+
+window.setChatTab = function(tab) {
+  chatTab = tab;
+  document.querySelectorAll(".filter-chat").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.chatTab === tab);
+  });
+  renderChats();
+};
+
+window.saveChatPrivacy = function() {
+  const val = document.getElementById("chatPrivacy")?.value || "public";
+  data.settings.chatPrivacy = val;
+  save();
+  toast(val === "none" ? "Chat-Anfragen deaktiviert" : "Chat-Anfragen erlaubt");
+};
+
+function renderChats() {
+  const container = document.getElementById("chatsList");
+  if (!container) return;
+
+  loadSocialLocal();
+
+  const privacyEl = document.getElementById("chatPrivacy");
+  if (privacyEl) privacyEl.value = data.settings.chatPrivacy || "public";
+
+  const me = myUid();
+  const allChats = Object.values(socialState.chats || {});
+
+  let list = [];
+  if (chatTab === "inbox") {
+    list = allChats.filter(c =>
+      c.status === "accepted" &&
+      (c.members || []).includes(me) &&
+      !isBlocked(otherMember(c))
+    );
+  } else if (chatTab === "requests") {
+    list = allChats.filter(c =>
+      c.status === "pending" &&
+      c.to === me
+    );
+  } else if (chatTab === "blocked") {
+    list = Object.keys(socialState.blocks || {}).map(uid => ({
+      id: "block_" + uid,
+      blockedUid: uid,
+      isBlock: true
+    }));
+  }
+
+  list.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
+
+  const reqCount = allChats.filter(c => c.status === "pending" && c.to === me).length;
+  const badge = document.getElementById("chatRequestBadge");
+  if (badge) badge.textContent = reqCount ? `(${reqCount})` : "";
+
+  if (!list.length) {
+    const emptyMsg = {
+      inbox: "Noch keine Chats. Schreib jemandem über Personen → Profil → Schreiben.",
+      requests: "Keine offenen Anfragen.",
+      blocked: "Niemand blockiert."
+    }[chatTab] || "Leer.";
+    container.innerHTML = `<div class="empty">${emptyMsg}</div>`;
+    return;
+  }
+
+  if (chatTab === "blocked") {
+    container.innerHTML = list.map(item => `
+      <div class="item">
+        <div class="w-9 h-9 rounded-xl bg-slate-800 grid place-items-center text-xs font-bold">
+          ${profileAvatarLetter(item.blockedUid)}
+        </div>
+        <div class="item-main">
+          <div class="item-title">${escapeHTML(profileName(item.blockedUid))}</div>
+          <div class="item-meta">Blockiert</div>
+        </div>
+        <button class="btn" onclick="unblockUser('${escapeHTML(item.blockedUid)}')">Entsperren</button>
+      </div>
+    `).join("");
+    return;
+  }
+
+  if (chatTab === "requests") {
+    container.innerHTML = list.map(c => {
+      const other = c.from;
+      return `
+        <div class="item">
+          <div class="w-9 h-9 rounded-xl bg-[#4f7cff] grid place-items-center text-xs font-bold">
+            ${profileAvatarLetter(other)}
+          </div>
+          <div class="item-main">
+            <div class="item-title">${escapeHTML(profileName(other))}</div>
+            <div class="item-meta">möchte chatten${c.preview ? " · " + escapeHTML(c.preview) : ""}</div>
+          </div>
+          <div class="flex gap-1">
+            <button class="btn btn-primary" onclick="acceptChatRequest('${escapeHTML(c.id)}')">Annehmen</button>
+            <button class="btn btn-danger" onclick="declineChatRequest('${escapeHTML(c.id)}')">Ablehnen</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+    return;
+  }
+
+  // inbox
+  container.innerHTML = list.map(c => {
+    const other = otherMember(c);
+    const muted = !!c.muted;
+    return `
+      <div class="item" style="cursor:pointer" onclick="openChatWindow('${escapeHTML(c.id)}')">
+        <div class="w-9 h-9 rounded-xl bg-[#4f7cff] grid place-items-center text-xs font-bold">
+          ${profileAvatarLetter(other)}
+        </div>
+        <div class="item-main">
+          <div class="item-title">${escapeHTML(profileName(other))} ${muted ? "🔇" : ""}</div>
+          <div class="item-meta">${escapeHTML(c.lastMessage || "Neuer Chat")}</div>
+        </div>
+        <div class="text-[10px] text-slate-500">
+          ${c.lastAt ? new Date(c.lastAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+window.startChatWith = async function(uid) {
+  closeModal();
+
+  if (!uid || uid === myUid()) return;
+
+  if ((data.settings.chatPrivacy || "public") === "none") {
+    toast("Du hast Chats deaktiviert (Einstellungen / Chats)");
+    return;
+  }
+
+  if (isBlocked(uid)) {
+    toast("Nutzer ist blockiert");
+    return;
+  }
+
+  // if they blocked me – we can't know fully offline; skip for preview
+  loadSocialLocal();
+  const me = myUid();
+  if (!me) {
+    toast("Bitte anmelden");
+    return;
+  }
+
+  const cid = chatIdFor(me, uid);
+  let chat = socialState.chats[cid];
+
+  if (chat && chat.status === "accepted") {
+    openChatWindow(cid);
+    return;
+  }
+
+  if (chat && chat.status === "pending") {
+    toast("Anfrage bereits gesendet");
+    openChatWindow(cid);
+    return;
+  }
+
+  chat = {
+    id: cid,
+    members: [me, uid],
+    from: me,
+    to: uid,
+    status: "pending",
+    lastMessage: "",
+    lastAt: Date.now(),
+    preview: "Chat-Anfrage",
+    muted: false
+  };
+  socialState.chats[cid] = chat;
+  socialState.messages[cid] = socialState.messages[cid] || [];
+  saveSocialLocal();
+  syncChatToFirebase(chat);
+
+  toast("Chat-Anfrage gesendet");
+  showPage("chats");
+  setChatTab("inbox");
+  openChatWindow(cid);
+};
+
+window.acceptChatRequest = function(chatId) {
+  const chat = socialState.chats[chatId];
+  if (!chat) return;
+  chat.status = "accepted";
+  chat.lastAt = Date.now();
+  saveSocialLocal();
+  syncChatToFirebase(chat);
+  toast("Anfrage angenommen");
+  renderChats();
+  openChatWindow(chatId);
+};
+
+window.declineChatRequest = function(chatId) {
+  delete socialState.chats[chatId];
+  delete socialState.messages[chatId];
+  saveSocialLocal();
+  if (!previewMode && currentUser) {
+    remove(ref(db, "chats/" + chatId)).catch(() => {});
+    remove(ref(db, "userChats/" + currentUser.uid + "/" + chatId)).catch(() => {});
+  }
+  toast("Anfrage abgelehnt");
+  renderChats();
+};
+
+window.blockUser = function(uid) {
+  if (!uid) return;
+  if (!confirm("Nutzer wirklich blockieren? Chats werden ausgeblendet.")) return;
+
+  socialState.blocks[uid] = true;
+  // hide related chats
+  Object.values(socialState.chats).forEach(c => {
+    if ((c.members || []).includes(uid)) {
+      c.hidden = true;
+    }
+  });
+  saveSocialLocal();
+
+  if (!previewMode && currentUser) {
+    set(ref(db, "blocks/" + currentUser.uid + "/" + uid), {
+      at: Date.now()
+    }).catch(() => {});
+  }
+
+  closeModal();
+  toast("Nutzer blockiert");
+  renderPeople();
+  renderChats();
+};
+
+window.unblockUser = function(uid) {
+  delete socialState.blocks[uid];
+  Object.values(socialState.chats).forEach(c => {
+    if ((c.members || []).includes(uid)) c.hidden = false;
+  });
+  saveSocialLocal();
+  if (!previewMode && currentUser) {
+    remove(ref(db, "blocks/" + currentUser.uid + "/" + uid)).catch(() => {});
+  }
+  toast("Nutzer entsperrt");
+  renderChats();
+  renderPeople();
+};
+
+window.openReportModal = function(uid) {
+  openModal(
+    "Nutzer melden",
+    `
+      <p class="text-xs text-slate-400 mb-3">
+        Meldung geht an die Moderation. Missbrauch kann zum Ausschluss führen.
+      </p>
+      <div class="field">
+        <label>Grund</label>
+        <select id="reportReason" class="select">
+          <option value="spam">Spam</option>
+          <option value="harassment">Belästigung / Beleidigung</option>
+          <option value="inappropriate">Unangemessene Inhalte</option>
+          <option value="impersonation">Falsche Identität</option>
+          <option value="other">Sonstiges</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Details (optional)</label>
+        <textarea id="reportDetails" class="textarea" placeholder="Was ist passiert?"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button class="btn" onclick="closeModal()">Abbrechen</button>
+        <button class="btn btn-danger" onclick="submitReport('${escapeHTML(uid)}')">Melden</button>
+      </div>
+    `
+  );
+};
+
+window.submitReport = function(uid) {
+  const reason = document.getElementById("reportReason")?.value || "other";
+  const details = (document.getElementById("reportDetails")?.value || "").trim().slice(0, 500);
+
+  const report = {
+    id: uid_gen("report"),
+    targetUid: uid,
+    fromUid: myUid(),
+    reason,
+    details,
+    at: Date.now(),
+    status: "open"
+  };
+
+  // local log
+  const key = "klassenBoardReports";
+  try {
+    const prev = JSON.parse(localStorage.getItem(key) || "[]");
+    prev.push(report);
+    localStorage.setItem(key, JSON.stringify(prev.slice(-50)));
+  } catch (e) {}
+
+  if (!previewMode && currentUser) {
+    set(ref(db, "reports/" + report.id), report).catch(() => {});
+  }
+
+  closeModal();
+  toast("Meldung gesendet – danke");
+};
+
+function uid_gen(prefix) {
+  return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+}
+
+function syncChatToFirebase(chat) {
+  if (previewMode || !currentUser) return;
+  set(ref(db, "chats/" + chat.id + "/meta"), chat).catch(() => {});
+  (chat.members || []).forEach(uid => {
+    set(ref(db, "userChats/" + uid + "/" + chat.id), {
+      id: chat.id,
+      lastAt: chat.lastAt || Date.now(),
+      status: chat.status
+    }).catch(() => {});
+  });
+}
+
+window.openChatWindow = function(chatId) {
+  loadSocialLocal();
+  const chat = socialState.chats[chatId];
+  if (!chat) {
+    toast("Chat nicht gefunden");
+    return;
+  }
+
+  activeChatId = chatId;
+  const other = otherMember(chat);
+  const pending = chat.status === "pending";
+  const msgs = socialState.messages[chatId] || [];
+
+  const body = `
+    <div class="flex items-center justify-between mb-3 gap-2">
+      <div class="text-sm font-semibold">${escapeHTML(profileName(other))}</div>
+      <div class="flex gap-1">
+        <button class="btn btn-icon text-xs" title="Stummschalten" onclick="toggleMuteChat('${escapeHTML(chatId)}')">${chat.muted ? "🔔" : "🔇"}</button>
+        <button class="btn btn-icon text-xs" title="Blockieren" onclick="blockUser('${escapeHTML(other)}')">⛔</button>
+        <button class="btn btn-icon text-xs" title="Melden" onclick="openReportModal('${escapeHTML(other)}')">⚑</button>
+      </div>
+    </div>
+    ${pending && chat.from === myUid() ? `
+      <div class="text-xs text-[#ffb454] mb-2 p-2 rounded-lg" style="background:rgba(255,180,84,.1)">
+        Anfrage gesendet – warte auf Annahme. Du kannst schon eine Nachricht schreiben.
+      </div>
+    ` : ""}
+    ${pending && chat.to === myUid() ? `
+      <div class="flex gap-2 mb-3">
+        <button class="btn btn-primary" onclick="acceptChatRequest('${escapeHTML(chatId)}'); openChatWindow('${escapeHTML(chatId)}')">Annehmen</button>
+        <button class="btn btn-danger" onclick="declineChatRequest('${escapeHTML(chatId)}'); closeModal()">Ablehnen</button>
+      </div>
+    ` : ""}
+    <div id="chatMessages" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 12px">
+      ${msgs.filter(m => !m.deleted).map(m => renderChatBubble(m)).join("") || `<div class="empty">Noch keine Nachrichten</div>`}
+    </div>
+    <div class="flex gap-2 mt-2">
+      <input id="chatInput" class="input" placeholder="Nachricht…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage('${escapeHTML(chatId)}')}">
+      <button class="btn btn-primary" onclick="sendChatMessage('${escapeHTML(chatId)}')">Senden</button>
+    </div>
+  `;
+
+  openModal("Chat", body);
+
+  setTimeout(() => {
+    const box = document.getElementById("chatMessages");
+    if (box) box.scrollTop = box.scrollHeight;
+    document.getElementById("chatInput")?.focus();
+  }, 50);
+
+  // live listen when online
+  if (!previewMode && currentUser) {
+    if (chatMessagesUnsub) {
+      try { chatMessagesUnsub(); } catch (e) {}
+      chatMessagesUnsub = null;
+    }
+    const r = ref(db, "chats/" + chatId + "/messages");
+    chatMessagesUnsub = onValue(r, snap => {
+      const val = snap.val() || {};
+      socialState.messages[chatId] = Object.values(val).sort((a, b) => (a.at || 0) - (b.at || 0));
+      saveSocialLocal();
+      if (activeChatId === chatId) {
+        const box = document.getElementById("chatMessages");
+        if (box) {
+          box.innerHTML = socialState.messages[chatId].filter(m => !m.deleted).map(renderChatBubble).join("") || `<div class="empty">Noch keine Nachrichten</div>`;
+          box.scrollTop = box.scrollHeight;
+        }
+      }
+    });
+  }
+};
+
+function renderChatBubble(m) {
+  const mine = m.from === myUid();
+  return `
+    <div style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%">
+      <div style="
+        padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.4;
+        background:${mine ? "rgba(79,124,255,.25)" : "rgba(255,255,255,.06)"};
+        border:1px solid ${mine ? "rgba(79,124,255,.35)" : "rgba(255,255,255,.08)"};
+        color:#e7ecf6;
+        white-space:pre-wrap;word-break:break-word;
+      ">${escapeHTML(m.text)}</div>
+      <div class="tiny muted mt-1" style="text-align:${mine ? "right" : "left"}">
+        ${m.at ? new Date(m.at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : ""}
+        ${mine ? ` · <button onclick="deleteMyMessage('${escapeHTML(m.chatId || activeChatId)}','${escapeHTML(m.id)}')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:10px">löschen</button>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+window.sendChatMessage = function(chatId) {
+  const input = document.getElementById("chatInput");
+  const text = (input?.value || "").trim();
+  if (!text) return;
+
+  if (text.length > 2000) {
+    toast("Nachricht zu lang");
+    return;
+  }
+
+  // simple moderation filter
+  if (containsBlockedWords(text)) {
+    toast("Nachricht enthält unangemessene Begriffe");
+    return;
+  }
+
+  const chat = socialState.chats[chatId];
+  if (!chat) return;
+
+  const other = otherMember(chat);
+  if (isBlocked(other)) {
+    toast("Nutzer ist blockiert");
+    return;
+  }
+
+  const msg = {
+    id: uid_gen("msg"),
+    chatId,
+    from: myUid(),
+    text,
+    at: Date.now(),
+    deleted: false
+  };
+
+  socialState.messages[chatId] = socialState.messages[chatId] || [];
+  socialState.messages[chatId].push(msg);
+  chat.lastMessage = text.slice(0, 80);
+  chat.lastAt = msg.at;
+  saveSocialLocal();
+
+  if (!previewMode && currentUser) {
+    set(ref(db, "chats/" + chatId + "/messages/" + msg.id), msg).catch(() => {});
+    syncChatToFirebase(chat);
+  }
+
+  if (input) input.value = "";
+  openChatWindow(chatId);
+  renderChats();
+};
+
+window.deleteMyMessage = function(chatId, msgId) {
+  const list = socialState.messages[chatId] || [];
+  const m = list.find(x => x.id === msgId);
+  if (!m || m.from !== myUid()) return;
+  m.deleted = true;
+  m.text = "";
+  saveSocialLocal();
+  if (!previewMode && currentUser) {
+    update(ref(db, "chats/" + chatId + "/messages/" + msgId), {
+      deleted: true,
+      text: ""
+    }).catch(() => {});
+  }
+  openChatWindow(chatId);
+};
+
+window.toggleMuteChat = function(chatId) {
+  const chat = socialState.chats[chatId];
+  if (!chat) return;
+  chat.muted = !chat.muted;
+  saveSocialLocal();
+  syncChatToFirebase(chat);
+  toast(chat.muted ? "Chat stummgeschaltet" : "Stummschaltung aufgehoben");
+  openChatWindow(chatId);
+};
+
+function containsBlockedWords(text) {
+  // lightweight client-side filter (not exhaustive)
+  const blocked = [
+    "hitler", "nazi", "kill yourself", "kys",
+    "nigger", "nigga", "faggot"
+  ];
+  const lower = text.toLowerCase();
+  return blocked.some(w => lower.includes(w));
+}
+
+function loadBlocksFromFirebase() {
+  if (previewMode || !currentUser) return;
+  onValue(ref(db, "blocks/" + currentUser.uid), snap => {
+    const val = snap.val() || {};
+    socialState.blocks = { ...socialState.blocks };
+    Object.keys(val).forEach(uid => {
+      socialState.blocks[uid] = true;
+    });
+    saveSocialLocal();
+    renderChats();
+  }, { onlyOnce: false });
+}
+
+function loadUserChatsFromFirebase() {
+  if (previewMode || !currentUser) return;
+  onValue(ref(db, "userChats/" + currentUser.uid), async snap => {
+    const val = snap.val() || {};
+    for (const chatId of Object.keys(val)) {
+      try {
+        const metaSnap = await get(ref(db, "chats/" + chatId + "/meta"));
+        if (metaSnap.exists()) {
+          socialState.chats[chatId] = metaSnap.val();
+        }
+      } catch (e) {}
+    }
+    saveSocialLocal();
+    renderChats();
+  });
+}
 
 /* ================================================================
    MODALS
