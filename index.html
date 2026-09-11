@@ -2855,7 +2855,7 @@ const googleProvider = new GoogleAuthProvider();
 
 const defaultData = {
 
-  version: 5,
+  version: 6,
 
   settings: {
     name: "",
@@ -3346,6 +3346,7 @@ window.startPreview = function() {
   loadPeople();
 
   setTimeout(() => startTutorial(false), 350);
+  setTimeout(() => showChangelogOnce(), 900);
 };
 
 window.exitPreviewToLogin = function() {
@@ -10192,44 +10193,45 @@ document.addEventListener("keydown", (event) => {
 
 function showChangelogOnce() {
 
-  const key =
-    "klassenBoardChangelogV4";
+  const key = "klassenBoardChangelogV6";
 
   if (localStorage.getItem(key)) {
     return;
   }
 
   openModal(
-    "🚀 KlassenBoard 4.0",
+    "🚀 KlassenBoard 6.0",
     `
-
       <div class="space-y-4">
 
         <div>
           <div class="text-xl font-extrabold font-display">
-            Neue Version!
+            Social Update
           </div>
-
           <div class="text-sm text-slate-500 mt-1">
-            Neue Features für Organisation und Lernen.
+            Profil, Personen, Chat & Moderation.
           </div>
         </div>
 
         <div class="space-y-2 text-sm">
 
-          <div>▤ Wochenübersicht</div>
-          <div>🔁 Wiederkehrende Termine</div>
-          <div>📈 Notentrend & Zielnoten</div>
-          <div>⏱️ Echter Pomodoro-Timer</div>
-          <div>🎒 Automatischer Rucksack-Vorschlag</div>
-          <div>🚨 Überfällige Aufgaben markiert</div>
-          <div>🃏 Karteikasten-Lernsystem (Spaced Repetition)</div>
-          <div>📥 Lernkarten-Import</div>
-          <div>🔥 Lern-Streak</div>
-          <div>📡 Offline-Hinweis</div>
-          <div>🔔 Echte Push-Benachrichtigungen</div>
-          <div>⌨️ Tastenkürzel (N, H, T, /)</div>
+          <div>👤 Profilbild (jedes Bild, auto-optimiert) + Username + Bio</div>
+          <div>📊 Persönlicher Besucherzähler</div>
+          <div>👥 Personen finden & suchen</div>
+          <div>❤️ Profil-Likes + Sortierung</div>
+          <div>💬 1:1-Chats mit Anfragen</div>
+          <div>📥 Posteingang · Anfragen · Blockiert</div>
+          <div>⛔ Blockieren & Entsperren</div>
+          <div>⚑ Melden (Spam, Belästigung, …)</div>
+          <div>🔇 Chat stummschalten</div>
+          <div>🔒 Chat-Privatsphäre (Anfragen an/aus)</div>
+          <div>🛡️ Einfacher Wortfilter beim Senden</div>
 
+        </div>
+
+        <div class="text-xs text-slate-500 leading-relaxed">
+          Tipp: Unter <strong>Personen</strong> Profile öffnen, liken oder anschreiben.
+          Unter <strong>Chats</strong> Anfragen annehmen. Firebase-Rules nicht vergessen.
         </div>
 
         <button
@@ -10246,10 +10248,7 @@ function showChangelogOnce() {
 
 window.closeChangelog = function() {
 
-  localStorage.setItem(
-    "klassenBoardChangelogV4",
-    "1"
-  );
+  localStorage.setItem("klassenBoardChangelogV6", "1");
 
   closeModal();
 };
