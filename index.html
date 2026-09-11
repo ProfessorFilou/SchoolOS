@@ -1587,6 +1587,11 @@
           <span>Chats</span>
         </button>
 
+        <button id="navAdminBtn" class="nav-btn" data-page="admin" onclick="showPage('admin')" style="display:none">
+          <span class="nav-icon">🛡</span>
+          <span>Admin</span>
+        </button>
+
         <button class="nav-btn" data-page="settings" onclick="showPage('settings')">
           <span class="nav-icon">⚙</span>
           <span>Einstellungen</span>
@@ -2487,6 +2492,71 @@
 
 
       <!-- ========================================================
+           ADMIN
+      ======================================================== -->
+
+      <section id="page-admin" class="page">
+
+        <div class="mb-5">
+          <h2 class="text-2xl font-extrabold font-display">Admin</h2>
+          <p class="text-sm text-slate-500 mt-1">
+            Moderation · Meldungen · Sperren
+          </p>
+        </div>
+
+        <div class="stats mb-4">
+          <div class="stat">
+            <div class="tiny muted">Offene Meldungen</div>
+            <div id="adminReportCount" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="tiny muted">Globale Sperren</div>
+            <div id="adminBanCount" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="tiny muted">Öffentliche Profile</div>
+            <div id="adminProfileCount" class="stat-value">0</div>
+          </div>
+        </div>
+
+        <div class="panel panel-pad mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <div class="panel-title">Meldungen</div>
+            <button class="btn" onclick="loadAdminReports(true)">↻ Aktualisieren</button>
+          </div>
+          <div id="adminReportsList"></div>
+        </div>
+
+        <div class="panel panel-pad mb-4">
+          <div class="panel-title mb-3">Nutzer global sperren</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>UID oder E-Mail-Hinweis</label>
+              <input id="adminBanUid" class="input" placeholder="Firebase UID">
+            </div>
+            <div class="field">
+              <label>Grund</label>
+              <input id="adminBanReason" class="input" placeholder="z. B. Belästigung">
+            </div>
+          </div>
+          <button class="btn btn-danger" onclick="adminBanUser()">Sperren</button>
+          <div id="adminBansList" class="mt-4"></div>
+        </div>
+
+        <div class="panel panel-pad">
+          <div class="panel-title mb-2">Admin-Info</div>
+          <p class="text-xs text-slate-400">
+            Angemeldet als Admin: <span id="adminEmailLabel" class="text-slate-200">–</span>
+          </p>
+          <p class="text-xs text-slate-500 mt-2">
+            Nur freigeschaltete Admin-Accounts sehen diesen Bereich.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
            SETTINGS
       ======================================================== -->
 
@@ -2962,8 +3032,20 @@ const pageNames = {
   teachers: "Lehrer",
   people: "Personen",
   chats: "Chats",
+  admin: "Admin",
   settings: "Einstellungen"
 };
+
+/* Admin accounts (email, lowercase) */
+const ADMIN_EMAILS = [
+  "ytprofessorfilou@gmail.com"
+];
+
+function isAdmin() {
+  if (previewMode) return false;
+  const email = (currentUser?.email || "").toLowerCase().trim();
+  return ADMIN_EMAILS.includes(email);
+}
 
 
 /* ================================================================
@@ -3718,6 +3800,18 @@ onAuthStateChanged(auth, user => {
   document.getElementById("topPreviewBadge").classList.remove("show");
   document.getElementById("previewSettingsCard").style.display = "none";
 
+  // Global ban check (non-admins can be blocked from the app)
+  get(ref(db, "bans/" + user.uid)).then(snap => {
+    if (snap.exists() && !ADMIN_EMAILS.includes((user.email || "").toLowerCase())) {
+      const ban = snap.val();
+      signOut(auth).catch(() => {});
+      showLoginError("Konto gesperrt" + (ban?.reason ? ": " + ban.reason : ""));
+      document.getElementById("loginScreen").style.display = "grid";
+      document.getElementById("app").classList.add("hidden");
+      return;
+    }
+  }).catch(() => {});
+
   setupUserUI(user);
 
   migrateLocalDataIfNeeded(user);
@@ -3770,6 +3864,16 @@ function setupUserUI(user) {
   loadSocialLocal();
   loadBlocksFromFirebase();
   loadUserChatsFromFirebase();
+
+  // Admin UI
+  const adminBtn = document.getElementById("navAdminBtn");
+  if (adminBtn) {
+    adminBtn.style.display = isAdmin() ? "" : "none";
+  }
+  if (isAdmin()) {
+    loadAdminReports();
+    loadAdminBans();
+  }
 }
 
 function updateAvatarDisplay(el, avatar, fallbackName) {
@@ -4003,6 +4107,7 @@ function renderAll() {
   renderTeachers();
   renderPeople();
   renderChats();
+  renderAdmin();
   renderSettings();
 }
 
@@ -7915,6 +8020,247 @@ function loadUserChatsFromFirebase() {
     renderChats();
   });
 }
+
+/* ================================================================
+   ADMIN
+================================================================ */
+
+let adminReportsCache = [];
+let adminBansCache = {};
+
+function renderAdmin() {
+  if (!isAdmin()) return;
+
+  const emailLabel = document.getElementById("adminEmailLabel");
+  if (emailLabel) emailLabel.textContent = currentUser?.email || "–";
+
+  const btn = document.getElementById("navAdminBtn");
+  if (btn) btn.style.display = "";
+
+  renderAdminReportsList();
+  renderAdminBansList();
+
+  const pc = document.getElementById("adminProfileCount");
+  if (pc) pc.textContent = String(peopleCache?.length || 0);
+}
+
+function loadAdminReports(forceToast) {
+  if (!isAdmin()) return;
+
+  // local reports
+  let local = [];
+  try {
+    local = JSON.parse(localStorage.getItem("klassenBoardReports") || "[]");
+  } catch (e) {}
+
+  if (previewMode || !currentUser) {
+    adminReportsCache = local;
+    renderAdminReportsList();
+    if (forceToast) toast("Lokale Meldungen geladen");
+    return;
+  }
+
+  onValue(ref(db, "reports"), snap => {
+    const val = snap.val() || {};
+    const remote = Object.values(val);
+    // merge by id
+    const map = {};
+    [...local, ...remote].forEach(r => {
+      if (r?.id) map[r.id] = r;
+    });
+    adminReportsCache = Object.values(map).sort((a, b) => (b.at || 0) - (a.at || 0));
+    renderAdminReportsList();
+    if (forceToast) toast("Meldungen aktualisiert");
+  }, { onlyOnce: true });
+}
+
+function renderAdminReportsList() {
+  const box = document.getElementById("adminReportsList");
+  const countEl = document.getElementById("adminReportCount");
+  if (!box) return;
+
+  const open = adminReportsCache.filter(r => (r.status || "open") === "open");
+  if (countEl) countEl.textContent = String(open.length);
+
+  if (!adminReportsCache.length) {
+    box.innerHTML = `<div class="empty">Keine Meldungen.</div>`;
+    return;
+  }
+
+  box.innerHTML = adminReportsCache.map(r => {
+    const status = r.status || "open";
+    return `
+      <div class="item ${status !== "open" ? "opacity-60" : ""}">
+        <div class="item-main">
+          <div class="item-title">${escapeHTML(r.reason || "Meldung")}</div>
+          <div class="item-meta">
+            Ziel: ${escapeHTML(r.targetUid || "–")}
+            · von: ${escapeHTML(r.fromUid || "–")}
+            · ${r.at ? new Date(r.at).toLocaleString("de-DE") : ""}
+            · ${status}
+          </div>
+          ${r.details ? `<div class="text-xs text-slate-400 mt-1">${escapeHTML(r.details)}</div>` : ""}
+        </div>
+        <div class="flex flex-col gap-1">
+          ${status === "open" ? `
+            <button class="btn btn-primary text-[10px]" onclick="adminResolveReport('${escapeHTML(r.id)}','resolved')">Erledigt</button>
+            <button class="btn btn-danger text-[10px]" onclick="adminResolveReport('${escapeHTML(r.id)}','dismissed')">Verwerfen</button>
+            <button class="btn text-[10px]" onclick="adminBanUserQuick('${escapeHTML(r.targetUid || "")}')">Sperren</button>
+          ` : `<span class="tiny muted">${escapeHTML(status)}</span>`}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+window.adminResolveReport = function(id, status) {
+  if (!isAdmin()) {
+    toast("Keine Berechtigung");
+    return;
+  }
+
+  const r = adminReportsCache.find(x => x.id === id);
+  if (r) r.status = status;
+
+  // local
+  try {
+    const local = JSON.parse(localStorage.getItem("klassenBoardReports") || "[]");
+    const i = local.findIndex(x => x.id === id);
+    if (i >= 0) {
+      local[i].status = status;
+      localStorage.setItem("klassenBoardReports", JSON.stringify(local));
+    }
+  } catch (e) {}
+
+  if (currentUser && !previewMode) {
+    update(ref(db, "reports/" + id), { status, resolvedAt: Date.now(), resolvedBy: currentUser.uid }).catch(() => {});
+  }
+
+  renderAdminReportsList();
+  toast(status === "resolved" ? "Meldung erledigt" : "Meldung verworfen");
+};
+
+window.adminBanUserQuick = function(uid) {
+  if (!uid) return;
+  document.getElementById("adminBanUid").value = uid;
+  document.getElementById("adminBanReason").value = "Nach Meldung";
+  adminBanUser();
+};
+
+window.adminBanUser = function() {
+  if (!isAdmin()) {
+    toast("Keine Berechtigung");
+    return;
+  }
+
+  const uid = (document.getElementById("adminBanUid")?.value || "").trim();
+  const reason = (document.getElementById("adminBanReason")?.value || "").trim() || "Admin-Sperre";
+
+  if (!uid) {
+    toast("UID eingeben");
+    return;
+  }
+
+  const ban = {
+    uid,
+    reason,
+    at: Date.now(),
+    by: currentUser?.uid || "admin",
+    byEmail: currentUser?.email || ""
+  };
+
+  adminBansCache[uid] = ban;
+
+  if (currentUser && !previewMode) {
+    set(ref(db, "bans/" + uid), ban).catch(err => {
+      console.error(err);
+      toast("Sperre konnte nicht gespeichert werden (Rules?)");
+    });
+  }
+
+  // local backup
+  try {
+    localStorage.setItem("klassenBoardBans", JSON.stringify(adminBansCache));
+  } catch (e) {}
+
+  renderAdminBansList();
+  toast("Nutzer gesperrt");
+};
+
+function loadAdminBans() {
+  if (!isAdmin()) return;
+
+  try {
+    adminBansCache = JSON.parse(localStorage.getItem("klassenBoardBans") || "{}");
+  } catch (e) {
+    adminBansCache = {};
+  }
+
+  if (previewMode || !currentUser) {
+    renderAdminBansList();
+    return;
+  }
+
+  onValue(ref(db, "bans"), snap => {
+    adminBansCache = snap.val() || {};
+    try {
+      localStorage.setItem("klassenBoardBans", JSON.stringify(adminBansCache));
+    } catch (e) {}
+    renderAdminBansList();
+  }, { onlyOnce: false });
+}
+
+function renderAdminBansList() {
+  const box = document.getElementById("adminBansList");
+  const countEl = document.getElementById("adminBanCount");
+  if (!box) return;
+
+  const entries = Object.values(adminBansCache || {});
+  if (countEl) countEl.textContent = String(entries.length);
+
+  if (!entries.length) {
+    box.innerHTML = `<div class="empty">Keine globalen Sperren.</div>`;
+    return;
+  }
+
+  box.innerHTML = entries.map(b => `
+    <div class="item">
+      <div class="item-main">
+        <div class="item-title">${escapeHTML(b.uid)}</div>
+        <div class="item-meta">${escapeHTML(b.reason || "")} · ${b.at ? new Date(b.at).toLocaleString("de-DE") : ""}</div>
+      </div>
+      <button class="btn" onclick="adminUnban('${escapeHTML(b.uid)}')">Entsperren</button>
+    </div>
+  `).join("");
+}
+
+window.adminUnban = function(uid) {
+  if (!isAdmin()) return;
+  delete adminBansCache[uid];
+  try {
+    localStorage.setItem("klassenBoardBans", JSON.stringify(adminBansCache));
+  } catch (e) {}
+  if (currentUser && !previewMode) {
+    remove(ref(db, "bans/" + uid)).catch(() => {});
+  }
+  renderAdminBansList();
+  toast("Sperre aufgehoben");
+};
+
+// Non-admins cannot open admin page
+const _showPageOriginal = window.showPage;
+window.showPage = function(page) {
+  if (page === "admin" && !isAdmin()) {
+    toast("Kein Admin-Zugang");
+    return;
+  }
+  _showPageOriginal(page);
+  if (page === "admin" && isAdmin()) {
+    loadAdminReports();
+    loadAdminBans();
+  }
+};
+
 
 /* ================================================================
    MODALS
