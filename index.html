@@ -271,6 +271,38 @@
       display: flex;
     }
 
+    /* ================= OFFLINE BANNER ================= */
+
+    .offline-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 13px;
+      margin-bottom: 12px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, rgba(239,68,68,.16), rgba(239,68,68,.05));
+      border: 1px solid rgba(239,68,68,.28);
+      flex-shrink: 0;
+    }
+
+    .offline-banner.show {
+      display: flex;
+    }
+
+    .offline-banner-text {
+      font-size: 11px;
+      color: #fca5a5;
+      line-height: 1.4;
+    }
+
+    .offline-banner-text strong {
+      color: #fecaca;
+      display: block;
+      font-size: 12px;
+      margin-bottom: 1px;
+    }
+
     /* ================= MAIN ================= */
 
     .main {
@@ -443,6 +475,11 @@
       margin-bottom: 0;
     }
 
+    .item.overdue {
+      border-color: rgba(239,68,68,.35);
+      background: rgba(239,68,68,.06);
+    }
+
     .item-main {
       min-width: 0;
       flex: 1;
@@ -458,6 +495,19 @@
       color: #64748b;
       font-size: 11px;
       margin-top: 3px;
+    }
+
+    .badge-overdue {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #fca5a5;
+      background: rgba(239,68,68,.14);
+      border: 1px solid rgba(239,68,68,.3);
+      padding: 3px 6px;
+      border-radius: 6px;
+      flex-shrink: 0;
     }
 
     .empty {
@@ -625,6 +675,52 @@
       box-shadow: 0 0 0 1px rgba(34,197,94,.10);
     }
 
+    /* ================= WEEK VIEW ================= */
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(5,minmax(150px,1fr));
+      gap: 10px;
+      min-width: 800px;
+    }
+
+    .week-day-col {
+      min-height: 120px;
+    }
+
+    .week-day-head {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .week-day-head.today {
+      color: #7ea0ff;
+    }
+
+    .week-item {
+      padding: 8px 9px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.05);
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .week-item-title {
+      font-weight: 700;
+    }
+
+    .week-item-meta {
+      color: #64748b;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+
     /* ================= CALENDAR ================= */
 
     .calendar-grid {
@@ -668,6 +764,7 @@
       padding: 3px 4px;
       border-radius: 5px;
       background: rgba(79,124,255,.16);
+      border-left: 2px solid #4f7cff;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -1039,6 +1136,39 @@
       background: #ffc57a;
     }
 
+    /* ================= SHORTCUT HINT ================= */
+
+    #shortcutHint {
+      position: fixed;
+      z-index: 350;
+      left: 50%;
+      bottom: 27px;
+      transform: translateX(-50%) translateY(20px);
+      padding: 8px 14px;
+      border-radius: 99px;
+      background: #161d2e;
+      border: 1px solid #263449;
+      font-size: 11px;
+      color: #94a3b8;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .2s ease;
+    }
+
+    #shortcutHint.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    kbd {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-family: inherit;
+      font-size: 10px;
+    }
+
     /* ================= MOBILE ================= */
 
     .mobile-nav {
@@ -1331,6 +1461,13 @@
         </button>
       </div>
 
+      <div id="offlineBanner" class="offline-banner">
+        <div class="offline-banner-text">
+          <strong>📡 Offline</strong>
+          Änderungen werden lokal gespeichert und synchronisiert, sobald du wieder online bist.
+        </div>
+      </div>
+
       <div class="nav-group">
         <div class="nav-label">Übersicht</div>
 
@@ -1342,6 +1479,11 @@
         <button class="nav-btn" data-page="today" onclick="showPage('today')">
           <span class="nav-icon">⚡</span>
           <span>Jetzt</span>
+        </button>
+
+        <button class="nav-btn" data-page="week" onclick="showPage('week')">
+          <span class="nav-icon">▤</span>
+          <span>Woche</span>
         </button>
       </div>
 
@@ -1520,7 +1662,7 @@
         <button
           onclick="openSearch()"
           class="btn btn-icon"
-          title="Suche"
+          title="Suche (/)"
         >
           🔎
         </button>
@@ -1686,6 +1828,39 @@
             <div id="todayImportant"></div>
           </div>
 
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
+           WEEK
+      ======================================================== -->
+
+      <section id="page-week" class="page">
+
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
+
+          <div>
+            <h2 class="text-2xl font-extrabold font-display">Woche</h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Stunden, Aufgaben und Termine dieser Woche auf einen Blick.
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+            <button class="btn" onclick="changeWeek(-1)">← Vorherige</button>
+            <button class="btn" onclick="changeWeek(0)">Diese Woche</button>
+            <button class="btn" onclick="changeWeek(1)">Nächste →</button>
+          </div>
+
+        </div>
+
+        <div class="panel panel-pad">
+          <div id="weekTitle" class="tiny muted mb-3"></div>
+          <div class="schedule-wrap">
+            <div id="weekGrid" class="week-grid"></div>
+          </div>
         </div>
 
       </section>
@@ -1936,9 +2111,14 @@
             </p>
           </div>
 
-          <button class="btn btn-primary" onclick="openBackpackModal()">
-            + Gegenstand
-          </button>
+          <div class="flex gap-2">
+            <button class="btn btn-accent" onclick="addMissingBackpackItems()">
+              🎒 Für morgen ergänzen
+            </button>
+            <button class="btn btn-primary" onclick="openBackpackModal()">
+              + Gegenstand
+            </button>
+          </div>
 
         </div>
 
@@ -2073,8 +2253,8 @@
           </div>
 
           <div class="stat">
-            <div class="tiny muted">Sets</div>
-            <div id="learningSets" class="stat-value">0</div>
+            <div class="tiny muted">🔥 Streak</div>
+            <div id="learningStreak" class="stat-value">0</div>
           </div>
 
         </div>
@@ -2107,13 +2287,18 @@
           <div>
             <h2 class="text-2xl font-extrabold font-display">Lernkarten</h2>
             <p class="text-sm text-slate-500 mt-1">
-              Eigene Karteikarten-Sets.
+              Eigene Karteikarten-Sets mit Karteikasten-Lernmodus.
             </p>
           </div>
 
-          <button class="btn btn-primary" onclick="openFlashcardModal()">
-            + Karte
-          </button>
+          <div class="flex gap-2">
+            <button class="btn" onclick="openFlashcardImportModal()">
+              📥 Import
+            </button>
+            <button class="btn btn-primary" onclick="openFlashcardModal()">
+              + Karte
+            </button>
+          </div>
 
         </div>
 
@@ -2317,6 +2502,8 @@
               🔔 Browser-Benachrichtigungen aktivieren
             </button>
 
+            <div id="notificationStatus" class="tiny muted mt-3"></div>
+
           </div>
 
           <div class="panel panel-pad">
@@ -2330,6 +2517,20 @@
             <button class="btn" onclick="startTutorial(true)">
               🔭 Tutorial erneut starten
             </button>
+
+          </div>
+
+          <div class="panel panel-pad">
+
+            <div class="panel-title mb-4">Tastenkürzel</div>
+
+            <div class="space-y-2 text-xs text-slate-400">
+              <div><kbd>N</kbd> Neue Aufgabe</div>
+              <div><kbd>H</kbd> Neue Hausaufgabe</div>
+              <div><kbd>T</kbd> Neuer Termin</div>
+              <div><kbd>/</kbd> Suche öffnen</div>
+              <div><kbd>Esc</kbd> Fenster schließen</div>
+            </div>
 
           </div>
 
@@ -2435,6 +2636,11 @@
 </div>
 
 
+<!-- SHORTCUT HINT -->
+
+<div id="shortcutHint"></div>
+
+
 <!-- TOASTS -->
 
 <div id="toasts"></div>
@@ -2492,7 +2698,7 @@ const googleProvider = new GoogleAuthProvider();
 
 const defaultData = {
 
-  version: 3,
+  version: 4,
 
   settings: {
     name: "",
@@ -2507,6 +2713,8 @@ const defaultData = {
   homework: [],
   events: [],
   grades: [],
+
+  gradeTargets: {},
 
   backpack: [],
   notes: [],
@@ -2525,7 +2733,9 @@ const defaultData = {
   learning: {
     minutesToday: 0,
     totalMinutes: 0,
-    sessions: []
+    sessions: [],
+    lastStudyDate: null,
+    streak: 0
   },
 
   announcements: [],
@@ -2551,11 +2761,23 @@ let previewMode = false;
 let taskFilter = "all";
 
 let calendarDate = new Date();
+let weekOffset = 0;
 let searchTimeout = null;
+
+let hasUnsyncedChanges = false;
+
+let pomodoro = {
+  running: false,
+  paused: false,
+  secondsLeft: 25*60,
+  totalSeconds: 25*60,
+  timer: null
+};
 
 const pageNames = {
   dashboard: "Dashboard",
   today: "Jetzt",
+  week: "Woche",
   schedule: "Stundenplan",
   tasks: "Aufgaben",
   homework: "Hausaufgaben",
@@ -2636,6 +2858,11 @@ function isToday(date) {
   return date === todayISO();
 }
 
+function isOverdue(date, done) {
+  if (!date || done) return false;
+  return date < todayISO();
+}
+
 function daysFromToday(date) {
   const a = new Date(todayISO());
   const b = new Date(date);
@@ -2654,8 +2881,8 @@ function dateLabel(date) {
   return formatShortDate(date);
 }
 
-function getDayIndex() {
-  const day = new Date().getDay();
+function getDayIndex(date) {
+  const day = (date || new Date()).getDay();
   return day === 0 ? 6 : day - 1;
 }
 
@@ -2700,6 +2927,14 @@ function subjectColor(name) {
   }
 
   return colors[Math.abs(hash) % colors.length];
+}
+
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = getDayIndex(d);
+  d.setDate(d.getDate() - day);
+  d.setHours(0,0,0,0);
+  return d;
 }
 
 
@@ -2833,8 +3068,8 @@ function buildDemoData() {
   ];
 
   demo.events = [
-    { id: uid("event"), title: "Physiktest: Mechanik", date: todayISO(), type: "Test", subject: "Physik", time: "09:55", note: "" },
-    { id: uid("event"), title: "Kunstprojekt Abgabe", date: todayISO(), type: "Termin", subject: "Kunst", time: "", note: "" }
+    { id: uid("event"), title: "Physiktest: Mechanik", date: todayISO(), type: "Test", subject: "Physik", time: "09:55", note: "", repeat: "none" },
+    { id: uid("event"), title: "Kunstprojekt Abgabe", date: todayISO(), type: "Termin", subject: "Kunst", time: "", note: "", repeat: "none" }
   ];
 
   demo.grades = [
@@ -2842,6 +3077,10 @@ function buildDemoData() {
     { id: uid("grade"), subject: "Englisch", value: "1,7", type: "Mündlich", weight: 1, date: todayISO() },
     { id: uid("grade"), subject: "Physik", value: "2,3", type: "Test", weight: 1, date: todayISO() }
   ];
+
+  demo.gradeTargets = {
+    "Mathematik": "2,0"
+  };
 
   demo.backpack = [
     { id: uid("bag"), title: "Mathebuch", subject: "Mathematik", done: false },
@@ -2854,9 +3093,9 @@ function buildDemoData() {
   ];
 
   demo.flashcards = [
-    { id: uid("card"), set: "Englisch Vokabeln", front: "to achieve", back: "erreichen", createdAt: Date.now() },
-    { id: uid("card"), set: "Englisch Vokabeln", front: "reliable", back: "zuverlässig", createdAt: Date.now() },
-    { id: uid("card"), set: "Physik Formeln", front: "F = m · a", back: "Kraft = Masse × Beschleunigung", createdAt: Date.now() }
+    { id: uid("card"), set: "Englisch Vokabeln", front: "to achieve", back: "erreichen", createdAt: Date.now(), box: 1, dueDate: todayISO() },
+    { id: uid("card"), set: "Englisch Vokabeln", front: "reliable", back: "zuverlässig", createdAt: Date.now(), box: 1, dueDate: todayISO() },
+    { id: uid("card"), set: "Physik Formeln", front: "F = m · a", back: "Kraft = Masse × Beschleunigung", createdAt: Date.now(), box: 1, dueDate: todayISO() }
   ];
 
   demo.goals = [
@@ -2866,7 +3105,9 @@ function buildDemoData() {
   demo.learning = {
     minutesToday: 25,
     totalMinutes: 140,
-    sessions: []
+    sessions: [],
+    lastStudyDate: todayISO(),
+    streak: 3
   };
 
   demo.meta.updatedAt = Date.now();
@@ -2958,6 +3199,13 @@ async function saveFirebase() {
     return;
   }
 
+  if (!navigator.onLine) {
+    hasUnsyncedChanges = true;
+    updateSyncUI("offline");
+    localStorage.setItem("klassenBoard", JSON.stringify(data));
+    return;
+  }
+
   try {
 
     data.meta.updatedAt = Date.now();
@@ -2969,11 +3217,15 @@ async function saveFirebase() {
       JSON.stringify(data)
     );
 
+    hasUnsyncedChanges = false;
+
     updateSyncUI("synced");
 
   } catch (error) {
 
     console.error(error);
+
+    hasUnsyncedChanges = true;
 
     updateSyncUI("offline");
 
@@ -3046,6 +3298,8 @@ function startFirebaseSync(user) {
         saveFirebase();
 
       }
+
+      hasUnsyncedChanges = false;
 
       updateSyncUI("synced");
 
@@ -3371,6 +3625,9 @@ function updateSyncUI(state) {
   const dot =
     document.getElementById("connectionDot");
 
+  const offlineBanner =
+    document.getElementById("offlineBanner");
+
   if (!status) return;
 
   if (previewMode) {
@@ -3383,6 +3640,8 @@ function updateSyncUI(state) {
 
     if (text) text.textContent = "Vorschau";
     if (dot) dot.textContent = "●";
+
+    offlineBanner?.classList.remove("show");
 
     return;
   }
@@ -3397,6 +3656,8 @@ function updateSyncUI(state) {
 
     if (text) text.textContent = "Synchronisiert";
     if (dot) dot.textContent = "●";
+
+    offlineBanner?.classList.remove("show");
 
   } else if (state === "local") {
 
@@ -3414,6 +3675,10 @@ function updateSyncUI(state) {
 
     if (text) text.textContent = "Offline";
     if (dot) dot.textContent = "●";
+
+    if (hasUnsyncedChanges || !navigator.onLine) {
+      offlineBanner?.classList.add("show");
+    }
   }
 
   const saved =
@@ -3493,6 +3758,7 @@ function renderAll() {
   renderHeader();
   renderDashboard();
   renderToday();
+  renderWeek();
   renderSchedule();
   renderTasks();
   renderHomework();
@@ -3797,6 +4063,11 @@ function renderTomorrowPreview() {
       subjects.includes(x.subject)
     );
 
+  const missing =
+    subjects.filter(s =>
+      !data.backpack.some(x => x.subject === s)
+    );
+
   container.innerHTML = `
 
     <div class="text-sm mb-3">
@@ -3824,6 +4095,11 @@ function renderTomorrowPreview() {
         relevant.length
           ? `${relevant.length} passende Rucksack-Einträge`
           : "Keine speziellen Pack-Einträge"
+      }
+      ${
+        missing.length
+          ? ` · ${missing.length} Fach${missing.length === 1 ? "" : "e"} noch nicht im Rucksack`
+          : ""
       }
     </div>
   `;
@@ -3995,6 +4271,133 @@ function timeToMinutes(value) {
 
 
 /* ================================================================
+   WEEK VIEW
+================================================================ */
+
+window.changeWeek = function(delta) {
+
+  if (delta === 0) {
+    weekOffset = 0;
+  } else {
+    weekOffset += delta;
+  }
+
+  renderWeek();
+};
+
+function renderWeek() {
+
+  const grid =
+    document.getElementById("weekGrid");
+
+  if (!grid) return;
+
+  const base =
+    startOfWeek(new Date());
+
+  base.setDate(base.getDate() + weekOffset*7);
+
+  const days = [
+    "Montag","Dienstag","Mittwoch","Donnerstag","Freitag"
+  ];
+
+  const titleEl =
+    document.getElementById("weekTitle");
+
+  const endOfWeek =
+    new Date(base);
+
+  endOfWeek.setDate(endOfWeek.getDate()+4);
+
+  if (titleEl) {
+
+    titleEl.textContent =
+      `${formatShortDate(localISO(base))} – ${formatShortDate(localISO(endOfWeek))}` +
+      (weekOffset === 0 ? " · Diese Woche" : "");
+  }
+
+  let html = "";
+
+  for (let i=0; i<5; i++) {
+
+    const date = new Date(base);
+
+    date.setDate(date.getDate()+i);
+
+    const iso = localISO(date);
+
+    const lessons =
+      data.schedule
+        .filter(x => Number(x.day) === i)
+        .sort((a,b) => Number(a.period)-Number(b.period));
+
+    const dayItems = [
+
+      ...lessons.map(x => ({
+        kind: "lesson",
+        title: x.subject,
+        meta: `${x.from || ""}–${x.to || ""}${x.room ? " · " + x.room : ""}`,
+        color: subjectColor(x.subject)
+      })),
+
+      ...data.tasks
+        .filter(x => x.date === iso)
+        .map(x => ({
+          kind: "task",
+          title: x.title,
+          meta: "Aufgabe" + (x.done ? " · erledigt" : ""),
+          color: "#4f7cff"
+        })),
+
+      ...data.homework
+        .filter(x => x.date === iso)
+        .map(x => ({
+          kind: "homework",
+          title: x.title,
+          meta: "Hausaufgabe" + (x.done ? " · erledigt" : ""),
+          color: "#ffb454"
+        })),
+
+      ...data.events
+        .filter(x => x.date === iso)
+        .map(x => ({
+          kind: "event",
+          title: x.title,
+          meta: x.type || "Termin",
+          color: "#ef4444"
+        }))
+
+    ];
+
+    html += `
+
+      <div class="week-day-col">
+
+        <div class="week-day-head ${iso === todayISO() ? "today" : ""}">
+          <span>${days[i]}</span>
+          <span class="tiny muted">${formatShortDate(iso)}</span>
+        </div>
+
+        ${
+          dayItems.length
+            ? dayItems.map(x => `
+                <div class="week-item" style="border-left:3px solid ${x.color}">
+                  <div class="week-item-title">${escapeHTML(x.title)}</div>
+                  <div class="week-item-meta">${escapeHTML(x.meta)}</div>
+                </div>
+              `).join("")
+            : `<div class="tiny muted">Nichts geplant</div>`
+        }
+
+      </div>
+    `;
+  }
+
+  grid.innerHTML = html;
+}
+
+
+/* ================================================================
    SCHEDULE
 ================================================================ */
 
@@ -4147,9 +4550,12 @@ function taskHTML(task) {
     low: "Niedrig"
   };
 
+  const overdue =
+    isOverdue(task.date, task.done);
+
   return `
 
-    <div class="item">
+    <div class="item ${overdue ? "overdue" : ""}">
 
       <button
         onclick="toggleTask('${task.id}')"
@@ -4189,6 +4595,12 @@ function taskHTML(task) {
         </div>
 
       </div>
+
+      ${
+        overdue
+          ? `<span class="badge-overdue">Überfällig</span>`
+          : ""
+      }
 
       <button
         onclick="deleteTask('${task.id}')"
@@ -4304,9 +4716,13 @@ function renderHomework() {
 
   container.innerHTML =
     items.length
-      ? items.map(x => `
+      ? items.map(x => {
 
-          <div class="item">
+          const overdue = isOverdue(x.date, x.done);
+
+          return `
+
+          <div class="item ${overdue ? "overdue" : ""}">
 
             <button
               onclick="toggleHomework('${x.id}')"
@@ -4337,6 +4753,8 @@ function renderHomework() {
 
             </div>
 
+            ${overdue ? `<span class="badge-overdue">Überfällig</span>` : ""}
+
             <button
               onclick="deleteHomework('${x.id}')"
               class="text-slate-600 hover:text-red-400"
@@ -4346,7 +4764,7 @@ function renderHomework() {
 
           </div>
 
-        `).join("")
+        `;}).join("")
       : `<div class="empty">Keine Hausaufgaben.</div>`;
 }
 
@@ -4440,9 +4858,7 @@ function renderCalendar() {
       `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
 
     const events =
-      data.events.filter(x =>
-        x.date === date
-      );
+      expandedEventsForDate(date);
 
     html += `
 
@@ -4461,7 +4877,10 @@ function renderCalendar() {
 
         ${
           events.slice(0,3).map(x =>
-            `<div class="cal-event">
+            `<div
+              class="cal-event"
+              style="background:${hexAlpha(subjectColor(x.subject || x.title),0.16)};border-left-color:${subjectColor(x.subject || x.title)}"
+            >
               ${escapeHTML(x.title)}
              </div>`
           ).join("")
@@ -4472,6 +4891,58 @@ function renderCalendar() {
   }
 
   grid.innerHTML = html;
+}
+
+function hexAlpha(hex, alpha) {
+
+  const h = hex.replace("#","");
+
+  const r = parseInt(h.substring(0,2),16);
+  const g = parseInt(h.substring(2,4),16);
+  const b = parseInt(h.substring(4,6),16);
+
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function expandedEventsForDate(date) {
+
+  return data.events.filter(x => {
+
+    if (x.date === date) return true;
+
+    if (!x.repeat || x.repeat === "none") return false;
+
+    if (date < x.date) return false;
+
+    const diffDays = daysFromToday(date) - daysFromToday(x.date);
+
+    if (x.repeat === "weekly") {
+
+      const start = new Date(x.date);
+      const cur = new Date(date);
+
+      const weeks =
+        Math.round(
+          (cur.getTime()-start.getTime()) / (7*86400000)
+        );
+
+      return weeks > 0 &&
+        start.getDay() === cur.getDay() &&
+        (cur.getTime()-start.getTime()) % (7*86400000) === 0;
+
+    }
+
+    if (x.repeat === "monthly") {
+
+      const start = new Date(x.date);
+      const cur = new Date(date);
+
+      return start.getDate() === cur.getDate() &&
+        cur.getTime() > start.getTime();
+    }
+
+    return false;
+  });
 }
 
 window.openEventModalForDate = function(date) {
@@ -4497,6 +4968,11 @@ function renderEvents() {
 
           <div class="item">
 
+            <div
+              class="w-1.5 self-stretch rounded-full"
+              style="background:${subjectColor(x.subject || x.title)}"
+            ></div>
+
             <div class="item-main">
 
               <div class="item-title">
@@ -4507,6 +4983,7 @@ function renderEvents() {
                 ${dateLabel(x.date)}
                 ${x.type ? " · " + escapeHTML(x.type) : ""}
                 ${x.subject ? " · " + escapeHTML(x.subject) : ""}
+                ${x.repeat && x.repeat !== "none" ? " · 🔁 " + escapeHTML(repeatLabel(x.repeat)) : ""}
               </div>
 
             </div>
@@ -4522,6 +4999,16 @@ function renderEvents() {
 
         `).join("")
       : `<div class="empty">Keine anstehenden Termine.</div>`;
+}
+
+function repeatLabel(repeat) {
+
+  const map = {
+    weekly: "wöchentlich",
+    monthly: "monatlich"
+  };
+
+  return map[repeat] || repeat;
 }
 
 window.deleteEvent = function(id) {
@@ -4561,6 +5048,64 @@ function calculateOverallAverage() {
   return weight
     ? sum/weight
     : null;
+}
+
+function subjectAverage(subject) {
+
+  let sum = 0;
+  let weight = 0;
+
+  for (const g of data.grades.filter(x => x.subject === subject)) {
+
+    const n = gradeNumber(g.value);
+
+    if (n === null) continue;
+
+    const w = Number(g.weight)||1;
+
+    sum += n*w;
+    weight += w;
+  }
+
+  return weight ? sum/weight : null;
+}
+
+function gradeSparkline(subject, grades) {
+
+  const points =
+    [...grades]
+      .filter(g => gradeNumber(g.value) !== null)
+      .sort((a,b) => String(a.date||"").localeCompare(String(b.date||"")))
+      .map(g => gradeNumber(g.value));
+
+  if (points.length < 2) return "";
+
+  const w = 120;
+  const h = 28;
+  const min = Math.min(...points, 1);
+  const max = Math.max(...points, 6);
+
+  const range = (max-min) || 1;
+
+  const coords =
+    points.map((p,i) => {
+      const x = (i/(points.length-1))*w;
+      // Note: lower grade number is better, so invert for visual "up = better"
+      const y = ((p-min)/range)*h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+
+  const trendUp =
+    points[points.length-1] < points[0];
+
+  const color =
+    trendUp ? "#22c55e" : "#ef4444";
+
+  return `
+    <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible">
+      <polyline points="${coords}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  `;
 }
 
 function renderGrades() {
@@ -4609,35 +5154,53 @@ function renderGrades() {
     Object.entries(groups)
       .map(([subject,grades]) => {
 
-        let sum = 0;
-        let weight = 0;
-
-        for (const g of grades) {
-
-          const n =
-            gradeNumber(g.value);
-
-          if (n === null) continue;
-
-          const w =
-            Number(g.weight)||1;
-
-          sum += n*w;
-          weight += w;
-        }
+        const avgNum =
+          subjectAverage(subject);
 
         const avg =
-          weight
-            ? (sum/weight).toFixed(2)
-            : "–";
+          avgNum === null
+            ? "–"
+            : avgNum.toFixed(2);
+
+        const target =
+          data.gradeTargets?.[subject];
+
+        const targetNum =
+          target ? gradeNumber(target) : null;
+
+        let targetHTML = "";
+
+        if (targetNum !== null && avgNum !== null) {
+
+          const diff = avgNum - targetNum;
+
+          targetHTML = `
+            <div class="tiny mt-2" style="color:${diff <= 0 ? '#4ade80' : '#fca5a5'}">
+              Ziel: ${escapeHTML(target)}
+              ${
+                diff <= 0
+                  ? " · Ziel erreicht 🎉"
+                  : ` · noch ${diff.toFixed(2)} Punkte`
+              }
+            </div>
+          `;
+
+        } else if (targetNum !== null) {
+
+          targetHTML = `
+            <div class="tiny muted mt-2">
+              Ziel: ${escapeHTML(target)}
+            </div>
+          `;
+        }
 
         return `
 
           <div class="panel panel-pad mb-4">
 
-            <div class="flex justify-between items-center mb-3">
+            <div class="flex justify-between items-center mb-3 gap-3">
 
-              <div>
+              <div class="min-w-0">
                 <div class="panel-title">
                   ${escapeHTML(subject)}
                 </div>
@@ -4645,16 +5208,31 @@ function renderGrades() {
                 <div class="tiny muted">
                   ${grades.length} Note${grades.length === 1 ? "" : "n"}
                 </div>
+
+                ${targetHTML}
               </div>
 
-              <div
-                class="text-lg font-extrabold font-display"
-                style="color:${subjectColor(subject)}"
-              >
-                Ø ${avg}
+              <div class="flex items-center gap-3">
+
+                ${gradeSparkline(subject, grades)}
+
+                <div
+                  class="text-lg font-extrabold font-display"
+                  style="color:${subjectColor(subject)}"
+                >
+                  Ø ${avg}
+                </div>
+
               </div>
 
             </div>
+
+            <button
+              class="btn tiny mb-3"
+              onclick="openGradeTargetModal('${encodeURIComponent(subject)}')"
+            >
+              🎯 Zielnote setzen
+            </button>
 
             ${grades.map(g => `
 
@@ -4703,6 +5281,70 @@ window.deleteGrade = function(id) {
   save();
 
   toast("Note gelöscht");
+};
+
+window.openGradeTargetModal = function(encodedSubject) {
+
+  const subject = decodeURIComponent(encodedSubject);
+
+  const current = data.gradeTargets?.[subject] || "";
+
+  openModal(
+    "Zielnote: " + subject,
+    `
+      <div class="field">
+        <label>Zielnote für ${escapeHTML(subject)}</label>
+        <input id="gradeTargetValue" class="input" placeholder="z. B. 2,0" value="${escapeHTML(current)}">
+      </div>
+
+      <div class="flex justify-between mt-5">
+        <button class="btn btn-danger" onclick="clearGradeTarget('${encodeURIComponent(subject)}')">
+          Entfernen
+        </button>
+        <button class="btn btn-primary" onclick="saveGradeTarget('${encodeURIComponent(subject)}')">
+          Speichern
+        </button>
+      </div>
+    `
+  );
+};
+
+window.saveGradeTarget = function(encodedSubject) {
+
+  const subject = decodeURIComponent(encodedSubject);
+
+  const value =
+    document.getElementById("gradeTargetValue").value.trim();
+
+  if (!value || gradeNumber(value) === null) {
+
+    toast("Bitte eine gültige Note eingeben");
+
+    return;
+  }
+
+  data.gradeTargets = data.gradeTargets || {};
+
+  data.gradeTargets[subject] = value;
+
+  save();
+
+  closeModal();
+
+  toast("Zielnote gespeichert");
+};
+
+window.clearGradeTarget = function(encodedSubject) {
+
+  const subject = decodeURIComponent(encodedSubject);
+
+  if (data.gradeTargets) {
+    delete data.gradeTargets[subject];
+  }
+
+  save();
+
+  closeModal();
 };
 
 
@@ -4853,6 +5495,50 @@ window.clearBackpackDone = function() {
   save();
 
   toast("Erledigte Gegenstände entfernt");
+};
+
+window.addMissingBackpackItems = function() {
+
+  const tomorrow =
+    new Date();
+
+  tomorrow.setDate(tomorrow.getDate()+1);
+
+  const day =
+    tomorrow.getDay() === 0 ? 6 : tomorrow.getDay()-1;
+
+  const subjects =
+    [...new Set(
+      data.schedule
+        .filter(x => Number(x.day) === day)
+        .map(x => x.subject)
+    )];
+
+  const missing =
+    subjects.filter(s =>
+      !data.backpack.some(x => x.subject === s && !x.done)
+    );
+
+  if (!missing.length) {
+
+    toast("Schon alles für morgen im Rucksack 🎉");
+
+    return;
+  }
+
+  for (const subject of missing) {
+
+    data.backpack.push({
+      id: uid("bag"),
+      title: subject + "-Materialien",
+      subject,
+      done: false
+    });
+  }
+
+  save();
+
+  toast(`${missing.length} Fach${missing.length === 1 ? "" : "er"} zum Rucksack hinzugefügt`);
 };
 
 
@@ -5155,14 +5841,15 @@ function renderLearning() {
     .textContent =
     `${todayMinutes} min`;
 
+  document.getElementById("learningStreak")
+    .textContent =
+    `🔥 ${Number(data.learning?.streak || 0)}`;
+
   const sets =
     new Set(
       data.flashcards
         .map(x => x.set || "Allgemein")
     );
-
-  document.getElementById("learningSets")
-    .textContent = sets.size;
 
   const nextExam =
     data.events
@@ -5222,58 +5909,138 @@ function renderLearning() {
         Gesamte Lernzeit
       </div>
 
-      <button
-        class="btn btn-primary mt-4"
-        onclick="startLearningSession()"
-      >
-        ▶ 25-Minuten-Session
-      </button>
+      <div id="pomodoroBox" class="mt-4"></div>
 
     `;
+
+  renderPomodoro();
 }
 
-window.startLearningSession = function() {
+function renderPomodoro() {
 
-  let seconds = 25*60;
+  const box = document.getElementById("pomodoroBox");
+
+  if (!box) return;
+
+  const minutes = String(Math.floor(pomodoro.secondsLeft/60)).padStart(2,"0");
+  const seconds = String(pomodoro.secondsLeft%60).padStart(2,"0");
+
+  box.innerHTML = `
+
+    <div class="text-2xl font-extrabold font-display mb-3">
+      ${minutes}:${seconds}
+    </div>
+
+    <div class="flex gap-2">
+
+      ${
+        !pomodoro.running
+          ? `<button class="btn btn-primary" onclick="pomodoroStart()">▶ Start</button>`
+          : `<button class="btn" onclick="pomodoroPause()">${pomodoro.paused ? "▶ Weiter" : "⏸ Pause"}</button>`
+      }
+
+      <button class="btn" onclick="pomodoroReset()">↺ Reset</button>
+
+    </div>
+  `;
+}
+
+window.pomodoroStart = function() {
+
+  pomodoro.running = true;
+  pomodoro.paused = false;
 
   toast("Lernsession gestartet – 25 Minuten!");
 
-  const interval =
-    setInterval(() => {
+  clearInterval(pomodoro.timer);
 
-      seconds--;
+  pomodoro.timer = setInterval(() => {
 
-      if (seconds <= 0) {
+    if (pomodoro.paused) return;
 
-        clearInterval(interval);
+    pomodoro.secondsLeft--;
 
-        data.learning.minutesToday =
-          Number(data.learning.minutesToday || 0)+25;
+    if (pomodoro.secondsLeft <= 0) {
 
-        data.learning.totalMinutes =
-          Number(data.learning.totalMinutes || 0)+25;
+      clearInterval(pomodoro.timer);
 
-        data.learning.sessions =
-          data.learning.sessions || [];
+      pomodoro.running = false;
 
-        data.learning.sessions.push({
-          id: uid("session"),
-          date: todayISO(),
-          minutes: 25
-        });
+      registerStudyMinutes(25);
 
-        save();
+      pomodoro.secondsLeft = pomodoro.totalSeconds;
 
-        toast("Lernsession fertig 🎉");
+      toast("Lernsession fertig 🎉");
+    }
 
-      }
+    renderPomodoro();
 
-    },1000);
+  },1000);
+
+  renderPomodoro();
 };
+
+window.pomodoroPause = function() {
+
+  pomodoro.paused = !pomodoro.paused;
+
+  renderPomodoro();
+};
+
+window.pomodoroReset = function() {
+
+  clearInterval(pomodoro.timer);
+
+  pomodoro.running = false;
+  pomodoro.paused = false;
+  pomodoro.secondsLeft = pomodoro.totalSeconds;
+
+  renderPomodoro();
+};
+
+function registerStudyMinutes(minutes) {
+
+  data.learning = data.learning || {};
+
+  const last = data.learning.lastStudyDate;
+  const today = todayISO();
+
+  if (last !== today) {
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate()-1);
+
+    if (last === localISO(yesterday)) {
+      data.learning.streak = Number(data.learning.streak||0)+1;
+    } else {
+      data.learning.streak = 1;
+    }
+
+    data.learning.minutesToday = 0;
+    data.learning.lastStudyDate = today;
+  }
+
+  data.learning.minutesToday =
+    Number(data.learning.minutesToday || 0)+minutes;
+
+  data.learning.totalMinutes =
+    Number(data.learning.totalMinutes || 0)+minutes;
+
+  data.learning.sessions =
+    data.learning.sessions || [];
+
+  data.learning.sessions.push({
+    id: uid("session"),
+    date: today,
+    minutes
+  });
+
+  save();
+}
 
 
 /* ================================================================
-   FLASHCARDS
+   FLASHCARDS (Leitner spaced repetition)
 ================================================================ */
 
 function renderFlashcards() {
@@ -5305,8 +6072,15 @@ function renderFlashcards() {
     groups[setName].push(card);
   }
 
+  const today = todayISO();
+
   container.innerHTML =
-    Object.entries(groups).map(([set,cards]) => `
+    Object.entries(groups).map(([set,cards]) => {
+
+      const due =
+        cards.filter(c => !c.dueDate || c.dueDate <= today).length;
+
+      return `
 
       <div class="panel panel-pad mb-4">
 
@@ -5318,7 +6092,7 @@ function renderFlashcards() {
             </div>
 
             <div class="tiny muted">
-              ${cards.length} Karten
+              ${cards.length} Karten · ${due} fällig
             </div>
           </div>
 
@@ -5334,6 +6108,10 @@ function renderFlashcards() {
         ${cards.slice(0,4).map(card => `
 
           <div class="item">
+
+            <div class="w-7 h-7 rounded-full grid place-items-center text-[10px] font-bold" style="background:rgba(79,124,255,.15);color:#7ea0ff">
+              ${Number(card.box)||1}
+            </div>
 
             <div class="item-main">
 
@@ -5360,7 +6138,7 @@ function renderFlashcards() {
 
       </div>
 
-    `).join("");
+    `;}).join("");
 }
 
 window.deleteFlashcard = function(id) {
@@ -5371,15 +6149,51 @@ window.deleteFlashcard = function(id) {
   save();
 };
 
+const leitnerIntervals = {
+  1: 0,
+  2: 1,
+  3: 3,
+  4: 7,
+  5: 14
+};
+
+function scheduleCard(card, knewIt) {
+
+  let box = Number(card.box) || 1;
+
+  if (knewIt) {
+    box = Math.min(5, box+1);
+  } else {
+    box = 1;
+  }
+
+  card.box = box;
+
+  const days = leitnerIntervals[box] || 0;
+
+  const due = new Date();
+
+  due.setDate(due.getDate()+days);
+
+  card.dueDate = localISO(due);
+}
+
 window.studySet = function(encoded) {
 
   const set =
     decodeURIComponent(encoded);
 
-  const cards =
+  const today = todayISO();
+
+  let cards =
     data.flashcards.filter(x =>
-      (x.set || "Allgemein") === set
+      (x.set || "Allgemein") === set &&
+      (!x.dueDate || x.dueDate <= today)
     );
+
+  if (!cards.length) {
+    cards = data.flashcards.filter(x => (x.set || "Allgemein") === set);
+  }
 
   if (!cards.length) return;
 
@@ -5391,13 +6205,13 @@ window.studySet = function(encoded) {
     const card = cards[index];
 
     openModal(
-      "Lernmodus",
+      "Lernmodus (Karteikasten)",
       `
 
         <div class="text-center py-6">
 
           <div class="tiny text-blue-400 uppercase font-bold">
-            Karte ${index+1}/${cards.length}
+            Karte ${index+1}/${cards.length} · Box ${Number(card.box)||1}
           </div>
 
           <div class="text-2xl font-extrabold mt-5 font-display">
@@ -5408,53 +6222,158 @@ window.studySet = function(encoded) {
             )}
           </div>
 
-          <button
-            class="btn btn-primary mt-7"
-            id="flashFlip"
-          >
-            ${showingBack ? "Vorderseite" : "Antwort zeigen"}
-          </button>
-
-          <div class="flex justify-center gap-2 mt-3">
-
-            <button class="btn" id="flashPrev">
-              ←
-            </button>
-
-            <button class="btn" id="flashNext">
-              →
-            </button>
-
-          </div>
+          ${
+            showingBack
+              ? `
+                <div class="flex justify-center gap-2 mt-7">
+                  <button class="btn" style="color:#fca5a5" id="flashDontKnow">
+                    ✕ Wusste ich nicht
+                  </button>
+                  <button class="btn btn-primary" id="flashKnow">
+                    ✓ Wusste ich
+                  </button>
+                </div>
+              `
+              : `
+                <button
+                  class="btn btn-primary mt-7"
+                  id="flashFlip"
+                >
+                  Antwort zeigen
+                </button>
+              `
+          }
 
         </div>
       `
     );
 
-    document.getElementById("flashFlip")
-      .onclick = () => {
-        showingBack = !showingBack;
-        renderCard();
-      };
+    if (!showingBack) {
 
-    document.getElementById("flashPrev")
-      .onclick = () => {
-        index =
-          (index-1+cards.length)%cards.length;
-        showingBack = false;
-        renderCard();
-      };
+      document.getElementById("flashFlip")
+        .onclick = () => {
+          showingBack = true;
+          renderCard();
+        };
 
-    document.getElementById("flashNext")
-      .onclick = () => {
-        index =
-          (index+1)%cards.length;
-        showingBack = false;
-        renderCard();
-      };
+    } else {
+
+      document.getElementById("flashKnow")
+        .onclick = () => {
+          scheduleCard(card,true);
+          save();
+          advance();
+        };
+
+      document.getElementById("flashDontKnow")
+        .onclick = () => {
+          scheduleCard(card,false);
+          save();
+          advance();
+        };
+    }
+  };
+
+  const advance = () => {
+
+    index++;
+    showingBack = false;
+
+    if (index >= cards.length) {
+
+      closeModal();
+
+      toast("Set durchgelernt 🎉");
+
+      return;
+    }
+
+    renderCard();
   };
 
   renderCard();
+};
+
+window.openFlashcardImportModal = function() {
+
+  openModal(
+    "Lernkarten importieren",
+    `
+      <div class="field">
+        <label>Set-Name</label>
+        <input id="importSet" class="input" placeholder="z. B. Französisch Vokabeln">
+      </div>
+
+      <div class="field">
+        <label>Karten (eine pro Zeile, Format: Frage = Antwort)</label>
+        <textarea id="importText" class="textarea" style="min-height:180px" placeholder="le chat = die Katze
+bonjour = hallo
+merci = danke"></textarea>
+      </div>
+
+      <div class="flex justify-end mt-5">
+        <button class="btn btn-primary" onclick="importFlashcards()">
+          Importieren
+        </button>
+      </div>
+    `
+  );
+};
+
+window.importFlashcards = function() {
+
+  const set =
+    document.getElementById("importSet").value.trim() || "Allgemein";
+
+  const text =
+    document.getElementById("importText").value;
+
+  const lines =
+    text.split("\n")
+      .map(l => l.trim())
+      .filter(Boolean);
+
+  let count = 0;
+
+  for (const line of lines) {
+
+    const separator =
+      line.includes("=") ? "=" :
+      line.includes("\t") ? "\t" :
+      line.includes(";") ? ";" : null;
+
+    if (!separator) continue;
+
+    const [front,back] =
+      line.split(separator).map(s => s.trim());
+
+    if (!front || !back) continue;
+
+    data.flashcards.push({
+      id: uid("card"),
+      set,
+      front,
+      back,
+      createdAt: Date.now(),
+      box: 1,
+      dueDate: todayISO()
+    });
+
+    count++;
+  }
+
+  if (!count) {
+
+    toast("Keine gültigen Zeilen gefunden (Format: Frage = Antwort)");
+
+    return;
+  }
+
+  save();
+
+  closeModal();
+
+  toast(`${count} Lernkarten importiert`);
 };
 
 
@@ -5646,6 +6565,21 @@ function renderSettings() {
 
   document.getElementById("previewSettingsCard")
     .style.display = previewMode ? "block" : "none";
+
+  const notifStatus = document.getElementById("notificationStatus");
+
+  if (notifStatus) {
+
+    if (!("Notification" in window)) {
+      notifStatus.textContent = "Wird von diesem Browser nicht unterstützt.";
+    } else if (Notification.permission === "granted") {
+      notifStatus.textContent = "✓ Aktiviert";
+    } else if (Notification.permission === "denied") {
+      notifStatus.textContent = "Blockiert – bitte in den Browsereinstellungen erlauben.";
+    } else {
+      notifStatus.textContent = "Noch nicht aktiviert.";
+    }
+  }
 }
 
 window.saveSettings = function() {
@@ -6470,6 +7404,16 @@ window.openEventModal = function(id=null,date=null) {
           >
         </div>
 
+        <div class="field">
+          <label>Wiederholung</label>
+
+          <select id="eventRepeat" class="select">
+            <option value="none" ${(!event || event.repeat === "none" || !event.repeat) ? "selected" : ""}>Keine</option>
+            <option value="weekly" ${event?.repeat === "weekly" ? "selected" : ""}>Wöchentlich</option>
+            <option value="monthly" ${event?.repeat === "monthly" ? "selected" : ""}>Monatlich</option>
+          </select>
+        </div>
+
         <div class="field full">
           <label>Beschreibung</label>
 
@@ -6537,6 +7481,9 @@ window.saveEvent = function(id) {
 
     time:
       document.getElementById("eventTime").value,
+
+    repeat:
+      document.getElementById("eventRepeat").value,
 
     note:
       document.getElementById("eventNote").value.trim()
@@ -6990,7 +7937,9 @@ window.saveReminder = function() {
       document.getElementById("reminderDate").value,
 
     time:
-      document.getElementById("reminderTime").value
+      document.getElementById("reminderTime").value,
+
+    notified: false
   });
 
   save();
@@ -7087,7 +8036,11 @@ window.saveFlashcard = function() {
 
     back,
 
-    createdAt: Date.now()
+    createdAt: Date.now(),
+
+    box: 1,
+
+    dueDate: todayISO()
   });
 
   save();
@@ -7544,6 +8497,10 @@ window.openSearch = function() {
       </div>
     `
   );
+
+  setTimeout(() => {
+    document.getElementById("globalSearch")?.focus();
+  },50);
 };
 
 window.runSearch = function() {
@@ -7755,7 +8712,162 @@ window.requestNotifications = async function() {
       ? "Benachrichtigungen aktiviert 🔔"
       : "Benachrichtigungen nicht aktiviert."
   );
+
+  renderSettings();
 };
+
+function sendNotification(title, body) {
+
+  if (!("Notification" in window)) return;
+
+  if (Notification.permission !== "granted") return;
+
+  try {
+    new Notification(title, { body, icon: "ProfessorFilouLOGO.png" });
+  } catch (error) {
+    console.warn(error);
+  }
+}
+
+let notifiedLessonIds = new Set();
+let notifiedReminderIds = new Set();
+
+function checkNotifications() {
+
+  if (!("Notification" in window)) return;
+
+  if (Notification.permission !== "granted") return;
+
+  const now = new Date();
+  const nowMinutes = now.getHours()*60+now.getMinutes();
+
+  // Upcoming lesson in ~10 minutes
+  const day = getDayIndex();
+
+  for (const lesson of data.schedule.filter(x => Number(x.day) === day)) {
+
+    if (!lesson.from) continue;
+
+    const from = timeToMinutes(lesson.from);
+
+    if (from - nowMinutes === 10 && !notifiedLessonIds.has(lesson.id + todayISO())) {
+
+      sendNotification(
+        "Gleich geht's los: " + lesson.subject,
+        `Beginnt um ${lesson.from}${lesson.room ? " · Raum " + lesson.room : ""}`
+      );
+
+      notifiedLessonIds.add(lesson.id + todayISO());
+    }
+  }
+
+  // Reminders due now
+  for (const reminder of data.reminders) {
+
+    if (reminder.notified) continue;
+
+    if (reminder.date !== todayISO()) continue;
+
+    if (!reminder.time) continue;
+
+    const reminderMinutes = timeToMinutes(reminder.time);
+
+    if (nowMinutes >= reminderMinutes && !notifiedReminderIds.has(reminder.id)) {
+
+      sendNotification("Erinnerung", reminder.title);
+
+      notifiedReminderIds.add(reminder.id);
+
+      reminder.notified = true;
+
+      save();
+    }
+  }
+}
+
+setInterval(checkNotifications, 30000);
+
+
+/* ================================================================
+   KEYBOARD SHORTCUTS
+================================================================ */
+
+function showShortcutHint(text) {
+
+  const hint = document.getElementById("shortcutHint");
+
+  if (!hint) return;
+
+  hint.innerHTML = text;
+
+  hint.classList.add("show");
+
+  clearTimeout(hint._timer);
+
+  hint._timer = setTimeout(() => {
+    hint.classList.remove("show");
+  },1400);
+}
+
+document.addEventListener("keydown", (event) => {
+
+  const tag = document.activeElement?.tagName;
+
+  const inInput =
+    tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+
+  if (event.key === "Escape") {
+
+    closeModal();
+
+    return;
+  }
+
+  if (inInput) return;
+
+  const appVisible =
+    document.getElementById("app") &&
+    !document.getElementById("app").classList.contains("hidden");
+
+  if (!appVisible) return;
+
+  if (event.key === "/") {
+
+    event.preventDefault();
+
+    openSearch();
+
+    return;
+  }
+
+  if (event.key === "n" || event.key === "N") {
+
+    openTaskModal();
+
+    showShortcutHint("<kbd>N</kbd> Neue Aufgabe");
+
+    return;
+  }
+
+  if (event.key === "h" || event.key === "H") {
+
+    openHomeworkModal();
+
+    showShortcutHint("<kbd>H</kbd> Neue Hausaufgabe");
+
+    return;
+  }
+
+  if (event.key === "t" || event.key === "T") {
+
+    openEventModal();
+
+    showShortcutHint("<kbd>T</kbd> Neuer Termin");
+
+    return;
+  }
+
+});
 
 
 /* ================================================================
@@ -7765,53 +8877,43 @@ window.requestNotifications = async function() {
 function showChangelogOnce() {
 
   const key =
-    "klassenBoardChangelogV3";
+    "klassenBoardChangelogV4";
 
   if (localStorage.getItem(key)) {
     return;
   }
 
   openModal(
-    "🚀 KlassenBoard 3.0",
+    "🚀 KlassenBoard 4.0",
     `
 
       <div class="space-y-4">
 
         <div>
           <div class="text-xl font-extrabold font-display">
-            Willkommen bei der neuen Version!
+            Neue Version!
           </div>
 
           <div class="text-sm text-slate-500 mt-1">
-            Das KlassenBoard wurde komplett neu aufgebaut.
+            Neue Features für Organisation und Lernen.
           </div>
         </div>
 
         <div class="space-y-2 text-sm">
 
-          <div>☁️ Firebase Realtime Sync</div>
-          <div>🔐 Google / E-Mail Login</div>
-          <div>🔭 Vorschau-Modus mit geführter Tour</div>
-          <div>📊 neues Dashboard</div>
-          <div>⏰ aktuelle Stunde + Schultag</div>
-          <div>📚 Hausaufgaben & Aufgaben</div>
-          <div>📅 Kalender & Tests</div>
-          <div>📈 Notenverwaltung</div>
-          <div>🎒 Rucksack</div>
-          <div>🧠 Lernbereich & Lernkarten</div>
-          <div>🎯 Ziele</div>
-          <div>🔎 globale Suche</div>
-          <div>☑️ Checklisten</div>
-          <div>🗒️ Notizen</div>
-          <div>🔔 Erinnerungen</div>
-          <div>📱 optimiert für Handy + iPad + PC</div>
-          <div>✨ neues Design</div>
-          <div>📤 Backup Import/Export</div>
+          <div>▤ Wochenübersicht</div>
+          <div>🔁 Wiederkehrende Termine</div>
+          <div>📈 Notentrend & Zielnoten</div>
+          <div>⏱️ Echter Pomodoro-Timer</div>
+          <div>🎒 Automatischer Rucksack-Vorschlag</div>
+          <div>🚨 Überfällige Aufgaben markiert</div>
+          <div>🃏 Karteikasten-Lernsystem (Spaced Repetition)</div>
+          <div>📥 Lernkarten-Import</div>
+          <div>🔥 Lern-Streak</div>
+          <div>📡 Offline-Hinweis</div>
+          <div>🔔 Echte Push-Benachrichtigungen</div>
+          <div>⌨️ Tastenkürzel (N, H, T, /)</div>
 
-        </div>
-
-        <div class="p-3 rounded-xl bg-[#4f7cff]/10 border border-[#4f7cff]/20 text-xs text-blue-200">
-          Deine Daten werden unter deinem eigenen Firebase-Benutzer gespeichert.
         </div>
 
         <button
@@ -7829,7 +8931,7 @@ function showChangelogOnce() {
 window.closeChangelog = function() {
 
   localStorage.setItem(
-    "klassenBoardChangelogV3",
+    "klassenBoardChangelogV4",
     "1"
   );
 
@@ -7880,6 +8982,8 @@ window.addEventListener(
 
     updateSyncUI("synced");
 
+    toast("Wieder online – synchronisiere...");
+
     if (currentUser && !previewMode) {
       saveFirebase();
     }
@@ -7891,7 +8995,11 @@ window.addEventListener(
   "offline",
   () => {
 
+    hasUnsyncedChanges = true;
+
     updateSyncUI("offline");
+
+    toast("Offline – Änderungen werden lokal gespeichert");
 
   }
 );
