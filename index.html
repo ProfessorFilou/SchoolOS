@@ -1577,6 +1577,11 @@
           <span>Lehrer</span>
         </button>
 
+        <button class="nav-btn" data-page="people" onclick="showPage('people')">
+          <span class="nav-icon">👥</span>
+          <span>Personen</span>
+        </button>
+
         <button class="nav-btn" data-page="settings" onclick="showPage('settings')">
           <span class="nav-icon">⚙</span>
           <span>Einstellungen</span>
@@ -1590,7 +1595,9 @@
 
         <div
           id="userAvatar"
-          class="w-8 h-8 rounded-full bg-[#4f7cff] grid place-items-center text-xs font-bold"
+          class="w-8 h-8 rounded-full bg-[#4f7cff] grid place-items-center text-xs font-bold overflow-hidden cursor-pointer"
+          onclick="showPage('settings')"
+          title="Profil bearbeiten"
         >
           ?
         </div>
@@ -2388,6 +2395,56 @@
 
 
       <!-- ========================================================
+           PEOPLE / PERSONEN
+      ======================================================== -->
+
+      <section id="page-people" class="page">
+
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
+
+          <div>
+            <h2 class="text-2xl font-extrabold font-display">Personen finden</h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Öffentliche Profile entdecken, liken und andere kennenlernen.
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+            <button class="btn" onclick="sortPeople('likes')">❤️ Meiste Likes</button>
+            <button class="btn" onclick="sortPeople('new')">Neu</button>
+          </div>
+
+        </div>
+
+        <div class="panel panel-pad mb-4">
+          <div class="field mb-0">
+            <label>Suche nach Username, Name, Klasse oder Bio</label>
+            <input
+              id="peopleSearch"
+              class="input"
+              placeholder="z. B. Sam, 10b, Mathe…"
+              oninput="filterPeople()"
+            >
+          </div>
+        </div>
+
+        <div id="peopleList" class="space-y-2"></div>
+
+        <div class="panel panel-pad mt-4">
+          <div class="panel-title mb-2">Dein öffentliches Profil</div>
+          <p class="text-xs text-slate-400 mb-3">
+            Wenn aktiviert, können andere dich finden und liken. Noten, Aufgaben und private Daten bleiben immer privat.
+          </p>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" id="settingPublicProfile" onchange="togglePublicProfile()">
+            Öffentliches Profil aktivieren
+          </label>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
            SETTINGS
       ======================================================== -->
 
@@ -2417,9 +2474,41 @@
 
             <div class="panel-title mb-4">Profil</div>
 
+            <div class="flex items-center gap-4 mb-4">
+              <div
+                id="settingsAvatarPreview"
+                class="w-16 h-16 rounded-2xl bg-[#4f7cff] grid place-items-center text-xl font-bold overflow-hidden cursor-pointer border border-white/10"
+                onclick="document.getElementById('avatarFile').click()"
+                title="Profilbild ändern"
+              >
+                ?
+              </div>
+              <div class="flex-1">
+                <button class="btn text-xs" onclick="document.getElementById('avatarFile').click()">
+                  📷 Bild wählen
+                </button>
+                <button class="btn text-xs mt-1" onclick="clearAvatar()">
+                  Entfernen
+                </button>
+                <input
+                  id="avatarFile"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  onchange="handleAvatarUpload(event)"
+                >
+                <div class="tiny muted mt-1">Beliebige Größe – wird automatisch optimiert</div>
+              </div>
+            </div>
+
             <div class="field">
-              <label>Dein Name</label>
-              <input id="settingName" class="input">
+              <label>Anzeigename</label>
+              <input id="settingName" class="input" placeholder="z. B. Sam">
+            </div>
+
+            <div class="field">
+              <label>Username (öffentlich)</label>
+              <input id="settingUsername" class="input" placeholder="z. B. sam10b">
             </div>
 
             <div class="field">
@@ -2427,8 +2516,20 @@
               <input id="settingClassName" class="input">
             </div>
 
+            <div class="field">
+              <label>Bio (öffentlich)</label>
+              <textarea id="settingBio" class="textarea" style="min-height:72px" placeholder="Erzähl kurz etwas über dich… (max. 160 Zeichen)"></textarea>
+              <div class="tiny muted mt-1"><span id="bioCount">0</span>/160</div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-1 mb-3">
+              <div class="text-xs text-slate-400">
+                ❤️ <span id="settingsOwnLikes">0</span> Likes auf dein Profil
+              </div>
+            </div>
+
             <button class="btn btn-primary" onclick="saveSettings()">
-              Speichern
+              Profil speichern
             </button>
 
           </div>
@@ -2467,7 +2568,7 @@
 
           <div class="panel panel-pad">
 
-            <div class="panel-title mb-4">Synchronisation</div>
+            <div class="panel-title mb-4">Synchronisation & Statistik</div>
 
             <div class="space-y-3 text-xs">
 
@@ -2484,6 +2585,16 @@
               <div class="flex justify-between">
                 <span class="muted">Letzte Speicherung</span>
                 <span id="settingsSaved">–</span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="muted">Deine Besuche</span>
+                <span id="settingsVisits">0</span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="muted">Gesamt-Besuche (App)</span>
+                <span id="settingsGlobalVisits">–</span>
               </div>
 
             </div>
@@ -2698,12 +2809,16 @@ const googleProvider = new GoogleAuthProvider();
 
 const defaultData = {
 
-  version: 4,
+  version: 5,
 
   settings: {
     name: "",
+    username: "",
     className: "Meine Klasse",
-    theme: "dark"
+    theme: "dark",
+    avatar: "",           // dataURL or empty
+    publicProfile: true,  // in Personen-finden sichtbar
+    bio: ""
   },
 
   schedule: [],
@@ -2739,6 +2854,11 @@ const defaultData = {
   },
 
   announcements: [],
+
+  visits: {
+    total: 0,
+    lastVisit: null
+  },
 
   meta: {
     createdAt: Date.now(),
@@ -2793,6 +2913,7 @@ const pageNames = {
   goals: "Ziele",
   subjects: "Fächer",
   teachers: "Lehrer",
+  people: "Personen",
   settings: "Einstellungen"
 };
 
@@ -3029,7 +3150,11 @@ function buildDemoData() {
   const demo = structuredClone(defaultData);
 
   demo.settings.name = "Sam";
+  demo.settings.username = "sam10b";
   demo.settings.className = "10b";
+  demo.settings.bio = "Mathe & Kunst. Suche manchmal Lernpartner für Physik.";
+  demo.settings.publicProfile = true;
+  demo.visits = { total: 12, lastVisit: todayISO() };
 
   demo.subjects = [
     { id: uid("subject"), name: "Mathematik", teacher: "Frau Keller", color: "#4f7cff" },
@@ -3121,11 +3246,17 @@ window.startPreview = function() {
   currentUser = null;
 
   data = buildDemoData();
+  data.settings.username = data.settings.username || "sam_preview";
+  data.visits = { total: 12, lastVisit: todayISO() };
 
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("app").classList.remove("hidden");
 
-  document.getElementById("userAvatar").textContent = "V";
+  updateAvatarDisplay(
+    document.getElementById("userAvatar"),
+    data.settings.avatar,
+    data.settings.name || "V"
+  );
   document.getElementById("userName").textContent = data.settings.name + " (Vorschau)";
 
   document.getElementById("settingsUid").textContent = "–";
@@ -3138,6 +3269,8 @@ window.startPreview = function() {
   updateSyncUI("local");
 
   renderAll();
+  peopleLoaded = false;
+  loadPeople();
 
   setTimeout(() => startTutorial(false), 350);
 };
@@ -3531,6 +3664,8 @@ onAuthStateChanged(auth, user => {
 function setupUserUI(user) {
 
   const name =
+    data.settings.name ||
+    data.settings.username ||
     user.displayName ||
     user.email?.split("@")[0] ||
     "Gast";
@@ -3538,8 +3673,11 @@ function setupUserUI(user) {
   document.getElementById("userName")
     .textContent = name;
 
-  document.getElementById("userAvatar")
-    .textContent = name.charAt(0).toUpperCase();
+  updateAvatarDisplay(
+    document.getElementById("userAvatar"),
+    data.settings.avatar,
+    name
+  );
 
   document.getElementById("settingsUid")
     .textContent = user.uid;
@@ -3548,10 +3686,21 @@ function setupUserUI(user) {
     .textContent = "Verbunden";
 
   if (!data.settings.name) {
-
     data.settings.name = name;
-
     save();
+  }
+
+  // Public profile + visits
+  publishPublicProfile();
+  recordVisit();
+}
+
+function updateAvatarDisplay(el, avatar, fallbackName) {
+  if (!el) return;
+  if (avatar) {
+    el.innerHTML = `<img src="${avatar}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+  } else {
+    el.textContent = (fallbackName || "?").charAt(0).toUpperCase();
   }
 }
 
@@ -3775,6 +3924,7 @@ function renderAll() {
   renderGoals();
   renderSubjects();
   renderTeachers();
+  renderPeople();
   renderSettings();
 }
 
@@ -6550,21 +6700,55 @@ window.deleteTeacher = function(id) {
 
 
 /* ================================================================
-   SETTINGS
+   SETTINGS + PROFILE + VISITS + PEOPLE
 ================================================================ */
 
 function renderSettings() {
 
-  document.getElementById("settingName")
-    .value =
-    data.settings.name || "";
+  const nameEl = document.getElementById("settingName");
+  const userEl = document.getElementById("settingUsername");
+  const classEl = document.getElementById("settingClassName");
+  const bioEl = document.getElementById("settingBio");
 
-  document.getElementById("settingClassName")
-    .value =
-    data.settings.className || "Meine Klasse";
+  if (nameEl) nameEl.value = data.settings.name || "";
+  if (userEl) userEl.value = data.settings.username || "";
+  if (classEl) classEl.value = data.settings.className || "Meine Klasse";
+  if (bioEl) {
+    bioEl.value = data.settings.bio || "";
+    const bc = document.getElementById("bioCount");
+    if (bc) bc.textContent = String((data.settings.bio || "").length);
+  }
+
+  updateAvatarDisplay(
+    document.getElementById("settingsAvatarPreview"),
+    data.settings.avatar,
+    data.settings.name || data.settings.username || "?"
+  );
+
+  // also keep sidebar avatar in sync
+  updateAvatarDisplay(
+    document.getElementById("userAvatar"),
+    data.settings.avatar,
+    data.settings.name || data.settings.username || "?"
+  );
+
+  const uname = data.settings.name || data.settings.username || "Benutzer";
+  const userNameEl = document.getElementById("userName");
+  if (userNameEl) userNameEl.textContent = previewMode ? uname + " (Vorschau)" : uname;
 
   document.getElementById("previewSettingsCard")
     .style.display = previewMode ? "block" : "none";
+
+  // visits
+  const visitsEl = document.getElementById("settingsVisits");
+  if (visitsEl) {
+    visitsEl.textContent = String(data.visits?.total || 0);
+  }
+
+  const pubCheck = document.getElementById("settingPublicProfile");
+  if (pubCheck) {
+    pubCheck.checked = data.settings.publicProfile !== false;
+  }
 
   const notifStatus = document.getElementById("notificationStatus");
 
@@ -6585,17 +6769,463 @@ function renderSettings() {
 window.saveSettings = function() {
 
   data.settings.name =
-    document.getElementById("settingName")
-      .value.trim();
+    document.getElementById("settingName")?.value.trim() || "";
+
+  data.settings.username =
+    document.getElementById("settingUsername")?.value.trim() || "";
 
   data.settings.className =
-    document.getElementById("settingClassName")
-      .value.trim() ||
+    document.getElementById("settingClassName")?.value.trim() ||
     "Meine Klasse";
 
-  save();
+  data.settings.bio =
+    (document.getElementById("settingBio")?.value.trim() || "").slice(0, 160);
 
-  toast("Einstellungen gespeichert");
+  save();
+  publishPublicProfile();
+
+  toast("Profil gespeichert");
+};
+
+// live bio counter
+document.addEventListener("input", (e) => {
+  if (e.target?.id === "settingBio") {
+    const el = document.getElementById("bioCount");
+    if (el) el.textContent = String((e.target.value || "").length);
+  }
+});
+
+window.handleAvatarUpload = function(event) {
+
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    toast("Bitte eine Bilddatei wählen");
+    event.target.value = "";
+    return;
+  }
+
+  toast("Bild wird optimiert…");
+
+  const reader = new FileReader();
+  reader.onerror = () => {
+    toast("Bild konnte nicht gelesen werden");
+    event.target.value = "";
+  };
+  reader.onload = () => {
+    const img = new Image();
+    img.onerror = () => {
+      toast("Ungültiges Bildformat");
+      event.target.value = "";
+    };
+    img.onload = () => {
+      try {
+        // Always resize – any file size is ok
+        const max = 256;
+        let w = img.width;
+        let h = img.height;
+        if (w > max || h > max) {
+          if (w > h) {
+            h = Math.round(h * max / w);
+            w = max;
+          } else {
+            w = Math.round(w * max / h);
+            h = max;
+          }
+        }
+        // safety: very wide images
+        if (w < 1) w = 1;
+        if (h < 1) h = 1;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#111726";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // progressive quality if still large
+        let quality = 0.85;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+        while (dataUrl.length > 180000 && quality > 0.4) {
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+
+        data.settings.avatar = dataUrl;
+        save();
+        publishPublicProfile();
+        renderSettings();
+        toast("Profilbild aktualisiert ✓");
+      } catch (err) {
+        console.error(err);
+        toast("Fehler beim Verarbeiten des Bildes");
+      }
+      event.target.value = "";
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.clearAvatar = function() {
+  data.settings.avatar = "";
+  save();
+  publishPublicProfile();
+  renderSettings();
+  toast("Profilbild entfernt");
+};
+
+window.togglePublicProfile = function() {
+  const checked = document.getElementById("settingPublicProfile")?.checked;
+  data.settings.publicProfile = !!checked;
+  save();
+  publishPublicProfile();
+  toast(checked ? "Öffentliches Profil aktiv" : "Öffentliches Profil deaktiviert");
+};
+
+/* ---------- Visits ---------- */
+
+function recordVisit() {
+  data.visits = data.visits || { total: 0, lastVisit: null };
+  const today = todayISO();
+  if (data.visits.lastVisit !== today) {
+    data.visits.total = (Number(data.visits.total) || 0) + 1;
+    data.visits.lastVisit = today;
+    if (!previewMode) {
+      localStorage.setItem("klassenBoard", JSON.stringify(data));
+    }
+  }
+
+  try {
+    if (currentUser && !previewMode && navigator.onLine) {
+      update(ref(db, "stats"), {
+        lastVisitAt: Date.now()
+      }).catch(() => {});
+
+      onValue(ref(db, "stats/globalVisits"), snap => {
+        const el = document.getElementById("settingsGlobalVisits");
+        if (el) el.textContent = snap.exists() ? String(snap.val()) : "–";
+      }, { onlyOnce: true });
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* ---------- Public profiles / People / Likes ---------- */
+
+let myLikedProfiles = new Set(); // uids I liked (local + firebase)
+let peopleSort = "likes"; // likes | new
+
+function loadMyLikes() {
+  if (previewMode || !currentUser) {
+    try {
+      const raw = localStorage.getItem("klassenBoardLikes");
+      myLikedProfiles = new Set(raw ? JSON.parse(raw) : []);
+    } catch {
+      myLikedProfiles = new Set();
+    }
+    return;
+  }
+  onValue(ref(db, "userLikes/" + currentUser.uid), snap => {
+    const val = snap.val() || {};
+    myLikedProfiles = new Set(Object.keys(val).filter(k => val[k]));
+    renderPeople();
+  }, { onlyOnce: false });
+}
+
+function publishPublicProfile() {
+  if (previewMode || !currentUser) return;
+
+  if (data.settings.publicProfile === false) {
+    set(ref(db, "publicProfiles/" + currentUser.uid), null).catch(() => {});
+    return;
+  }
+
+  const profilePath = ref(db, "publicProfiles/" + currentUser.uid);
+
+  onValue(profilePath, snap => {
+    const existing = snap.val() || {};
+    const profile = {
+      uid: currentUser.uid,
+      name: data.settings.name || "",
+      username: data.settings.username || data.settings.name || "",
+      className: data.settings.className || "",
+      bio: (data.settings.bio || "").slice(0, 160),
+      avatar: data.settings.avatar || "",
+      likeCount: Number(existing.likeCount) || 0,
+      updatedAt: Date.now()
+    };
+    set(profilePath, profile).catch(err => {
+      console.warn("public profile publish failed", err);
+    });
+  }, { onlyOnce: true });
+}
+
+let peopleCache = [];
+let peopleLoaded = false;
+let peopleListener = null;
+
+function loadPeople(force = false) {
+  if (previewMode) {
+    peopleCache = [
+      {
+        uid: "demo1",
+        name: "Lina",
+        username: "lina10b",
+        className: "10b",
+        bio: "Mathe-Fan & male gerne. Suche Lernpartner für Physik ✨",
+        avatar: "",
+        likeCount: 14,
+        updatedAt: Date.now() - 86400000
+      },
+      {
+        uid: "demo2",
+        name: "Jonas",
+        username: "jonas_phy",
+        className: "10a",
+        bio: "Physik & Basketball. Immer offen für Tipps zu Noten.",
+        avatar: "",
+        likeCount: 9,
+        updatedAt: Date.now() - 3600000
+      },
+      {
+        uid: "demo3",
+        name: "Mira",
+        username: "mira_art",
+        className: "9c",
+        bio: "Kunst, Musik und gute Playlists.",
+        avatar: "",
+        likeCount: 22,
+        updatedAt: Date.now() - 7200000
+      }
+    ];
+    peopleLoaded = true;
+    loadMyLikes();
+    renderPeople();
+    return;
+  }
+
+  if (peopleLoaded && !force) {
+    renderPeople();
+    return;
+  }
+
+  if (peopleListener) {
+    peopleListener();
+    peopleListener = null;
+  }
+
+  peopleListener = onValue(ref(db, "publicProfiles"), snap => {
+    const val = snap.val() || {};
+    peopleCache = Object.values(val)
+      .filter(p => p && p.uid && p.uid !== currentUser?.uid)
+      .map(p => ({
+        ...p,
+        likeCount: Number(p.likeCount) || 0
+      }));
+    peopleLoaded = true;
+    renderPeople();
+
+    // own likes display
+    const own = val[currentUser?.uid];
+    const ownLikesEl = document.getElementById("settingsOwnLikes");
+    if (ownLikesEl) {
+      ownLikesEl.textContent = String(own?.likeCount || 0);
+    }
+  }, err => {
+    console.warn(err);
+    peopleCache = [];
+    peopleLoaded = true;
+    renderPeople();
+  });
+
+  loadMyLikes();
+}
+
+function renderPeople() {
+  const container = document.getElementById("peopleList");
+  if (!container) return;
+
+  if (!peopleLoaded) {
+    loadPeople();
+    container.innerHTML = `<div class="empty">Lade Profile…</div>`;
+    return;
+  }
+
+  const q = (document.getElementById("peopleSearch")?.value || "").trim().toLowerCase();
+
+  let list = [...peopleCache];
+
+  if (q) {
+    list = list.filter(p =>
+      (p.name || "").toLowerCase().includes(q) ||
+      (p.username || "").toLowerCase().includes(q) ||
+      (p.className || "").toLowerCase().includes(q) ||
+      (p.bio || "").toLowerCase().includes(q)
+    );
+  }
+
+  if (peopleSort === "likes") {
+    list.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+  } else {
+    list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  }
+
+  if (!list.length) {
+    container.innerHTML = `<div class="panel panel-pad empty">
+      ${previewMode
+        ? "Im Vorschau-Modus siehst du Beispiel-Profile."
+        : "Keine öffentlichen Profile gefunden. Aktiviere dein Profil und lade Freunde ein!"}
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(p => {
+    const letter = (p.username || p.name || "?").charAt(0).toUpperCase();
+    const avatarHtml = p.avatar
+      ? `<img src="${escapeHTML(p.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover">`
+      : letter;
+    const liked = myLikedProfiles.has(p.uid);
+    const likes = Number(p.likeCount) || 0;
+
+    return `
+      <div class="item" style="cursor:pointer" onclick="openPersonProfile('${escapeHTML(p.uid)}')">
+        <div class="w-11 h-11 rounded-xl bg-[#4f7cff] grid place-items-center text-sm font-bold overflow-hidden flex-shrink-0">
+          ${avatarHtml}
+        </div>
+        <div class="item-main min-w-0">
+          <div class="item-title flex items-center gap-2">
+            ${escapeHTML(p.name || p.username || "Unbekannt")}
+            ${p.username ? `<span class="text-[10px] text-slate-500 font-normal">@${escapeHTML(p.username)}</span>` : ""}
+          </div>
+          <div class="item-meta">
+            ${escapeHTML(p.className || "")}
+            ${p.bio ? " · " + escapeHTML((p.bio || "").slice(0, 60)) + ((p.bio || "").length > 60 ? "…" : "") : ""}
+          </div>
+        </div>
+        <button
+          class="btn btn-icon text-sm"
+          style="${liked ? "color:#f472b6;border-color:rgba(244,114,182,.35)" : ""}"
+          onclick="event.stopPropagation(); toggleLikeProfile('${escapeHTML(p.uid)}')"
+          title="${liked ? "Unlike" : "Like"}"
+        >
+          ${liked ? "❤️" : "🤍"} <span class="text-[10px] ml-0.5">${likes}</span>
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+window.filterPeople = function() {
+  renderPeople();
+};
+
+window.sortPeople = function(mode) {
+  peopleSort = mode === "new" ? "new" : "likes";
+  renderPeople();
+};
+
+window.toggleLikeProfile = async function(uid) {
+  if (!uid) return;
+
+  if (previewMode) {
+    if (myLikedProfiles.has(uid)) {
+      myLikedProfiles.delete(uid);
+      const p = peopleCache.find(x => x.uid === uid);
+      if (p) p.likeCount = Math.max(0, (p.likeCount || 0) - 1);
+      toast("Like entfernt");
+    } else {
+      myLikedProfiles.add(uid);
+      const p = peopleCache.find(x => x.uid === uid);
+      if (p) p.likeCount = (p.likeCount || 0) + 1;
+      toast("Profil geliked ❤️");
+    }
+    localStorage.setItem("klassenBoardLikes", JSON.stringify([...myLikedProfiles]));
+    renderPeople();
+    return;
+  }
+
+  if (!currentUser) {
+    toast("Bitte anmelden, um zu liken");
+    return;
+  }
+
+  const already = myLikedProfiles.has(uid);
+  const likeRef = ref(db, "userLikes/" + currentUser.uid + "/" + uid);
+  const countRef = ref(db, "publicProfiles/" + uid + "/likeCount");
+
+  try {
+    if (already) {
+      await set(likeRef, null);
+      myLikedProfiles.delete(uid);
+      // optimistic
+      const p = peopleCache.find(x => x.uid === uid);
+      if (p) p.likeCount = Math.max(0, (p.likeCount || 0) - 1);
+      // best-effort decrement
+      onValue(countRef, snap => {
+        const n = Math.max(0, (Number(snap.val()) || 0) - 1);
+        set(countRef, n).catch(() => {});
+      }, { onlyOnce: true });
+      toast("Like entfernt");
+    } else {
+      await set(likeRef, true);
+      myLikedProfiles.add(uid);
+      const p = peopleCache.find(x => x.uid === uid);
+      if (p) p.likeCount = (p.likeCount || 0) + 1;
+      onValue(countRef, snap => {
+        const n = (Number(snap.val()) || 0) + 1;
+        set(countRef, n).catch(() => {});
+      }, { onlyOnce: true });
+      toast("Profil geliked ❤️");
+    }
+    renderPeople();
+  } catch (err) {
+    console.error(err);
+    toast("Like fehlgeschlagen – prüfe Firebase-Rules");
+  }
+};
+
+window.openPersonProfile = function(uid) {
+  const p = peopleCache.find(x => x.uid === uid);
+  if (!p) return;
+
+  const letter = (p.username || p.name || "?").charAt(0).toUpperCase();
+  const avatarHtml = p.avatar
+    ? `<img src="${escapeHTML(p.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:18px">`
+    : `<div style="width:100%;height:100%;display:grid;place-items:center;font-size:28px;font-weight:800;background:#4f7cff;border-radius:18px">${letter}</div>`;
+  const liked = myLikedProfiles.has(p.uid);
+  const likes = Number(p.likeCount) || 0;
+
+  openModal(
+    "Profil",
+    `
+      <div class="flex flex-col items-center text-center gap-3 py-2">
+        <div style="width:88px;height:88px;overflow:hidden;border-radius:18px">
+          ${avatarHtml}
+        </div>
+        <div>
+          <div class="text-xl font-extrabold font-display">${escapeHTML(p.name || "Unbekannt")}</div>
+          ${p.username ? `<div class="text-sm text-slate-400 mt-0.5">@${escapeHTML(p.username)}</div>` : ""}
+          ${p.className ? `<div class="text-xs text-slate-500 mt-1">${escapeHTML(p.className)}</div>` : ""}
+        </div>
+        ${p.bio ? `
+          <div class="text-sm text-slate-300 leading-relaxed max-w-sm px-2" style="white-space:pre-wrap">
+            ${escapeHTML(p.bio)}
+          </div>
+        ` : `<div class="text-xs text-slate-600">Keine Bio</div>`}
+        <div class="flex items-center gap-3 mt-2">
+          <button
+            class="btn ${liked ? "btn-accent" : "btn-primary"}"
+            onclick="toggleLikeProfile('${escapeHTML(p.uid)}'); setTimeout(() => openPersonProfile('${escapeHTML(p.uid)}'), 200)"
+          >
+            ${liked ? "❤️ Geliked" : "🤍 Like"} · ${likes}
+          </button>
+        </div>
+      </div>
+    `
+  );
 };
 
 
