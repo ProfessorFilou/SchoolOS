@@ -7550,79 +7550,6 @@ window.updateLessonWeekOffsetUI = function() {
   ).join("");
 };
 
-/** NEU: Fach/Lehrer-Vorlagen – füllt leere Felder aus Fächer- & Lehrer-Listen */
-window.applySubjectTeacherTemplate = function() {
-  const subjectEl = document.getElementById("lessonSubject");
-  const teacherEl = document.getElementById("lessonTeacher");
-  const roomEl = document.getElementById("lessonRoom");
-  if (!subjectEl) return;
-  const name = String(subjectEl.value || "").trim();
-  if (!name) return;
-  const sub = (data.subjects || []).find(
-    s => String(s.name || "").toLowerCase() === name.toLowerCase()
-  );
-  if (sub) {
-    if (teacherEl && !String(teacherEl.value || "").trim() && sub.teacher) {
-      teacherEl.value = sub.teacher;
-    }
-  }
-  const tchBySubject = (data.teachers || []).find(
-    t => String(t.subject || "").toLowerCase() === name.toLowerCase()
-  );
-  const tchByName = sub?.teacher
-    ? (data.teachers || []).find(
-        t => String(t.name || "").toLowerCase() === String(sub.teacher).toLowerCase()
-      )
-    : null;
-  const tch = tchByName || tchBySubject;
-  if (tch) {
-    if (teacherEl && !String(teacherEl.value || "").trim() && tch.name) {
-      teacherEl.value = tch.name;
-    }
-    if (roomEl && !String(roomEl.value || "").trim() && tch.room) {
-      roomEl.value = tch.room;
-    }
-  }
-};
-
-/** NEU: Beim Speichern einer Stunde fehlende Fächer/Lehrer als Vorlage anlegen */
-function ensureSubjectTeacherFromLesson(lesson) {
-  if (!lesson?.subject) return;
-  data.subjects = data.subjects || [];
-  data.teachers = data.teachers || [];
-  const subName = String(lesson.subject).trim();
-  let sub = data.subjects.find(
-    s => String(s.name || "").toLowerCase() === subName.toLowerCase()
-  );
-  if (!sub) {
-    data.subjects.push({
-      id: uid("subject"),
-      name: subName,
-      teacher: String(lesson.teacher || "").trim(),
-      color: typeof subjectColor === "function" ? subjectColor(subName) : "#4f7cff"
-    });
-  } else if (lesson.teacher && !sub.teacher) {
-    sub.teacher = String(lesson.teacher).trim();
-  }
-  if (lesson.teacher) {
-    const tName = String(lesson.teacher).trim();
-    let tch = data.teachers.find(
-      t => String(t.name || "").toLowerCase() === tName.toLowerCase()
-    );
-    if (!tch) {
-      data.teachers.push({
-        id: uid("teacher"),
-        name: tName,
-        subject: subName,
-        room: String(lesson.room || "").trim()
-      });
-    } else {
-      if (!tch.subject) tch.subject = subName;
-      if (lesson.room && !tch.room) tch.room = String(lesson.room).trim();
-    }
-  }
-}
-
 
 function isCurrentLesson(lesson) {
   if (!isLessonInWeek(lesson)) return false;
@@ -14519,20 +14446,17 @@ window.openLessonModal = function(id=null, presetDay="", presetPeriod="") {
             list="subjectSuggestions"
             placeholder="z. B. Mathematik"
             value="${escapeHTML(lesson?.subject || "")}"
-            onchange="applySubjectTeacherTemplate()"
-            onblur="applySubjectTeacherTemplate()"
           >
 
           <datalist id="subjectSuggestions">
 
             ${
-              (data.subjects || []).map(x =>
-                `<option value="${escapeHTML(x.name)}">${escapeHTML(x.teacher ? x.name + " · " + x.teacher : x.name)}</option>`
+              data.subjects.map(x =>
+                `<option value="${escapeHTML(x.name)}">`
               ).join("")
             }
 
           </datalist>
-          <div class="tiny muted mt-1">Aus „Fächer“/„Lehrer“ wird Lehrer &amp; Raum automatisch übernommen, wenn das Feld leer ist.</div>
         </div>
 
         <div class="time-row">
@@ -14612,17 +14536,9 @@ window.openLessonModal = function(id=null, presetDay="", presetPeriod="") {
           <input
             id="lessonTeacher"
             class="input"
-            list="teacherSuggestions"
             placeholder="z. B. Herr Müller"
             value="${escapeHTML(lesson?.teacher || "")}"
           >
-          <datalist id="teacherSuggestions">
-            ${
-              (data.teachers || []).map(x =>
-                `<option value="${escapeHTML(x.name)}">${escapeHTML(x.subject ? x.name + " · " + x.subject : x.name)}</option>`
-              ).join("")
-            }
-          </datalist>
         </div>
 
       </div>
@@ -14651,7 +14567,6 @@ window.openLessonModal = function(id=null, presetDay="", presetPeriod="") {
 
     `
   );
-  setTimeout(() => { try { applySubjectTeacherTemplate(); } catch (e) {} }, 0);
 };
 
 window.saveLesson = function(id) {
@@ -14705,8 +14620,6 @@ window.saveLesson = function(id) {
 
     return;
   }
-
-  try { ensureSubjectTeacherFromLesson(lesson); } catch (e) {}
 
   const existing =
     data.schedule.findIndex(x =>
