@@ -17912,6 +17912,7 @@ function animateBadgeUnlock(el) {
 function updateNavPill() {
   const sidebar = document.querySelector(".sidebar .sidebar-scroll");
   if (!sidebar) return;
+
   let pill = document.getElementById("navPillIndicator");
   if (!pill) {
     pill = document.createElement("div");
@@ -17919,71 +17920,100 @@ function updateNavPill() {
     sidebar.style.position = "relative";
     sidebar.prepend(pill);
   }
+
   const activeBtn = sidebar.querySelector(".nav-btn.active");
   if (!activeBtn) {
-    pill.style.height = "0";
+    pill.style.height = "0px";
+    pill.style.width = "0px";
     pill.style.opacity = "0";
+    pill.style.transform = "translate3d(0,0,0)";
     return;
   }
-  // offsetTop relativ zum Scroll-Container (zuverlässiger als getBoundingClientRect bei Collapse)
-  let top = 0;
-  let node = activeBtn;
-  while (node && node !== sidebar) {
-    top += node.offsetTop;
-    node = node.offsetParent;
-    if (node === sidebar || !node) break;
-    // wenn offsetParent die sidebar-scroll-Children überspringt
-  }
-  // Fallback: sum offsetTop bis sidebar
-  top = 0;
-  node = activeBtn;
-  while (node && node !== sidebar) {
-    top += node.offsetTop;
-    const parent = node.parentElement;
-    if (!parent || parent === sidebar) break;
-    node = parent;
-  }
 
-  const h = activeBtn.offsetHeight || 44;
+  // FIX: echte Geometrie verwenden – keine offsetTop-Kette, keine
+  // festen left/right-Werte. So sitzt die Box exakt auf dem aktiven Button.
+  const sidebarRect = sidebar.getBoundingClientRect();
+  const buttonRect = activeBtn.getBoundingClientRect();
+
+  const top = buttonRect.top - sidebarRect.top + sidebar.scrollTop;
+  const left = buttonRect.left - sidebarRect.left + sidebar.scrollLeft;
+
   pill.style.opacity = "1";
-  pill.style.height = h + "px";
-  pill.style.width = "";
-  pill.style.left = "";
-  pill.style.right = "";
-  pill.style.transform = `translateY(${top}px)`;
+  pill.style.left = left + "px";
+  pill.style.width = buttonRect.width + "px";
+  pill.style.right = "auto";
+  pill.style.height = buttonRect.height + "px";
+  pill.style.transform = `translate3d(0, ${top}px, 0)`;
 }
 
 function scheduleNavPillUpdate() {
-  requestAnimationFrame(() => {
-    updateNavPill();
-    requestAnimationFrame(() => updateNavPill());
+  // Mehrfach nachziehen, bis Collapse/Expand/Rendering/Transition fertig ist.
+  [0, 16, 50, 100, 180, 280, 400, 500].forEach(delay => {
+    setTimeout(() => {
+      requestAnimationFrame(() => updateNavPill());
+    }, delay);
   });
-  setTimeout(updateNavPill, 280);
 }
-try {
-  window.addEventListener("resize", () => {
-    if (typeof scheduleNavPillUpdate === "function") scheduleNavPillUpdate();
+
+(function initNavPillFix() {
+  let rafPending = false;
+
+  function updateSoon() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      updateNavPill();
+    });
+  }
+
+  // Klick auf Menübutton
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".nav-btn")) scheduleNavPillUpdate();
+  }, true);
+
+  // Einklappen/Ausklappen und andere CSS-Transitions
+  document.addEventListener("transitionend", (e) => {
+    const target = e.target;
+    if (
+      target.closest(".sidebar") ||
+      target.closest(".sidebar-scroll") ||
+      target.closest(".nav-btn") ||
+      ["width", "transform", "padding", "height", "left", "right"].includes(e.propertyName)
+    ) {
+      scheduleNavPillUpdate();
+    }
+  }, true);
+
+  const sidebar = document.querySelector(".sidebar .sidebar-scroll");
+  if (sidebar) {
+    sidebar.addEventListener("scroll", updateSoon, { passive: true });
+  }
+
+  window.addEventListener("resize", scheduleNavPillUpdate, { passive: true });
+  window.addEventListener("orientationchange", scheduleNavPillUpdate, { passive: true });
+  window.addEventListener("load", scheduleNavPillUpdate, { once: true });
+
+  // Reagiert auf sidebar-collapsed, active-Klassen und neu gerenderte Navigation.
+  const observer = new MutationObserver(() => scheduleNavPillUpdate());
+
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class", "style"]
   });
-} catch (e) {}
 
+  if (sidebar) {
+    observer.observe(sidebar, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeFilter: ["class"]
+    });
+  }
 
-// Button Ripple – Delegation, kein Eingriff in bestehende onclicks
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".btn");
-  if (!btn) return;
-  try {
-    const rect = btn.getBoundingClientRect();
-    const ripple = document.createElement("span");
-    const size = Math.max(rect.width, rect.height);
-    ripple.className = "ripple";
-    ripple.style.width = ripple.style.height = size + "px";
-    ripple.style.left = (e.clientX - rect.left - size / 2) + "px";
-    ripple.style.top = (e.clientY - rect.top - size / 2) + "px";
-    btn.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-  } catch (err) {}
-});
-
+  // Initiales Layout + Nachziehen über 0–500 ms.
+  scheduleNavPillUpdate();
+})();
 
 /* ================================================================
    ONLINE / OFFLINE
