@@ -7144,9 +7144,28 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
 
 
         <div id="adminTabSchool" style="display:none">
+          <div class="panel panel-pad mb-4" style="border-color:rgba(var(--accent-rgb),.25)">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+              <div>
+                <div class="panel-title">Schule &amp; Klassen</div>
+                <div class="tiny muted" id="schoolAccessHint">Lade Rechte…</div>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn" onclick="loadSchoolSystem(true);toast('Schule neu geladen')">↻ Aktualisieren</button>
+                <button type="button" class="btn btn-primary" id="btnTeacherModeFromAdmin" style="display:none" onclick="setTeacherMode(true)">Lehrer-Dashboard öffnen</button>
+              </div>
+            </div>
+            <div class="td-kpi-row" style="margin-top:12px">
+              <div class="stat"><div class="tiny muted">Schulen</div><div id="schoolKpiSchools" class="stat-value">0</div></div>
+              <div class="stat"><div class="tiny muted">Klassen</div><div id="schoolKpiClasses" class="stat-value">0</div></div>
+              <div class="stat"><div class="tiny muted">Lehrer</div><div id="schoolKpiTeachers" class="stat-value">0</div></div>
+              <div class="stat"><div class="tiny muted">Schüler</div><div id="schoolKpiStudents" class="stat-value">0</div></div>
+            </div>
+          </div>
+
           <div class="panel panel-pad mb-4" id="schoolMasterPanel" style="display:none">
-            <div class="panel-title mb-2">Owner · Schulen & Lehrer</div>
-            <p class="text-xs text-slate-500 mb-3">Nur Master kann Schulen anlegen und Lehrer ernennen.</p>
+            <div class="panel-title mb-2">Owner · Schulen &amp; Lehrer ernennen</div>
+            <p class="text-xs text-slate-500 mb-3">Nur der Owner kann Schulen anlegen und Lehrer freischalten.</p>
             <div class="form-grid">
               <div class="field">
                 <label>Neue Schule</label>
@@ -7154,10 +7173,11 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               </div>
             </div>
             <button class="btn btn-primary mb-4" onclick="masterCreateSchool()">Schule erstellen</button>
+            <div id="schoolsListAdmin" class="mb-4 space-y-2"></div>
             <div class="form-grid">
               <div class="field">
-                <label>Lehrer ernennen (E-Mail oder UID)</label>
-                <input id="teacherGrantId" class="input" placeholder="name@schule.de oder UID">
+                <label>Lehrer (E-Mail, @Username oder UID)</label>
+                <input id="teacherGrantId" class="input" placeholder="name@schule.de · @user · UID" list="peopleSuggestList">
               </div>
               <div class="field">
                 <label>Schule zuweisen</label>
@@ -7165,12 +7185,12 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               </div>
             </div>
             <button class="btn btn-primary" onclick="masterGrantTeacher()">Lehrer ernennen</button>
-            <div id="teachersList" class="mt-4 space-y-2"></div>
+            <div id="teachersListAdmin" class="mt-4 space-y-2"></div>
           </div>
 
-          <div class="panel panel-pad mb-4">
+          <div class="panel panel-pad mb-4" id="schoolClassesPanel">
             <div class="panel-title mb-2">Klassen verwalten</div>
-            <p class="text-xs text-slate-500 mb-3">Lehrer und Owner können Klassen anlegen und Schüler zuordnen.</p>
+            <p class="text-xs text-slate-500 mb-3">Klassen anlegen, Codes teilen, Mitglieder sehen – mit Namen und Accounts.</p>
             <div class="form-grid">
               <div class="field">
                 <label>Schule</label>
@@ -7185,13 +7205,15 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
             <div id="schoolClassesList" class="mt-4 space-y-2"></div>
           </div>
 
-          <div class="panel panel-pad mb-4">
+          <div class="panel panel-pad mb-4" id="schoolAssignPanel">
             <div class="panel-title mb-2">Schüler zuordnen</div>
+            <p class="text-xs text-slate-500 mb-3">Suche nach Name, E-Mail oder @Username – oder füge per Invite-Code hinzu.</p>
             <div class="form-grid">
               <div class="field">
-                <label>Schüler (E-Mail, @Username oder UID)</label>
-                <input id="assignStudentUid" class="input" placeholder="name@schule.de · @user · UID">
-                <div id="assignStudentHint" class="tiny muted mt-1"></div>
+                <label>Schüler suchen</label>
+                <input id="assignStudentUid" class="input" placeholder="Tippe Name, @user oder E-Mail…" list="peopleSuggestList" oninput="onAssignStudentInput()" autocomplete="off">
+                <div id="assignStudentHint" class="tiny muted mt-1">Account wird automatisch aufgelöst</div>
+                <div id="assignStudentResults" class="mt-2 space-y-1"></div>
               </div>
               <div class="field">
                 <label>Klasse</label>
@@ -7202,11 +7224,12 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               <button class="btn btn-primary" onclick="assignStudentToClass()">In Klasse setzen</button>
               <button class="btn" onclick="removeStudentFromClass()">Aus Klasse entfernen</button>
             </div>
+            <datalist id="peopleSuggestList"></datalist>
           </div>
 
           <div class="panel panel-pad mb-4">
             <div class="panel-title mb-2">Einladungs-Codes</div>
-            <p class="text-xs text-slate-500 mb-2">Schüler können unter Einstellungen mit Code beitreten.</p>
+            <p class="text-xs text-slate-500 mb-2">Schüler: Einstellungen → Klassen-Invite → Code einlösen.</p>
             <div id="classInviteCodes" class="space-y-2 text-sm"></div>
           </div>
         </div>
@@ -8224,6 +8247,7 @@ const pageNames = {
   people: "Personen",
   chats: "Chats",
   admin: "Admin",
+  "teacher-dashboard": "Lehrer",
   settings: "Einstellungen"
 };
 
@@ -17435,9 +17459,18 @@ let adminTab = "users";
 let adminUserNotes = {};
 
 window.setAdminTab = function(tab) {
-  adminTab = tab || "users";
+  // Pure teachers (not admin): only school tab
+  const teacherOnly = (typeof isTeacher === "function" && isTeacher()) && !(typeof isAdmin === "function" && isAdmin());
+  if (teacherOnly && tab !== "school") tab = "school";
+  adminTab = tab || (teacherOnly ? "school" : "users");
   document.querySelectorAll(".filter-admin").forEach(b => {
-    b.classList.toggle("active", b.dataset.adminTab === adminTab);
+    const t = b.dataset.adminTab;
+    if (teacherOnly && t !== "school") {
+      b.style.display = "none";
+    } else {
+      b.style.display = "";
+    }
+    b.classList.toggle("active", t === adminTab);
   });
   const map = {
     users: "adminTabUsers",
@@ -17451,8 +17484,13 @@ window.setAdminTab = function(tab) {
     const el = document.getElementById(id);
     if (el) el.style.display = adminTab === k ? "" : "none";
   });
-  if (adminTab === "users") renderAdminUsers();
-  if (adminTab === "admins") renderAdminsList();
+  // hide KPI row for teacher-only
+  try {
+    const kpi = document.querySelector("#page-admin .admin-kpi-row");
+    if (kpi) kpi.style.display = teacherOnly ? "none" : "";
+  } catch (e) {}
+  if (adminTab === "users" && typeof renderAdminUsers === "function") renderAdminUsers();
+  if (adminTab === "admins" && typeof renderAdminsList === "function") renderAdminsList();
   if (adminTab === "school") {
     try { loadSchoolSystem(true); } catch (e) {}
   }
@@ -17468,7 +17506,8 @@ window.refreshAdminAll = function() {
 };
 
 function renderAdmin() {
-  if (!isAdmin()) return;
+  const teacherOnly = (typeof isTeacher === "function" && isTeacher()) && !isAdmin();
+  if (!isAdmin() && !teacherOnly) return;
 
   const emailLabel = document.getElementById("adminEmailLabel");
   if (emailLabel) emailLabel.textContent = currentUser?.email || "–";
@@ -17479,6 +17518,10 @@ function renderAdmin() {
       role.textContent = "◈ OWNER";
       role.classList.add("owner-master");
       role.style.color = "";
+    } else if (teacherOnly) {
+      role.textContent = "📘 LEHRER";
+      role.classList.remove("owner-master");
+      role.style.color = "#a5b4fc";
     } else {
       role.textContent = "Administrator";
       role.classList.remove("owner-master");
@@ -17491,7 +17534,29 @@ function renderAdmin() {
   if (masterBox) masterBox.style.display = isMasterAdmin() ? "" : "none";
 
   const btn = document.getElementById("navAdminBtn");
-  if (btn) btn.style.display = "";
+  if (btn) {
+    btn.style.display = "";
+    const span = btn.querySelector("span:not(.nav-icon)");
+    if (span) span.textContent = teacherOnly ? "Schule" : "Admin";
+  }
+
+  // Title for teachers
+  try {
+    const h = document.querySelector("#page-admin h2");
+    const p = document.querySelector("#page-admin .admin-header p");
+    if (teacherOnly) {
+      if (h) h.textContent = "Schule";
+      if (p) p.textContent = "Klassen · Schüler · Codes";
+    } else {
+      if (h) h.textContent = "Admin";
+      if (p) p.textContent = "Nutzer · Moderation · System";
+    }
+  } catch (e) {}
+
+  if (teacherOnly) {
+    setAdminTab("school");
+    return;
+  }
 
   renderAdminReportsList();
   renderAdminBansList();
@@ -19086,24 +19151,76 @@ window.useStreakFreeze = function() {
 };
 
 
+
 /* ================================================================
-   SCHOOL SYSTEM – Schulen, Klassen, Lehrer (Owner ernennt Lehrer)
+   SCHOOL SYSTEM v2 – Schulen, Klassen, Lehrer (robust + local fallback)
 ================================================================ */
 
 window.__sosSchools = window.__sosSchools || {};
 window.__sosClasses = window.__sosClasses || {};
 window.__sosTeachers = window.__sosTeachers || {};
 
+const SOS_SCHOOL_LS_KEY = "schoolosSchoolSystemLocal";
+
+function schoolLocalSave() {
+  try {
+    localStorage.setItem(SOS_SCHOOL_LS_KEY, JSON.stringify({
+      schools: window.__sosSchools || {},
+      classes: window.__sosClasses || {},
+      teachers: window.__sosTeachers || {},
+      at: Date.now()
+    }));
+  } catch (e) {}
+}
+function schoolLocalLoad() {
+  try {
+    const raw = localStorage.getItem(SOS_SCHOOL_LS_KEY);
+    if (!raw) return false;
+    const j = JSON.parse(raw);
+    if (j.schools) window.__sosSchools = j.schools;
+    if (j.classes) window.__sosClasses = j.classes;
+    if (j.teachers) window.__sosTeachers = j.teachers;
+    return true;
+  } catch (e) { return false; }
+}
+
 function isTeacher() {
-  if (previewMode || !currentUser) return false;
-  if (typeof isMasterAdmin === "function" && isMasterAdmin()) return true;
-  const t = window.__sosTeachers[currentUser.uid];
-  if (t) return true;
-  return Object.values(window.__sosTeachers || {}).some(x => x && x.uid === currentUser.uid);
+  try {
+    if (typeof isMasterAdmin === "function" && isMasterAdmin()) return true;
+    if (previewMode || !currentUser) {
+      // preview: allow if local teachers map has anyone matching demo
+      return false;
+    }
+    const uid = currentUser.uid;
+    const email = (currentUser.email || "").toLowerCase().trim();
+    const map = window.__sosTeachers || {};
+    if (map[uid]) return true;
+    return Object.values(map).some(function (x) {
+      if (!x) return false;
+      if (x.uid && x.uid === uid) return true;
+      if (email && String(x.email || "").toLowerCase().trim() === email) return true;
+      return false;
+    });
+  } catch (e) { return false; }
 }
 
 function canManageSchool() {
   return (typeof isMasterAdmin === "function" && isMasterAdmin()) || isTeacher();
+}
+
+function myTeacherRecord() {
+  if (!currentUser) return null;
+  const uid = currentUser.uid;
+  const email = (currentUser.email || "").toLowerCase().trim();
+  const map = window.__sosTeachers || {};
+  if (map[uid]) return { key: uid, rec: map[uid] };
+  for (const k of Object.keys(map)) {
+    const x = map[k];
+    if (!x) continue;
+    if (x.uid === uid) return { key: k, rec: x };
+    if (email && String(x.email || "").toLowerCase().trim() === email) return { key: k, rec: x };
+  }
+  return null;
 }
 
 function genSchoolId() {
@@ -19116,240 +19233,45 @@ function genClassCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
-window.loadSchoolSystem = async function(render) {
-  if (!currentUser || previewMode) return;
-  try {
-    const [s, c, t] = await Promise.all([
-      get(ref(db, "schools")),
-      get(ref(db, "classes")),
-      get(ref(db, "teachers"))
-    ]);
-    window.__sosSchools = s.val() || {};
-    window.__sosClasses = c.val() || {};
-    window.__sosTeachers = t.val() || {};
-  } catch (e) {
-    console.warn("school load", e);
-  }
-  if (render) renderSchoolAdminUI();
-};
-
-function fillSchoolSelects() {
-  const schools = Object.values(window.__sosSchools || {});
-  const opts = schools.length
-    ? schools.map(s => `<option value="${escapeHTML(s.id)}">${escapeHTML(s.name || s.id)}</option>`).join("")
-    : `<option value="">Keine Schule</option>`;
-  ["teacherGrantSchool", "classSchoolSelect"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const prev = el.value;
-    el.innerHTML = opts;
-    if (prev) el.value = prev;
-  });
-  // assign class select
-  const classSel = document.getElementById("assignClassSelect");
-  if (classSel) {
-    const classes = Object.values(window.__sosClasses || {});
-    classSel.innerHTML = classes.length
-      ? classes.map(c => {
-          const sch = window.__sosSchools[c.schoolId];
-          const label = (sch ? sch.name + " · " : "") + (c.name || c.id);
-          return `<option value="${escapeHTML(c.id)}">${escapeHTML(label)}</option>`;
-        }).join("")
-      : `<option value="">Keine Klasse</option>`;
-  }
-}
-
-function renderSchoolAdminUI() {
-  const masterPanel = document.getElementById("schoolMasterPanel");
-  if (masterPanel) masterPanel.style.display = isMasterAdmin() ? "" : "none";
-  fillSchoolSelects();
-  renderTeachersList();
-  renderSchoolClasses();
-  renderClassInviteCodes();
-}
-
-function renderTeachersList() {
-  const box = document.getElementById("teachersList");
-  if (!box) return;
-  const list = Object.values(window.__sosTeachers || {});
-  box.innerHTML = list.length ? list.map(t => {
-    const schoolNames = Object.keys(t.schools || {}).map(sid => window.__sosSchools[sid]?.name || sid).join(", ");
-    return `<div class="item">
-      <div class="item-main">
-        <div class="item-title">${escapeHTML(t.email || t.uid || "")} <span class="role-badge mod">LEHRER</span></div>
-        <div class="item-meta">${escapeHTML(schoolNames || "keine Schule")} · ${t.grantedAt ? new Date(t.grantedAt).toLocaleDateString("de-DE") : ""}</div>
-      </div>
-      ${isMasterAdmin() ? `<button class="btn btn-danger text-[10px]" onclick="masterRevokeTeacher('${escapeHTML(t.uid)}')">Entfernen</button>` : ""}
-    </div>`;
-  }).join("") : `<div class="empty">Noch keine Lehrer ernannt</div>`;
-}
-
-window.renderSchoolClasses = function() {
-  const box = document.getElementById("schoolClassesList");
-  if (!box) return;
-  const schoolId = document.getElementById("classSchoolSelect")?.value || "";
-  let list = Object.values(window.__sosClasses || {});
-  if (schoolId) list = list.filter(c => c.schoolId === schoolId);
-  // teachers only see their school classes
-  if (!isMasterAdmin() && isTeacher()) {
-    const t = window.__sosTeachers[currentUser.uid] || Object.values(window.__sosTeachers).find(x => x.uid === currentUser.uid);
-    const allowed = t?.schools || {};
-    list = list.filter(c => allowed[c.schoolId] || (c.teacherUids && c.teacherUids[currentUser.uid]));
-  }
-  box.innerHTML = list.length ? list.map(c => {
-    const students = Object.keys(c.students || {}).length;
-    const teachers = Object.keys(c.teacherUids || {}).length;
-    return `<div class="item">
-      <div class="item-main">
-        <div class="item-title">${escapeHTML(c.name || "")}</div>
-        <div class="item-meta">${students} Schüler · ${teachers} Lehrer · Code <code>${escapeHTML(c.inviteCode || "–")}</code></div>
-      </div>
-      <button class="btn text-[10px]" onclick="viewClassMembers('${escapeHTML(c.id)}')">Mitglieder</button>
-      <button class="btn text-[10px]" onclick="navigator.clipboard.writeText('${escapeHTML(c.inviteCode || "")}');toast('Code kopiert')">Code</button>
-    </div>`;
-  }).join("") : `<div class="empty">Keine Klassen</div>`;
-};
-
-function renderClassInviteCodes() {
-  const box = document.getElementById("classInviteCodes");
-  if (!box) return;
-  const list = Object.values(window.__sosClasses || {});
-  box.innerHTML = list.length ? list.map(c => {
-    const sch = window.__sosSchools[c.schoolId];
-    return `<div class="item-meta"><strong>${escapeHTML(c.name)}</strong> (${escapeHTML(sch?.name || "")}) → <code>${escapeHTML(c.inviteCode || "–")}</code></div>`;
-  }).join("") : `<div class="empty">Keine Codes</div>`;
-}
-
-window.masterCreateSchool = async function() {
-  if (!isMasterAdmin()) { toast("Nur Owner"); return; }
-  const name = (document.getElementById("schoolNewName")?.value || "").trim().slice(0, 80);
-  if (!name) { toast("Name eingeben"); return; }
-  const id = genSchoolId();
-  const entry = {
-    id,
-    name,
-    createdAt: Date.now(),
-    createdBy: currentUser.uid
+function peoplePool() {
+  const seen = new Set();
+  const out = [];
+  const add = function (p) {
+    if (!p || !p.uid || seen.has(p.uid)) return;
+    seen.add(p.uid);
+    out.push(p);
   };
+  (window.adminUsersCache || []).forEach(add);
+  (window.peopleCache || []).forEach(add);
+  return out;
+}
+
+function resolveAccountLabel(uid) {
   try {
-    await set(ref(db, "schools/" + id), entry);
-    window.__sosSchools[id] = entry;
-    try { writeAudit("school_create", { id, name }); } catch (e) {}
-    toast("Schule erstellt");
-    document.getElementById("schoolNewName").value = "";
-    renderSchoolAdminUI();
-  } catch (e) {
-    console.warn(e);
-    toast("Fehler – Rules für schools?");
-  }
-};
+    if (!uid) return { title: "–", meta: "", email: "", name: "", username: "" };
+    const p = peoplePool().find(x => x.uid === uid);
+    if (p) {
+      const name = p.name || p.username || "";
+      const email = p.email || "";
+      const uname = p.username ? "@" + p.username : "";
+      if (name && email) return { title: name, meta: (uname ? uname + " · " : "") + email, email, name, username: p.username || "" };
+      if (name) return { title: name, meta: uname || String(uid).slice(0, 10) + "…", email, name, username: p.username || "" };
+      if (email) return { title: email, meta: String(uid).slice(0, 12) + "…", email, name: "", username: p.username || "" };
+    }
+    const pub = (window.publicProfilesCache && window.publicProfilesCache[uid]) || null;
+    if (pub) {
+      const name = pub.name || pub.username || "";
+      if (name) return { title: name, meta: (pub.username ? "@" + pub.username + " · " : "") + (pub.className || String(uid).slice(0, 10) + "…"), email: pub.email || "", name, username: pub.username || "" };
+    }
+  } catch (e) {}
+  const s = String(uid);
+  return { title: s.length > 14 ? s.slice(0, 12) + "…" : s, meta: s, email: "", name: "", username: "" };
+}
 
-window.masterGrantTeacher = async function() {
-  if (!isMasterAdmin()) { toast("Nur Owner"); return; }
-  const raw = (document.getElementById("teacherGrantId")?.value || "").trim();
-  const schoolId = document.getElementById("teacherGrantSchool")?.value || "";
-  if (!raw) { toast("E-Mail oder UID"); return; }
-  if (!schoolId) { toast("Schule wählen"); return; }
-
-  // Prefer UID if looks like firebase uid, else store under email key and uid field empty
-  let uidKey = raw;
-  let email = "";
-  if (raw.includes("@")) {
-    email = raw.toLowerCase();
-    // try find in adminUsersCache / peopleCache
-    const p = (adminUsersCache || []).find(x => (x.email || "").toLowerCase() === email)
-      || (peopleCache || []).find(x => (x.email || "").toLowerCase() === email);
-    if (p?.uid) uidKey = p.uid;
-    else uidKey = "email_" + email.replace(/[^a-z0-9]/g, "_");
-  }
-  const entry = {
-    uid: uidKey.startsWith("email_") ? "" : uidKey,
-    email: email || (raw.includes("@") ? raw.toLowerCase() : ""),
-    schools: { [schoolId]: true },
-    grantedAt: Date.now(),
-    grantedBy: currentUser.uid,
-    role: "teacher"
-  };
-  // merge existing schools if re-grant
-  const existing = window.__sosTeachers[uidKey];
-  if (existing?.schools) entry.schools = { ...existing.schools, [schoolId]: true };
-  if (existing?.uid) entry.uid = existing.uid || entry.uid;
-
-  try {
-    await set(ref(db, "teachers/" + uidKey), entry);
-    window.__sosTeachers[uidKey] = entry;
-    try { writeAudit("teacher_grant", { uid: uidKey, email, schoolId }); } catch (e) {}
-    toast("Lehrer ernannt");
-    renderSchoolAdminUI();
-  } catch (e) {
-    console.warn(e);
-    toast("Fehler – Rules für teachers?");
-  }
-};
-
-window.masterRevokeTeacher = async function(uidKey) {
-  if (!isMasterAdmin() || !uidKey) return;
-  if (!confirm("Lehrer-Status wirklich entfernen?")) return;
-  try {
-    await remove(ref(db, "teachers/" + uidKey));
-    delete window.__sosTeachers[uidKey];
-    try { writeAudit("teacher_revoke", { uid: uidKey }); } catch (e) {}
-    toast("Lehrer entfernt");
-    renderSchoolAdminUI();
-  } catch (e) {
-    toast("Entfernen fehlgeschlagen");
-  }
-};
-
-window.createClassRoom = async function() {
-  if (!canManageSchool()) { toast("Keine Berechtigung"); return; }
-  const schoolId = document.getElementById("classSchoolSelect")?.value || "";
-  const name = (document.getElementById("classNewName")?.value || "").trim().slice(0, 40);
-  if (!schoolId) { toast("Schule wählen"); return; }
-  if (!name) { toast("Klassenname"); return; }
-  // teacher may only create in their schools
-  if (!isMasterAdmin()) {
-    const t = window.__sosTeachers[currentUser.uid] || Object.values(window.__sosTeachers).find(x => x.uid === currentUser.uid);
-    if (!t?.schools?.[schoolId]) { toast("Keine Rechte für diese Schule"); return; }
-  }
-  const id = genClassId();
-  const inviteCode = genClassCode();
-  const entry = {
-    id,
-    schoolId,
-    name,
-    inviteCode,
-    createdAt: Date.now(),
-    createdBy: currentUser.uid,
-    teacherUids: { [currentUser.uid]: true },
-    students: {}
-  };
-  try {
-    await set(ref(db, "classes/" + id), entry);
-    // also index invite
-    await set(ref(db, "classJoinCodes/" + inviteCode), {
-      code: inviteCode,
-      classId: id,
-      schoolId,
-      className: name,
-      schoolName: window.__sosSchools[schoolId]?.name || "",
-      by: currentUser.uid
-    });
-    window.__sosClasses[id] = entry;
-    try { writeAudit("class_create", { id, name, schoolId }); } catch (e) {}
-    toast("Klasse angelegt · Code " + inviteCode);
-    document.getElementById("classNewName").value = "";
-    renderSchoolAdminUI();
-  } catch (e) {
-    console.warn(e);
-    toast("Fehler – Rules für classes?");
-  }
-};
-
-window.resolveStudentInput = function(raw) {
+window.resolveStudentInput = function (raw) {
   raw = String(raw || "").trim();
   if (!raw) return null;
-  const pools = [].concat(window.adminUsersCache || [], window.peopleCache || []);
+  const pools = peoplePool();
   if (raw.startsWith("@")) {
     const un = raw.slice(1).toLowerCase();
     const p = pools.find(x => String(x.username || "").toLowerCase() === un);
@@ -19360,18 +19282,408 @@ window.resolveStudentInput = function(raw) {
     const p = pools.find(x => String(x.email || "").toLowerCase() === em);
     if (p?.uid) return p.uid;
   }
-  // exact uid
   if (pools.some(x => x.uid === raw)) return raw;
-  // looks like firebase uid
-  if (/^[A-Za-z0-9]{20,}$/.test(raw)) return raw;
-  // name search
+  if (/^[A-Za-z0-9_-]{18,}$/.test(raw)) return raw;
   const q = raw.toLowerCase();
-  const p = pools.find(x => String(x.name || "").toLowerCase() === q);
-  if (p?.uid) return p.uid;
-  return raw; // fallback as uid
+  const exact = pools.find(x => String(x.name || "").toLowerCase() === q);
+  if (exact?.uid) return exact.uid;
+  const partial = pools.filter(x =>
+    String(x.name || "").toLowerCase().includes(q) ||
+    String(x.username || "").toLowerCase().includes(q) ||
+    String(x.email || "").toLowerCase().includes(q)
+  );
+  if (partial.length === 1) return partial[0].uid;
+  return raw;
 };
 
-window.assignStudentToClass = async function() {
+window.onAssignStudentInput = function () {
+  const q = (document.getElementById("assignStudentUid")?.value || "").trim().toLowerCase();
+  const box = document.getElementById("assignStudentResults");
+  const hint = document.getElementById("assignStudentHint");
+  if (!box) return;
+  if (!q || q.length < 1) {
+    box.innerHTML = "";
+    if (hint) hint.textContent = "Account wird automatisch aufgelöst";
+    return;
+  }
+  const hits = peoplePool().filter(p =>
+    String(p.name || "").toLowerCase().includes(q) ||
+    String(p.username || "").toLowerCase().includes(q) ||
+    String(p.email || "").toLowerCase().includes(q) ||
+    String(p.uid || "").toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (hint) {
+    const resolved = resolveStudentInput(document.getElementById("assignStudentUid")?.value || "");
+    const a = resolved ? resolveAccountLabel(resolved) : null;
+    hint.textContent = a && a.title !== resolved
+      ? ("Gefunden: " + a.title + (a.meta ? " · " + a.meta : ""))
+      : (hits.length ? hits.length + " Treffer" : "Kein Profil in Cache – UID wird direkt verwendet");
+  }
+  box.innerHTML = hits.map(p => {
+    const a = resolveAccountLabel(p.uid);
+    return `<button type="button" class="item w-full text-left" onclick="document.getElementById('assignStudentUid').value='${escapeHTML(p.uid)}';onAssignStudentInput();toast('Ausgewählt: ${escapeHTML(a.title)}')">
+      <div class="item-main min-w-0">
+        <div class="item-title truncate">${escapeHTML(a.title)}</div>
+        <div class="item-meta truncate">${escapeHTML(a.meta)}</div>
+      </div>
+    </button>`;
+  }).join("");
+};
+
+function fillPeopleDatalist() {
+  const dl = document.getElementById("peopleSuggestList");
+  if (!dl) return;
+  const opts = peoplePool().slice(0, 200).map(p => {
+    const label = [p.name, p.username ? "@" + p.username : "", p.email].filter(Boolean).join(" · ");
+    return `<option value="${escapeHTML(p.email || p.username || p.uid)}">${escapeHTML(label)}</option>`;
+  }).join("");
+  dl.innerHTML = opts;
+}
+
+async function schoolDbWrite(path, value) {
+  if (previewMode || !currentUser || typeof ref !== "function") {
+    schoolLocalSave();
+    return { local: true };
+  }
+  try {
+    await set(ref(db, path), value);
+    schoolLocalSave();
+    return { ok: true };
+  } catch (e) {
+    console.warn("school write", path, e);
+    schoolLocalSave();
+    return { local: true, error: e };
+  }
+}
+
+async function schoolDbUpdate(path, value) {
+  if (previewMode || !currentUser || typeof update !== "function") {
+    schoolLocalSave();
+    return { local: true };
+  }
+  try {
+    await update(ref(db, path), value);
+    schoolLocalSave();
+    return { ok: true };
+  } catch (e) {
+    console.warn("school update", path, e);
+    schoolLocalSave();
+    return { local: true, error: e };
+  }
+}
+
+async function schoolDbRemove(path) {
+  if (previewMode || !currentUser || typeof remove !== "function") {
+    schoolLocalSave();
+    return { local: true };
+  }
+  try {
+    await remove(ref(db, path));
+    schoolLocalSave();
+    return { ok: true };
+  } catch (e) {
+    schoolLocalSave();
+    return { local: true, error: e };
+  }
+}
+
+window.loadSchoolSystem = async function (render) {
+  schoolLocalLoad();
+  if (currentUser && !previewMode && typeof get === "function" && typeof ref === "function") {
+    try {
+      const [s, c, t] = await Promise.all([
+        get(ref(db, "schools")),
+        get(ref(db, "classes")),
+        get(ref(db, "teachers"))
+      ]);
+      const sv = s.val(), cv = c.val(), tv = t.val();
+      if (sv && typeof sv === "object") window.__sosSchools = sv;
+      if (cv && typeof cv === "object") window.__sosClasses = cv;
+      if (tv && typeof tv === "object") window.__sosTeachers = tv;
+      schoolLocalSave();
+    } catch (e) {
+      console.warn("school load firebase", e);
+    }
+  }
+  if (render !== false) renderSchoolAdminUI();
+  try {
+    if (typeof applyTeacherModeNav === "function") applyTeacherModeNav();
+    if (typeof renderTeacherDashboard === "function" &&
+        document.getElementById("page-teacher-dashboard")?.classList.contains("active")) {
+      renderTeacherDashboard();
+    }
+  } catch (e) {}
+};
+
+function fillSchoolSelects() {
+  const schools = Object.values(window.__sosSchools || {}).filter(Boolean);
+  // filter schools for teachers
+  let schoolList = schools;
+  if (!isMasterAdmin() && isTeacher()) {
+    const tr = myTeacherRecord();
+    const allowed = (tr && tr.rec && tr.rec.schools) || {};
+    schoolList = schools.filter(s => allowed[s.id]);
+    if (!schoolList.length) schoolList = schools; // fallback show all if map empty
+  }
+  const opts = schoolList.length
+    ? schoolList.map(s => `<option value="${escapeHTML(s.id)}">${escapeHTML(s.name || s.id)}</option>`).join("")
+    : `<option value="">Keine Schule – Owner legt an</option>`;
+  ["teacherGrantSchool", "classSchoolSelect"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const prev = el.value;
+    el.innerHTML = opts;
+    if (prev && [...el.options].some(o => o.value === prev)) el.value = prev;
+  });
+  const classSel = document.getElementById("assignClassSelect");
+  if (classSel) {
+    let classes = Object.values(window.__sosClasses || {}).filter(Boolean);
+    if (!isMasterAdmin() && isTeacher()) {
+      const tr = myTeacherRecord();
+      const allowed = (tr && tr.rec && tr.rec.schools) || {};
+      const uid = currentUser?.uid;
+      classes = classes.filter(c => allowed[c.schoolId] || (c.teacherUids && uid && c.teacherUids[uid]));
+    }
+    classSel.innerHTML = classes.length
+      ? classes.map(c => {
+          const sch = window.__sosSchools[c.schoolId];
+          const label = (sch ? sch.name + " · " : "") + (c.name || c.id);
+          return `<option value="${escapeHTML(c.id)}">${escapeHTML(label)}</option>`;
+        }).join("")
+      : `<option value="">Keine Klasse</option>`;
+  }
+  fillPeopleDatalist();
+}
+
+function updateSchoolKpis() {
+  const schools = Object.keys(window.__sosSchools || {}).length;
+  const classes = Object.values(window.__sosClasses || {});
+  let students = 0;
+  classes.forEach(c => { students += Object.keys(c.students || {}).length; });
+  const teachers = Object.keys(window.__sosTeachers || {}).length;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+  set("schoolKpiSchools", schools);
+  set("schoolKpiClasses", classes.length);
+  set("schoolKpiTeachers", teachers);
+  set("schoolKpiStudents", students);
+}
+
+function renderSchoolAdminUI() {
+  const masterPanel = document.getElementById("schoolMasterPanel");
+  if (masterPanel) masterPanel.style.display = isMasterAdmin() ? "" : "none";
+  const hint = document.getElementById("schoolAccessHint");
+  if (hint) {
+    if (isMasterAdmin()) hint.textContent = "Owner-Rechte · volle Verwaltung";
+    else if (isTeacher()) hint.textContent = "Lehrer-Rechte · Klassen & Schüler deiner Schule";
+    else hint.textContent = "Keine Schule-Rechte – Owner muss dich als Lehrer ernennen";
+  }
+  const btnT = document.getElementById("btnTeacherModeFromAdmin");
+  if (btnT) btnT.style.display = (isTeacher() || isMasterAdmin()) ? "" : "none";
+  fillSchoolSelects();
+  updateSchoolKpis();
+  renderTeachersList();
+  renderSchoolsListAdmin();
+  renderSchoolClasses();
+  renderClassInviteCodes();
+}
+
+function renderSchoolsListAdmin() {
+  const box = document.getElementById("schoolsListAdmin");
+  if (!box) return;
+  const list = Object.values(window.__sosSchools || {});
+  box.innerHTML = list.length ? list.map(s => `
+    <div class="item">
+      <div class="item-main">
+        <div class="item-title">${escapeHTML(s.name || s.id)}</div>
+        <div class="item-meta">ID ${escapeHTML(s.id)} · ${s.createdAt ? new Date(s.createdAt).toLocaleDateString("de-DE") : ""}</div>
+      </div>
+    </div>`).join("") : `<div class="empty">Noch keine Schule angelegt</div>`;
+}
+
+function renderTeachersList() {
+  const box = document.getElementById("teachersListAdmin") || document.getElementById("teachersList");
+  if (!box) return;
+  const list = Object.entries(window.__sosTeachers || {});
+  box.innerHTML = list.length ? list.map(([key, t]) => {
+    const schoolNames = Object.keys(t.schools || {}).map(sid => window.__sosSchools[sid]?.name || sid).join(", ");
+    const a = t.uid ? resolveAccountLabel(t.uid) : null;
+    const title = (a && a.name) ? a.title : (t.email || t.uid || key);
+    const meta = [schoolNames || "keine Schule", t.email || "", t.uid ? t.uid.slice(0, 10) + "…" : ""].filter(Boolean).join(" · ");
+    return `<div class="item">
+      <div class="item-main">
+        <div class="item-title">${escapeHTML(title)} <span class="role-badge admin">LEHRER</span></div>
+        <div class="item-meta">${escapeHTML(meta)}${t.grantedAt ? " · " + new Date(t.grantedAt).toLocaleDateString("de-DE") : ""}</div>
+      </div>
+      ${isMasterAdmin() ? `<button class="btn btn-danger text-[10px]" onclick="masterRevokeTeacher('${escapeHTML(key)}')">Entfernen</button>` : ""}
+    </div>`;
+  }).join("") : `<div class="empty">Noch keine Lehrer ernannt</div>`;
+}
+
+window.renderSchoolClasses = function () {
+  const box = document.getElementById("schoolClassesList");
+  if (!box) return;
+  const schoolId = document.getElementById("classSchoolSelect")?.value || "";
+  let list = Object.values(window.__sosClasses || {}).filter(Boolean);
+  if (schoolId) list = list.filter(c => c.schoolId === schoolId);
+  if (!isMasterAdmin() && isTeacher()) {
+    const tr = myTeacherRecord();
+    const allowed = (tr && tr.rec && tr.rec.schools) || {};
+    const uid = currentUser?.uid;
+    list = list.filter(c => allowed[c.schoolId] || (c.teacherUids && uid && c.teacherUids[uid]));
+  }
+  box.innerHTML = list.length ? list.map(c => {
+    const students = Object.keys(c.students || {});
+    const n = students.length;
+    const preview = students.slice(0, 3).map(u => resolveAccountLabel(u).title).join(", ");
+    const sch = window.__sosSchools[c.schoolId]?.name || "";
+    return `<div class="item">
+      <div class="item-main min-w-0">
+        <div class="item-title">${escapeHTML(c.name || "")} <span class="tiny muted">${escapeHTML(sch)}</span></div>
+        <div class="item-meta">${n} Schüler${preview ? " · " + escapeHTML(preview) + (n > 3 ? "…" : "") : ""} · Code <code>${escapeHTML(c.inviteCode || "–")}</code></div>
+      </div>
+      <button class="btn text-[10px]" onclick="viewClassMembers('${escapeHTML(c.id)}')">Mitglieder</button>
+      <button class="btn text-[10px]" onclick="navigator.clipboard.writeText('${escapeHTML(c.inviteCode || "")}');toast('Code kopiert')">Code</button>
+    </div>`;
+  }).join("") : `<div class="empty">Keine Klassen – lege oben eine an</div>`;
+};
+
+function renderClassInviteCodes() {
+  const box = document.getElementById("classInviteCodes");
+  if (!box) return;
+  let list = Object.values(window.__sosClasses || {}).filter(Boolean);
+  if (!isMasterAdmin() && isTeacher()) {
+    const tr = myTeacherRecord();
+    const allowed = (tr && tr.rec && tr.rec.schools) || {};
+    const uid = currentUser?.uid;
+    list = list.filter(c => allowed[c.schoolId] || (c.teacherUids && uid && c.teacherUids[uid]));
+  }
+  box.innerHTML = list.length ? list.map(c => {
+    const sch = window.__sosSchools[c.schoolId];
+    return `<div class="item">
+      <div class="item-main">
+        <div class="item-title">${escapeHTML(c.name)} <span class="tiny muted">${escapeHTML(sch?.name || "")}</span></div>
+        <div class="item-meta">Code <code style="font-size:13px;letter-spacing:.06em">${escapeHTML(c.inviteCode || "–")}</code> · ${Object.keys(c.students||{}).length} Schüler</div>
+      </div>
+      <button class="btn text-[10px]" onclick="navigator.clipboard.writeText('${escapeHTML(c.inviteCode||"")}');toast('Code kopiert')">Kopieren</button>
+    </div>`;
+  }).join("") : `<div class="empty">Keine Codes</div>`;
+}
+
+window.masterCreateSchool = async function () {
+  if (!isMasterAdmin()) { toast("Nur Owner"); return; }
+  const name = (document.getElementById("schoolNewName")?.value || "").trim().slice(0, 80);
+  if (!name) { toast("Name eingeben"); return; }
+  const id = genSchoolId();
+  const entry = { id, name, createdAt: Date.now(), createdBy: currentUser?.uid || "local" };
+  window.__sosSchools[id] = entry;
+  const res = await schoolDbWrite("schools/" + id, entry);
+  try { writeAudit("school_create", { id, name }); } catch (e) {}
+  toast(res.local && !res.ok ? "Schule lokal gespeichert (Cloud später)" : "Schule erstellt");
+  const inp = document.getElementById("schoolNewName");
+  if (inp) inp.value = "";
+  renderSchoolAdminUI();
+};
+
+window.masterGrantTeacher = async function () {
+  if (!isMasterAdmin()) { toast("Nur Owner"); return; }
+  const raw = (document.getElementById("teacherGrantId")?.value || "").trim();
+  const schoolId = document.getElementById("teacherGrantSchool")?.value || "";
+  if (!raw) { toast("E-Mail, @Username oder UID"); return; }
+  if (!schoolId) { toast("Schule wählen"); return; }
+
+  let uidKey = raw;
+  let email = "";
+  let uid = "";
+  const pools = peoplePool();
+  if (raw.startsWith("@")) {
+    const p = pools.find(x => String(x.username || "").toLowerCase() === raw.slice(1).toLowerCase());
+    if (p) { uidKey = p.uid; uid = p.uid; email = (p.email || "").toLowerCase(); }
+  } else if (raw.includes("@")) {
+    email = raw.toLowerCase();
+    const p = pools.find(x => String(x.email || "").toLowerCase() === email);
+    if (p?.uid) { uidKey = p.uid; uid = p.uid; }
+    else uidKey = "email_" + email.replace(/[^a-z0-9]/g, "_");
+  } else {
+    const resolved = resolveStudentInput(raw);
+    uidKey = resolved || raw;
+    uid = uidKey;
+    const p = pools.find(x => x.uid === uidKey);
+    if (p?.email) email = String(p.email).toLowerCase();
+  }
+
+  const entry = {
+    uid: uid || (uidKey.startsWith("email_") ? "" : uidKey),
+    email: email || (raw.includes("@") ? raw.toLowerCase() : ""),
+    schools: { [schoolId]: true },
+    grantedAt: Date.now(),
+    grantedBy: currentUser?.uid || "local",
+    role: "teacher"
+  };
+  const existing = window.__sosTeachers[uidKey];
+  if (existing?.schools) entry.schools = { ...existing.schools, [schoolId]: true };
+  if (existing?.uid) entry.uid = existing.uid || entry.uid;
+  if (existing?.email && !entry.email) entry.email = existing.email;
+
+  window.__sosTeachers[uidKey] = entry;
+  const res = await schoolDbWrite("teachers/" + uidKey, entry);
+  try { writeAudit("teacher_grant", { uid: uidKey, email, schoolId }); } catch (e) {}
+  toast(res.error ? "Lehrer lokal gesetzt (Cloud-Fehler)" : "Lehrer ernannt");
+  const inp = document.getElementById("teacherGrantId");
+  if (inp) inp.value = "";
+  renderSchoolAdminUI();
+  try { applyTeacherModeNav(); } catch (e) {}
+};
+
+window.masterRevokeTeacher = async function (uidKey) {
+  if (!isMasterAdmin() || !uidKey) return;
+  if (!confirm("Lehrer-Status wirklich entfernen?")) return;
+  delete window.__sosTeachers[uidKey];
+  await schoolDbRemove("teachers/" + uidKey);
+  try { writeAudit("teacher_revoke", { uid: uidKey }); } catch (e) {}
+  toast("Lehrer entfernt");
+  renderSchoolAdminUI();
+};
+
+window.createClassRoom = async function () {
+  if (!canManageSchool()) { toast("Keine Berechtigung – du brauchst Lehrer-Rechte"); return; }
+  const schoolId = document.getElementById("classSchoolSelect")?.value || "";
+  const name = (document.getElementById("classNewName")?.value || "").trim().slice(0, 40);
+  if (!schoolId) { toast("Schule wählen (Owner muss Schule anlegen)"); return; }
+  if (!name) { toast("Klassenname eingeben"); return; }
+  if (!isMasterAdmin()) {
+    const tr = myTeacherRecord();
+    if (!tr?.rec?.schools?.[schoolId]) { toast("Keine Rechte für diese Schule"); return; }
+  }
+  const id = genClassId();
+  const inviteCode = genClassCode();
+  const entry = {
+    id,
+    schoolId,
+    name,
+    inviteCode,
+    createdAt: Date.now(),
+    createdBy: currentUser?.uid || "local",
+    teacherUids: currentUser?.uid ? { [currentUser.uid]: true } : {},
+    students: {}
+  };
+  window.__sosClasses[id] = entry;
+  await schoolDbWrite("classes/" + id, entry);
+  await schoolDbWrite("classJoinCodes/" + inviteCode, {
+    code: inviteCode,
+    classId: id,
+    schoolId,
+    className: name,
+    schoolName: window.__sosSchools[schoolId]?.name || "",
+    by: currentUser?.uid || "local"
+  });
+  try { writeAudit("class_create", { id, name, schoolId }); } catch (e) {}
+  toast("Klasse angelegt · Code " + inviteCode);
+  const inp = document.getElementById("classNewName");
+  if (inp) inp.value = "";
+  renderSchoolAdminUI();
+};
+
+window.assignStudentToClass = async function () {
   if (!canManageSchool()) { toast("Keine Berechtigung"); return; }
   const raw = (document.getElementById("assignStudentUid")?.value || "").trim();
   const uid = resolveStudentInput(raw);
@@ -19379,37 +19691,38 @@ window.assignStudentToClass = async function() {
   if (!uid || !classId) { toast("Schüler und Klasse wählen"); return; }
   const cls = window.__sosClasses[classId];
   if (!cls) { toast("Klasse nicht gefunden"); return; }
-  const students = { ...(cls.students || {}), [uid]: { at: Date.now(), by: currentUser.uid } };
+  const students = { ...(cls.students || {}), [uid]: { at: Date.now(), by: currentUser?.uid || "local" } };
+  cls.students = students;
+  window.__sosClasses[classId] = cls;
+  await schoolDbUpdate("classes/" + classId, { students });
+  await schoolDbWrite("userSchool/" + uid, {
+    schoolId: cls.schoolId,
+    classId,
+    className: cls.name,
+    schoolName: window.__sosSchools[cls.schoolId]?.name || "",
+    role: "student",
+    updatedAt: Date.now()
+  });
   try {
-    await update(ref(db, "classes/" + classId), { students });
-    await set(ref(db, "userSchool/" + uid), {
-      schoolId: cls.schoolId,
-      classId,
-      className: cls.name,
-      schoolName: window.__sosSchools[cls.schoolId]?.name || "",
-      role: "student",
-      updatedAt: Date.now()
-    });
-    // try update public profile className
-    try {
+    if (!previewMode && currentUser) {
       await update(ref(db, "publicProfiles/" + uid), {
         className: cls.name,
         schoolId: cls.schoolId,
         classId
       });
-    } catch (e) {}
-    cls.students = students;
-    window.__sosClasses[classId] = cls;
-    try { writeAudit("student_assign", { uid, classId }); } catch (e) {}
-    toast("Schüler zugeordnet");
-    renderSchoolClasses();
-  } catch (e) {
-    console.warn(e);
-    toast("Zuordnung fehlgeschlagen");
-  }
+    }
+  } catch (e) {}
+  try { writeAudit("student_assign", { uid, classId }); } catch (e) {}
+  const a = resolveAccountLabel(uid);
+  toast("Zugeordnet: " + a.title);
+  const resBox = document.getElementById("assignStudentResults");
+  if (resBox) resBox.innerHTML = "";
+  renderSchoolClasses();
+  updateSchoolKpis();
+  renderClassInviteCodes();
 };
 
-window.removeStudentFromClass = async function() {
+window.removeStudentFromClass = async function () {
   if (!canManageSchool()) { toast("Keine Berechtigung"); return; }
   const uid = resolveStudentInput(document.getElementById("assignStudentUid")?.value || "");
   const classId = document.getElementById("assignClassSelect")?.value || "";
@@ -19418,72 +19731,76 @@ window.removeStudentFromClass = async function() {
   if (!cls) return;
   const students = { ...(cls.students || {}) };
   delete students[uid];
-  try {
-    await update(ref(db, "classes/" + classId), { students });
-    await remove(ref(db, "userSchool/" + uid));
-    cls.students = students;
-    try { writeAudit("student_remove", { uid, classId }); } catch (e) {}
-    toast("Schüler entfernt");
-    renderSchoolClasses();
-  } catch (e) {
-    toast("Entfernen fehlgeschlagen");
-  }
+  cls.students = students;
+  window.__sosClasses[classId] = cls;
+  await schoolDbUpdate("classes/" + classId, { students });
+  await schoolDbRemove("userSchool/" + uid);
+  try { writeAudit("student_remove", { uid, classId }); } catch (e) {}
+  toast("Schüler entfernt");
+  renderSchoolClasses();
+  updateSchoolKpis();
 };
 
-function resolveAccountLabel(uid) {
-  try {
-    const pools = [].concat(window.adminUsersCache || [], window.peopleCache || []);
-    const p = pools.find(x => x && x.uid === uid);
-    if (p) {
-      const name = p.name || p.username || "";
-      const email = p.email || "";
-      const uname = p.username ? "@" + p.username : "";
-      if (name && email) return { title: name, meta: (uname ? uname + " · " : "") + email, email, name, username: p.username || "" };
-      if (name) return { title: name, meta: uname || uid.slice(0, 10) + "…", email, name, username: p.username || "" };
-      if (email) return { title: email, meta: uid.slice(0, 12) + "…", email, name: "", username: p.username || "" };
-    }
-    // publicProfiles cache if present
-    const pub = (window.publicProfilesCache && window.publicProfilesCache[uid]) || null;
-    if (pub) {
-      const name = pub.name || pub.username || "";
-      if (name) return { title: name, meta: (pub.username ? "@" + pub.username + " · " : "") + (pub.className || uid.slice(0, 10) + "…"), email: pub.email || "", name, username: pub.username || "" };
-    }
-  } catch (e) {}
-  return { title: uid.slice(0, 12) + "…", meta: uid, email: "", name: "", username: "" };
-}
-
-window.viewClassMembers = function(classId) {
+window.viewClassMembers = function (classId) {
   const cls = window.__sosClasses[classId];
   if (!cls) return;
   const students = Object.keys(cls.students || {});
   const teachers = Object.keys(cls.teacherUids || {});
-  const row = (u, role) => {
+  const row = function (u, role) {
     const a = resolveAccountLabel(u);
     return `<div class="item">
       <div class="item-main min-w-0">
-        <div class="item-title truncate">${escapeHTML(a.title)} ${role === "teacher" ? '<span class="role-badge mod">LEHRER</span>' : ""}</div>
-        <div class="item-meta truncate">${escapeHTML(a.meta)}</div>
+        <div class="item-title truncate">${escapeHTML(a.title)} ${role === "teacher" ? '<span class="role-badge admin">LEHRER</span>' : ""}</div>
+        <div class="item-meta truncate">${escapeHTML(a.meta || u)}</div>
       </div>
-      <button class="btn text-[10px]" onclick="document.getElementById('assignStudentUid').value='${escapeHTML(u)}';toast('Account übernommen')">Übernehmen</button>
+      <button class="btn text-[10px]" onclick="document.getElementById('assignStudentUid').value='${escapeHTML(u)}';try{setAdminTab('school')}catch(e){};toast('Übernommen')">Übernehmen</button>
+      ${role === "student" ? `<button class="btn btn-danger text-[10px]" onclick="document.getElementById('assignStudentUid').value='${escapeHTML(u)}';document.getElementById('assignClassSelect').value='${escapeHTML(classId)}';removeStudentFromClass();closeModal()">Entfernen</button>` : ""}
     </div>`;
   };
   openModal("Klasse " + (cls.name || ""), `
+    <div class="text-sm mb-1"><strong>Schule:</strong> ${escapeHTML(window.__sosSchools[cls.schoolId]?.name || "–")}</div>
+    <div class="text-sm mb-3"><strong>Code:</strong> <code>${escapeHTML(cls.inviteCode || "")}</code>
+      <button class="btn text-[10px] ml-2" onclick="navigator.clipboard.writeText('${escapeHTML(cls.inviteCode||"")}');toast('Kopiert')">Kopieren</button>
+    </div>
     <div class="text-sm mb-2"><strong>Lehrer (${teachers.length}):</strong></div>
-    <div class="space-y-1 mb-3">${teachers.map(u => row(u, "teacher")).join("") || "–"}</div>
+    <div class="space-y-1 mb-3">${teachers.map(u => row(u, "teacher")).join("") || "<div class='empty'>–</div>"}</div>
     <div class="text-sm mb-2"><strong>Schüler (${students.length}):</strong></div>
-    <div class="space-y-1 max-h-56 overflow-y-auto">${students.map(u => row(u, "student")).join("") || "<div class='empty'>Keine Schüler</div>"}</div>
-    <div class="mt-3 text-xs text-slate-400">Invite-Code: <code>${escapeHTML(cls.inviteCode || "")}</code></div>
+    <div class="space-y-1 max-h-64 overflow-y-auto">${students.map(u => row(u, "student")).join("") || "<div class='empty'>Keine Schüler – zuordnen oder Code teilen</div>"}</div>
   `);
 };
 
-/** Schüler: Code einlösen → Klasse + Schule */
-window.joinClassByCode = async function(code) {
+window.joinClassByCode = async function (code) {
   code = String(code || "").trim().toUpperCase();
   if (!code || !currentUser) return false;
+  // local first
+  const localCls = Object.values(window.__sosClasses || {}).find(c => String(c.inviteCode || "").toUpperCase() === code);
+  if (localCls) {
+    const students = { ...(localCls.students || {}), [currentUser.uid]: { at: Date.now(), by: "self" } };
+    localCls.students = students;
+    window.__sosClasses[localCls.id] = localCls;
+    schoolLocalSave();
+    try {
+      await schoolDbUpdate("classes/" + localCls.id, { students });
+      await schoolDbWrite("userSchool/" + currentUser.uid, {
+        schoolId: localCls.schoolId,
+        classId: localCls.id,
+        className: localCls.name,
+        schoolName: window.__sosSchools[localCls.schoolId]?.name || "",
+        role: "student",
+        updatedAt: Date.now()
+      });
+    } catch (e) {}
+    data.settings.className = localCls.name;
+    data.settings.schoolId = localCls.schoolId;
+    data.settings.classId = localCls.id;
+    data.settings.schoolName = window.__sosSchools[localCls.schoolId]?.name || "";
+    try { save(); } catch (e) {}
+    toast("Beigetreten: " + localCls.name);
+    return true;
+  }
   try {
     let snap = await get(ref(db, "classJoinCodes/" + code));
     if (!snap.exists()) {
-      // fallback legacy classInvites
       snap = await get(ref(db, "classInvites/" + code));
       if (!snap.exists()) { toast("Code ungültig"); return false; }
       const inv = snap.val();
@@ -19508,6 +19825,8 @@ window.joinClassByCode = async function(code) {
       role: "student",
       updatedAt: Date.now()
     });
+    window.__sosClasses[classId] = { ...cls, students };
+    schoolLocalSave();
     data.settings.className = cls.name;
     data.settings.schoolId = cls.schoolId;
     data.settings.classId = classId;
@@ -26212,199 +26531,221 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
 })();
 
 
-/* ===== Teacher Mode + Teacher Dashboard ===== */
+
+/* ===== Teacher Mode + Teacher Dashboard (v2) ===== */
 (function(){
   function teacherModeOn() {
     try {
       if (localStorage.getItem("schoolosTeacherMode") === "1") return true;
-      if (data && data.settings && data.settings.teacherMode === true) return true;
+      if (typeof data !== "undefined" && data && data.settings && data.settings.teacherMode === true) return true;
     } catch (e) {}
     return false;
   }
   window.isTeacherModeActive = function() {
-    return typeof isTeacher === "function" && isTeacher() && teacherModeOn();
+    try {
+      return (typeof isTeacher === "function" && isTeacher()) && teacherModeOn();
+    } catch (e) { return false; }
   };
   window.setTeacherMode = function(on) {
-    if (typeof isTeacher === "function" && !isTeacher() && !isMasterAdmin()) {
-      toast("Keine Lehrer-Rechte");
+    on = !!on;
+    if (on && typeof isTeacher === "function" && !isTeacher()) {
+      toast("Keine Lehrer-Rechte – Owner muss dich ernennen (Admin → Schule)");
       return;
     }
     try {
       localStorage.setItem("schoolosTeacherMode", on ? "1" : "0");
-      if (data && data.settings) data.settings.teacherMode = !!on;
-      try { if (typeof save === "function") save(); } catch (e) {}
+      if (typeof data !== "undefined" && data) {
+        data.settings = data.settings || {};
+        data.settings.teacherMode = on;
+        try { if (typeof save === "function") save(); } catch (e) {}
+      }
     } catch (e) {}
     const cb = document.getElementById("settingTeacherMode");
-    if (cb) cb.checked = !!on;
-    toast(on ? "Lehrer-Modus an" : "Schüler-Ansicht");
+    if (cb) cb.checked = on;
+    toast(on ? "Lehrer-Dashboard aktiv" : "Schüler-Dashboard aktiv");
+    applyTeacherModeNav();
     try {
-      if (on) {
-        showPage("teacher-dashboard");
-      } else {
-        showPage("dashboard");
-      }
-      applyTeacherModeNav();
-      renderAll();
-    } catch (e) {
-      try { renderTeacherDashboard(); } catch (err) {}
-    }
+      if (on) window.showPage("teacher-dashboard");
+      else window.showPage("dashboard");
+    } catch (e) {}
   };
   window.applyTeacherModeNav = function() {
-    const active = isTeacherModeActive();
-    // Hide pure student widgets when in teacher mode on student dashboard
-    try {
-      const studentOnly = ["startTile", "morningCard", "bringListCard", "weekGoalCard", "eveningCard"];
-      // don't force-hide; teacher has own page
-    } catch (e) {}
+    const canTeach = (typeof isTeacher === "function" && isTeacher()) ||
+      (typeof isMasterAdmin === "function" && isMasterAdmin());
     const box = document.getElementById("teacherModeSettings");
-    if (box) box.style.display = (typeof isTeacher === "function" && (isTeacher() || (typeof isMasterAdmin==="function" && isMasterAdmin()))) ? "" : "none";
+    if (box) box.style.display = canTeach ? "" : "none";
     const cb = document.getElementById("settingTeacherMode");
-    if (cb) cb.checked = teacherModeOn() && (typeof isTeacher === "function" && isTeacher());
+    if (cb) cb.checked = canTeach && teacherModeOn();
+    // Sidebar: ensure Admin/Schule visible
+    try {
+      const btn = document.getElementById("navAdminBtn");
+      if (btn) {
+        btn.style.display = (canTeach || (typeof isAdmin === "function" && isAdmin())) ? "" : "none";
+        const span = btn.querySelector("span:not(.nav-icon)");
+        if (span && canTeach && !(typeof isAdmin === "function" && isAdmin())) span.textContent = "Schule";
+      }
+    } catch (e) {}
   };
 
   window.renderTeacherDashboard = function() {
     const page = document.getElementById("page-teacher-dashboard");
     if (!page) return;
-    if (typeof loadSchoolSystem === "function") {
-      try { loadSchoolSystem(false); } catch (e) {}
-    }
+    try { if (typeof loadSchoolSystem === "function") loadSchoolSystem(false); } catch (e) {}
     const myUid = (typeof currentUser !== "undefined" && currentUser) ? currentUser.uid : null;
     const schools = window.__sosSchools || {};
     const classes = Object.values(window.__sosClasses || {});
-    const myClasses = classes.filter(c => {
+    const myClasses = classes.filter(function(c) {
       if (!c) return false;
       if (typeof isMasterAdmin === "function" && isMasterAdmin()) return true;
       if (c.teacherUids && myUid && c.teacherUids[myUid]) return true;
-      // teacher granted for school
-      const t = (window.__sosTeachers || {})[myUid] || Object.values(window.__sosTeachers || {}).find(x => x && x.uid === myUid);
-      if (t && t.schools && c.schoolId && t.schools[c.schoolId]) return true;
+      try {
+        const tr = typeof myTeacherRecord === "function" ? myTeacherRecord() : null;
+        if (tr && tr.rec && tr.rec.schools && c.schoolId && tr.rec.schools[c.schoolId]) return true;
+      } catch (e) {}
       return false;
     });
-    let studentSet = new Set();
-    myClasses.forEach(c => Object.keys(c.students || {}).forEach(u => studentSet.add(u)));
-    const schoolIds = new Set(myClasses.map(c => c.schoolId).filter(Boolean));
-    const codes = myClasses.filter(c => c.inviteCode).length;
-
-    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const studentSet = new Set();
+    myClasses.forEach(function(c) { Object.keys(c.students || {}).forEach(function(u) { studentSet.add(u); }); });
+    const schoolIds = new Set(myClasses.map(function(c) { return c.schoolId; }).filter(Boolean));
+    const codes = myClasses.filter(function(c) { return c.inviteCode; }).length;
+    function setTxt(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
     setTxt("tdStatClasses", myClasses.length);
     setTxt("tdStatStudents", studentSet.size);
     setTxt("tdStatSchools", schoolIds.size);
     setTxt("tdStatCodes", codes);
-
     const nameEl = document.getElementById("teacherDashName");
-    if (nameEl) nameEl.textContent = (data?.settings?.name ? data.settings.name + " · " : "") + "Lehrer-Dashboard";
+    if (nameEl) {
+      const n = (typeof data !== "undefined" && data?.settings?.name) ? data.settings.name + " · " : "";
+      nameEl.textContent = n + "Lehrer-Dashboard";
+    }
     const sum = document.getElementById("teacherDashSummary");
-    if (sum) sum.textContent = myClasses.length
-      ? (myClasses.length + " Klasse" + (myClasses.length===1?"":"n") + " · " + studentSet.size + " Schüler")
-      : "Noch keine Klassen – im Admin-Bereich anlegen.";
-
+    if (sum) {
+      sum.textContent = myClasses.length
+        ? (myClasses.length + " Klasse" + (myClasses.length === 1 ? "" : "n") + " · " + studentSet.size + " Schüler")
+        : "Noch keine Klassen – unter Admin/Schule anlegen.";
+    }
     const list = document.getElementById("tdClassesList");
     if (list) {
       if (!myClasses.length) {
-        list.innerHTML = '<div class="empty">Keine Klassen. Owner ernennt Lehrer, dann Klasse anlegen.</div>';
+        list.innerHTML = '<div class="empty">Keine Klassen. Owner ernennt Lehrer, dann unter Schule Klasse anlegen.</div>';
       } else {
-        list.innerHTML = myClasses.map(c => {
+        list.innerHTML = myClasses.map(function(c) {
           const n = Object.keys(c.students || {}).length;
           const sch = schools[c.schoolId]?.name || "";
-          return `<div class="item" style="cursor:pointer" onclick="viewClassMembers('${escapeHTML(c.id)}')">
-            <div class="item-main">
-              <div class="item-title">${escapeHTML(c.name || c.id)}</div>
-              <div class="item-meta">${escapeHTML(sch)} · ${n} Schüler · Code ${escapeHTML(c.inviteCode || "–")}</div>
-            </div>
-            <button class="btn text-[10px]" onclick="event.stopPropagation();viewClassMembers('${escapeHTML(c.id)}')">Mitglieder</button>
-          </div>`;
+          const preview = Object.keys(c.students || {}).slice(0, 3).map(function(u) {
+            return (typeof resolveAccountLabel === "function" ? resolveAccountLabel(u).title : u.slice(0, 8));
+          }).join(", ");
+          return '<div class="item" style="cursor:pointer" onclick="viewClassMembers(\'' + escapeHTML(c.id) + '\')">' +
+            '<div class="item-main min-w-0"><div class="item-title">' + escapeHTML(c.name || c.id) + '</div>' +
+            '<div class="item-meta">' + escapeHTML(sch) + " · " + n + " Schüler" +
+            (preview ? " · " + escapeHTML(preview) : "") +
+            " · Code " + escapeHTML(c.inviteCode || "–") + "</div></div>" +
+            '<button class="btn text-[10px]" onclick="event.stopPropagation();viewClassMembers(\'' + escapeHTML(c.id) + '\')">Mitglieder</button></div>';
         }).join("");
       }
     }
-
     const slist = document.getElementById("tdStudentsList");
     if (slist) {
-      const uids = [...studentSet].slice(0, 24);
+      const uids = Array.from(studentSet).slice(0, 30);
       if (!uids.length) {
         slist.innerHTML = '<div class="empty">Noch keine Schüler in deinen Klassen.</div>';
       } else {
-        slist.innerHTML = uids.map(uid => {
-          const a = typeof resolveAccountLabel === "function" ? resolveAccountLabel(uid) : { title: uid.slice(0,12)+"…", meta: uid };
+        slist.innerHTML = uids.map(function(uid) {
+          const a = typeof resolveAccountLabel === "function" ? resolveAccountLabel(uid) : { title: uid.slice(0, 12) + "…", meta: uid };
           const initial = (a.name || a.title || "?").trim().charAt(0).toUpperCase();
-          return `<div class="td-student-row">
-            <div class="td-avatar">${escapeHTML(initial)}</div>
-            <div class="item-main min-w-0">
-              <div class="item-title truncate">${escapeHTML(a.title)}</div>
-              <div class="item-meta truncate">${escapeHTML(a.meta)}</div>
-            </div>
-          </div>`;
-        }).join("") + (studentSet.size > 24 ? `<div class="tiny muted mt-2">+${studentSet.size - 24} weitere</div>` : "");
+          return '<div class="td-student-row"><div class="td-avatar">' + escapeHTML(initial) + '</div>' +
+            '<div class="item-main min-w-0"><div class="item-title truncate">' + escapeHTML(a.title) + '</div>' +
+            '<div class="item-meta truncate">' + escapeHTML(a.meta) + '</div></div></div>';
+        }).join("") + (studentSet.size > 30 ? '<div class="tiny muted mt-2">+' + (studentSet.size - 30) + " weitere</div>" : "");
       }
     }
   };
 
-  // Hook showPage: redirect dashboard → teacher-dashboard when mode on
-  const _showPage = window.showPage;
-  if (typeof _showPage === "function") {
+  // Patch showPage once
+  function patchShowPage() {
+    if (window.__sosTeacherShowPagePatched) return;
+    if (typeof window.showPage !== "function") return;
+    window.__sosTeacherShowPagePatched = true;
+    const prev = window.showPage;
     window.showPage = function(page) {
       try {
         if (page === "dashboard" && isTeacherModeActive()) page = "teacher-dashboard";
-        if (page === "teacher-dashboard" && !isTeacherModeActive()) {
-          if (typeof isTeacher === "function" && isTeacher()) {
-            // allow explicit open only if teacher rights; else fallback
-          } else {
+        if (page === "admin") {
+          // ok
+        }
+        if (page === "teacher-dashboard") {
+          if (!(typeof isTeacher === "function" && isTeacher()) && !(typeof isMasterAdmin === "function" && isMasterAdmin())) {
             page = "dashboard";
           }
         }
       } catch (e) {}
-      const r = _showPage.apply(this, [page]);
+      const r = prev.apply(this, [page]);
       try {
         if (page === "teacher-dashboard") renderTeacherDashboard();
         if (page === "settings") applyTeacherModeNav();
+        if (page === "admin") {
+          try { renderAdmin(); } catch (e) {}
+        }
       } catch (e) {}
       return r;
     };
   }
+  patchShowPage();
+  setTimeout(patchShowPage, 500);
+  setTimeout(patchShowPage, 2000);
 
-  const _renderAll = window.renderAll;
-  if (typeof _renderAll === "function") {
+  // Patch renderAll
+  function patchRenderAll() {
+    if (window.__sosTeacherRenderAllPatched) return;
+    if (typeof window.renderAll !== "function") return;
+    window.__sosTeacherRenderAllPatched = true;
+    const prev = window.renderAll;
     window.renderAll = function() {
-      const r = _renderAll.apply(this, arguments);
+      const r = prev.apply(this, arguments);
       try {
         applyTeacherModeNav();
         if (document.getElementById("page-teacher-dashboard")?.classList.contains("active")) {
           renderTeacherDashboard();
         }
-        // If teacher mode and currently on student dashboard, switch
         if (isTeacherModeActive() && document.getElementById("page-dashboard")?.classList.contains("active")) {
-          showPage("teacher-dashboard");
+          window.showPage("teacher-dashboard");
         }
       } catch (e) {}
       return r;
     };
   }
+  patchRenderAll();
+  setTimeout(patchRenderAll, 500);
 
-  const _renderSettings = window.renderSettings;
-  if (typeof _renderSettings === "function") {
+  function patchSettings() {
+    if (window.__sosTeacherSettingsPatched) return;
+    if (typeof window.renderSettings !== "function") return;
+    window.__sosTeacherSettingsPatched = true;
+    const prev = window.renderSettings;
     window.renderSettings = function() {
-      const r = _renderSettings.apply(this, arguments);
+      const r = prev.apply(this, arguments);
       try { applyTeacherModeNav(); } catch (e) {}
       return r;
     };
   }
+  patchSettings();
+  setTimeout(patchSettings, 800);
 
-  // After school system loads, refresh teacher dash
-  const _loadSchool = window.loadSchoolSystem;
-  if (typeof _loadSchool === "function") {
-    window.loadSchoolSystem = async function(render) {
-      const r = await _loadSchool.apply(this, arguments);
-      try {
-        if (document.getElementById("page-teacher-dashboard")?.classList.contains("active")) {
-          renderTeacherDashboard();
-        }
-        applyTeacherModeNav();
-      } catch (e) {}
-      return r;
-    };
-  }
+  // Boot: load school system + apply nav
+  setTimeout(function() {
+    try { schoolLocalLoad(); } catch (e) {}
+    try { applyTeacherModeNav(); } catch (e) {}
+    try {
+      if (typeof loadSchoolSystem === "function" && currentUser && !previewMode) {
+        loadSchoolSystem(false);
+      }
+    } catch (e) {}
+  }, 1200);
 
-  setTimeout(function(){ try { applyTeacherModeNav(); } catch(e){} }, 1500);
-  setInterval(function(){ try { applyTeacherModeNav(); } catch(e){} }, 8000);
+  setInterval(function() {
+    try { applyTeacherModeNav(); } catch (e) {}
+  }, 10000);
 })();
+
 
 </script>
