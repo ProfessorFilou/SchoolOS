@@ -15935,13 +15935,24 @@ function loadPeople(force = false) {
 
   peopleListener = onValue(ref(db, "publicProfiles"), snap => {
     const val = snap.val() || {};
-    peopleCache = Object.values(val)
-      .filter(p => p && p.uid && p.uid !== currentUser?.uid)
-      .map(p => ({
-        ...p,
-        likeCount: Number(p.likeCount) || 0
-      }));
+    peopleCache = Object.entries(val)
+      .map(([k, p]) => {
+        if (!p || typeof p !== "object") return null;
+        const uid = p.uid || k;
+        return {
+          ...p,
+          uid,
+          name: p.name || p.displayName || p.username || "",
+          username: p.username || "",
+          email: p.email || "",
+          likeCount: Number(p.likeCount) || 0
+        };
+      })
+      .filter(p => p && p.uid && p.uid !== currentUser?.uid);
     peopleLoaded = true;
+    try { window.__sosProfileCache = window.__sosProfileCache || {};
+      peopleCache.forEach(p => { window.__sosProfileCache[p.uid] = p; });
+    } catch (e) {}
     renderPeople();
 
     // own likes display
@@ -17646,7 +17657,20 @@ function loadAdminUsers(forceToast) {
 
   onValue(ref(db, "publicProfiles"), snap => {
     const val = snap.val() || {};
-    adminUsersCache = Object.values(val).filter(p => p && p.uid);
+    adminUsersCache = Object.entries(val).map(([k, p]) => {
+      if (!p || typeof p !== "object") return null;
+      return {
+        ...p,
+        uid: p.uid || k,
+        name: p.name || p.displayName || p.username || "",
+        username: p.username || "",
+        email: p.email || ""
+      };
+    }).filter(p => p && p.uid);
+    try {
+      window.__sosProfileCache = window.__sosProfileCache || {};
+      adminUsersCache.forEach(p => { window.__sosProfileCache[p.uid] = p; });
+    } catch (e) {}
     renderAdminUsers();
     const pc = document.getElementById("adminProfileCount");
     if (pc) pc.textContent = String(adminUsersCache.length);
@@ -19237,36 +19261,120 @@ function peoplePool() {
   const seen = new Set();
   const out = [];
   const add = function (p) {
-    if (!p || !p.uid || seen.has(p.uid)) return;
-    seen.add(p.uid);
-    out.push(p);
+    if (!p) return;
+    const uid = p.uid || p.id;
+    if (!uid || seen.has(uid)) return;
+    seen.add(uid);
+    out.push({ ...p, uid });
   };
-  (window.adminUsersCache || []).forEach(add);
-  (window.peopleCache || []).forEach(add);
+  try {
+    const cache = window.__sosProfileCache || {};
+    Object.keys(cache).forEach(k => add({ ...cache[k], uid: cache[k].uid || k }));
+  } catch (e) {}
+  (typeof adminUsersCache !== "undefined" ? adminUsersCache : []).forEach(add);
+  (typeof peopleCache !== "undefined" ? peopleCache : []).forEach(add);
+  // also scan class student metadata for names
+  try {
+    Object.values(window.__sosClasses || {}).forEach(function (c) {
+      Object.entries(c.students || {}).forEach(function ([uid, meta]) {
+        if (meta && typeof meta === "object" && (meta.name || meta.email || meta.username)) {
+          add({ uid, name: meta.name || "", email: meta.email || "", username: meta.username || "" });
+        }
+      });
+    });
+  } catch (e) {}
   return out;
 }
 
 function resolveAccountLabel(uid) {
   try {
     if (!uid) return { title: "–", meta: "", email: "", name: "", username: "" };
-    const p = peoplePool().find(x => x.uid === uid);
+    // 1) profile cache
+    const cache = window.__sosProfileCache || {};
+    let p = cache[uid] || peoplePool().find(x => x.uid === uid);
+    // 2) student meta on any class
+    if (!p || !(p.name || p.username || p.email)) {
+      try {
+        for (const c of Object.values(window.__sosClasses || {})) {
+          const meta = (c.students || {})[uid];
+          if (meta && typeof meta === "object" && (meta.name || meta.email || meta.username)) {
+            p = { uid, name: meta.name || "", email: meta.email || "", username: meta.username || "", className: c.name || "" };
+            break;
+          }
+        }
+      } catch (e) {}
+    }
     if (p) {
-      const name = p.name || p.username || "";
+      const name = p.name || p.displayName || p.username || "";
       const email = p.email || "";
       const uname = p.username ? "@" + p.username : "";
-      if (name && email) return { title: name, meta: (uname ? uname + " · " : "") + email, email, name, username: p.username || "" };
-      if (name) return { title: name, meta: uname || String(uid).slice(0, 10) + "…", email, name, username: p.username || "" };
-      if (email) return { title: email, meta: String(uid).slice(0, 12) + "…", email, name: "", username: p.username || "" };
-    }
-    const pub = (window.publicProfilesCache && window.publicProfilesCache[uid]) || null;
-    if (pub) {
-      const name = pub.name || pub.username || "";
-      if (name) return { title: name, meta: (pub.username ? "@" + pub.username + " · " : "") + (pub.className || String(uid).slice(0, 10) + "…"), email: pub.email || "", name, username: pub.username || "" };
+      const cls = p.className ? String(p.className) : "";
+      if (name && (email || uname)) {
+        return { title: name, meta: [uname, email, cls].filter(Boolean).join(" · "), email, name, username: p.username || "" };
+      }
+      if (name) return { title: name, meta: [uname, cls, String(uid).slice(0, 10) + "…"].filter(Boolean).join(" · "), email, name, username: p.username || "" };
+      if (email) return { title: email, meta: [uname, cls].filter(Boolean).join(" · ") || String(uid).slice(0, 12) + "…", email, name: "", username: p.username || "" };
+      if (uname) return { title: uname, meta: cls || String(uid).slice(0, 12) + "…", email, name: "", username: p.username || "" };
     }
   } catch (e) {}
   const s = String(uid);
-  return { title: s.length > 14 ? s.slice(0, 12) + "…" : s, meta: s, email: "", name: "", username: "" };
+  return { title: s.length > 14 ? s.slice(0, 12) + "…" : s, meta: "Profil nicht geladen", email: "", name: "", username: "" };
 }
+
+/** Fetch missing profiles for a list of uids (Firebase) – fills __sosProfileCache */
+window.enrichProfilesForUids = async function (uids) {
+  uids = (uids || []).filter(Boolean);
+  if (!uids.length) return;
+  window.__sosProfileCache = window.__sosProfileCache || {};
+  const missing = uids.filter(u => {
+    const p = window.__sosProfileCache[u];
+    return !p || !(p.name || p.username || p.email);
+  });
+  if (!missing.length) return;
+  // from existing caches first
+  const pool = [].concat(
+    typeof adminUsersCache !== "undefined" ? adminUsersCache : [],
+    typeof peopleCache !== "undefined" ? peopleCache : []
+  );
+  missing.forEach(uid => {
+    const hit = pool.find(x => x && x.uid === uid);
+    if (hit) window.__sosProfileCache[uid] = { ...hit, uid };
+  });
+  const still = missing.filter(u => {
+    const p = window.__sosProfileCache[u];
+    return !p || !(p.name || p.username || p.email);
+  });
+  if (!still.length || previewMode || typeof get !== "function") return;
+  await Promise.all(still.slice(0, 40).map(async function (uid) {
+    try {
+      const snap = await get(ref(db, "publicProfiles/" + uid));
+      if (snap.exists()) {
+        const p = snap.val() || {};
+        window.__sosProfileCache[uid] = {
+          ...p,
+          uid: p.uid || uid,
+          name: p.name || p.displayName || p.username || "",
+          username: p.username || "",
+          email: p.email || ""
+        };
+      } else {
+        // try users node if exists
+        try {
+          const u2 = await get(ref(db, "users/" + uid));
+          if (u2.exists()) {
+            const p = u2.val() || {};
+            window.__sosProfileCache[uid] = {
+              uid,
+              name: p.name || p.displayName || p.settings?.name || "",
+              username: p.username || p.settings?.username || "",
+              email: p.email || ""
+            };
+          }
+        } catch (e) {}
+      }
+    } catch (e) {}
+  }));
+};
 
 window.resolveStudentInput = function (raw) {
   raw = String(raw || "").trim();
@@ -19691,7 +19799,14 @@ window.assignStudentToClass = async function () {
   if (!uid || !classId) { toast("Schüler und Klasse wählen"); return; }
   const cls = window.__sosClasses[classId];
   if (!cls) { toast("Klasse nicht gefunden"); return; }
-  const students = { ...(cls.students || {}), [uid]: { at: Date.now(), by: currentUser?.uid || "local" } };
+  const prof = (window.__sosProfileCache && window.__sosProfileCache[uid]) || peoplePool().find(x => x.uid === uid) || {};
+  const students = { ...(cls.students || {}), [uid]: {
+    at: Date.now(),
+    by: currentUser?.uid || "local",
+    name: prof.name || prof.displayName || "",
+    username: prof.username || "",
+    email: prof.email || ""
+  } };
   cls.students = students;
   window.__sosClasses[classId] = cls;
   await schoolDbUpdate("classes/" + classId, { students });
@@ -19775,7 +19890,14 @@ window.joinClassByCode = async function (code) {
   // local first
   const localCls = Object.values(window.__sosClasses || {}).find(c => String(c.inviteCode || "").toUpperCase() === code);
   if (localCls) {
-    const students = { ...(localCls.students || {}), [currentUser.uid]: { at: Date.now(), by: "self" } };
+    const me = {
+      at: Date.now(),
+      by: "self",
+      name: (data?.settings?.name || currentUser.displayName || ""),
+      username: (data?.settings?.username || ""),
+      email: (currentUser.email || "")
+    };
+    const students = { ...(localCls.students || {}), [currentUser.uid]: me };
     localCls.students = students;
     window.__sosClasses[localCls.id] = localCls;
     schoolLocalSave();
@@ -19815,7 +19937,14 @@ window.joinClassByCode = async function (code) {
     const clsSnap = await get(ref(db, "classes/" + classId));
     if (!clsSnap.exists()) { toast("Klasse nicht gefunden"); return false; }
     const cls = clsSnap.val();
-    const students = { ...(cls.students || {}), [currentUser.uid]: { at: Date.now(), by: "self" } };
+    const me = {
+      at: Date.now(),
+      by: "self",
+      name: (data?.settings?.name || currentUser.displayName || ""),
+      username: (data?.settings?.username || ""),
+      email: (currentUser.email || "")
+    };
+    const students = { ...(cls.students || {}), [currentUser.uid]: me };
     await update(ref(db, "classes/" + classId), { students });
     await set(ref(db, "userSchool/" + currentUser.uid), {
       schoolId: cls.schoolId,
@@ -26532,8 +26661,12 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
 
 
 
-/* ===== Teacher Mode + Teacher Dashboard (v2) ===== */
+
+/* ===== Teacher Mode + Teacher Dashboard (v3 – no lag, names) ===== */
 (function(){
+  var _tdSig = "";
+  var _tdRendering = false;
+
   function teacherModeOn() {
     try {
       if (localStorage.getItem("schoolosTeacherMode") === "1") return true;
@@ -26564,6 +26697,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     if (cb) cb.checked = on;
     toast(on ? "Lehrer-Dashboard aktiv" : "Schüler-Dashboard aktiv");
     applyTeacherModeNav();
+    _tdSig = ""; // force refresh once
     try {
       if (on) window.showPage("teacher-dashboard");
       else window.showPage("dashboard");
@@ -26573,24 +26707,43 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     const canTeach = (typeof isTeacher === "function" && isTeacher()) ||
       (typeof isMasterAdmin === "function" && isMasterAdmin());
     const box = document.getElementById("teacherModeSettings");
-    if (box) box.style.display = canTeach ? "" : "none";
+    if (box) {
+      const show = canTeach ? "" : "none";
+      if (box.style.display !== show) box.style.display = show;
+    }
     const cb = document.getElementById("settingTeacherMode");
-    if (cb) cb.checked = canTeach && teacherModeOn();
-    // Sidebar: ensure Admin/Schule visible
+    if (cb) {
+      const want = canTeach && teacherModeOn();
+      if (cb.checked !== want) cb.checked = want;
+    }
     try {
       const btn = document.getElementById("navAdminBtn");
       if (btn) {
-        btn.style.display = (canTeach || (typeof isAdmin === "function" && isAdmin())) ? "" : "none";
+        const show = (canTeach || (typeof isAdmin === "function" && isAdmin())) ? "" : "none";
+        if (btn.style.display !== show) btn.style.display = show;
         const span = btn.querySelector("span:not(.nav-icon)");
-        if (span && canTeach && !(typeof isAdmin === "function" && isAdmin())) span.textContent = "Schule";
+        if (span && canTeach && !(typeof isAdmin === "function" && isAdmin())) {
+          if (span.textContent !== "Schule") span.textContent = "Schule";
+        }
       }
     } catch (e) {}
   };
 
-  window.renderTeacherDashboard = function() {
+  function classSignature() {
+    try {
+      return JSON.stringify(window.__sosClasses || {}) + "|" + JSON.stringify(window.__sosProfileCache || {});
+    } catch (e) { return String(Date.now()); }
+  }
+
+  window.renderTeacherDashboard = function(force) {
     const page = document.getElementById("page-teacher-dashboard");
-    if (!page) return;
-    try { if (typeof loadSchoolSystem === "function") loadSchoolSystem(false); } catch (e) {}
+    if (!page || !page.classList.contains("active")) return;
+    if (_tdRendering) return;
+    const sig = classSignature();
+    if (!force && sig === _tdSig) return; // skip identical re-render (stops animation spam)
+    _tdRendering = true;
+    _tdSig = sig;
+
     const myUid = (typeof currentUser !== "undefined" && currentUser) ? currentUser.uid : null;
     const schools = window.__sosSchools || {};
     const classes = Object.values(window.__sosClasses || {});
@@ -26608,31 +26761,40 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     myClasses.forEach(function(c) { Object.keys(c.students || {}).forEach(function(u) { studentSet.add(u); }); });
     const schoolIds = new Set(myClasses.map(function(c) { return c.schoolId; }).filter(Boolean));
     const codes = myClasses.filter(function(c) { return c.inviteCode; }).length;
-    function setTxt(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+
+    function setTxt(id, v) {
+      const el = document.getElementById(id);
+      if (el && el.textContent !== String(v)) el.textContent = String(v);
+    }
     setTxt("tdStatClasses", myClasses.length);
     setTxt("tdStatStudents", studentSet.size);
     setTxt("tdStatSchools", schoolIds.size);
     setTxt("tdStatCodes", codes);
+
     const nameEl = document.getElementById("teacherDashName");
     if (nameEl) {
       const n = (typeof data !== "undefined" && data?.settings?.name) ? data.settings.name + " · " : "";
-      nameEl.textContent = n + "Lehrer-Dashboard";
+      const t = n + "Lehrer-Dashboard";
+      if (nameEl.textContent !== t) nameEl.textContent = t;
     }
     const sum = document.getElementById("teacherDashSummary");
     if (sum) {
-      sum.textContent = myClasses.length
+      const t = myClasses.length
         ? (myClasses.length + " Klasse" + (myClasses.length === 1 ? "" : "n") + " · " + studentSet.size + " Schüler")
         : "Noch keine Klassen – unter Admin/Schule anlegen.";
+      if (sum.textContent !== t) sum.textContent = t;
     }
+
     const list = document.getElementById("tdClassesList");
     if (list) {
       if (!myClasses.length) {
         list.innerHTML = '<div class="empty">Keine Klassen. Owner ernennt Lehrer, dann unter Schule Klasse anlegen.</div>';
       } else {
         list.innerHTML = myClasses.map(function(c) {
-          const n = Object.keys(c.students || {}).length;
+          const stu = Object.keys(c.students || {});
+          const n = stu.length;
           const sch = schools[c.schoolId]?.name || "";
-          const preview = Object.keys(c.students || {}).slice(0, 3).map(function(u) {
+          const preview = stu.slice(0, 3).map(function(u) {
             return (typeof resolveAccountLabel === "function" ? resolveAccountLabel(u).title : u.slice(0, 8));
           }).join(", ");
           return '<div class="item" style="cursor:pointer" onclick="viewClassMembers(\'' + escapeHTML(c.id) + '\')">' +
@@ -26659,9 +26821,21 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
         }).join("") + (studentSet.size > 30 ? '<div class="tiny muted mt-2">+' + (studentSet.size - 30) + " weitere</div>" : "");
       }
     }
+    _tdRendering = false;
+
+    // enrich names async, then one refresh if new data
+    const allUids = Array.from(studentSet);
+    if (allUids.length && typeof enrichProfilesForUids === "function") {
+      enrichProfilesForUids(allUids).then(function() {
+        const sig2 = classSignature();
+        if (sig2 !== _tdSig) {
+          _tdSig = "";
+          renderTeacherDashboard(true);
+        }
+      }).catch(function(){});
+    }
   };
 
-  // Patch showPage once
   function patchShowPage() {
     if (window.__sosTeacherShowPagePatched) return;
     if (typeof window.showPage !== "function") return;
@@ -26670,9 +26844,6 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     window.showPage = function(page) {
       try {
         if (page === "dashboard" && isTeacherModeActive()) page = "teacher-dashboard";
-        if (page === "admin") {
-          // ok
-        }
         if (page === "teacher-dashboard") {
           if (!(typeof isTeacher === "function" && isTeacher()) && !(typeof isMasterAdmin === "function" && isMasterAdmin())) {
             page = "dashboard";
@@ -26681,7 +26852,10 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       } catch (e) {}
       const r = prev.apply(this, [page]);
       try {
-        if (page === "teacher-dashboard") renderTeacherDashboard();
+        if (page === "teacher-dashboard") {
+          _tdSig = "";
+          renderTeacherDashboard(true);
+        }
         if (page === "settings") applyTeacherModeNav();
         if (page === "admin") {
           try { renderAdmin(); } catch (e) {}
@@ -26691,10 +26865,9 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     };
   }
   patchShowPage();
-  setTimeout(patchShowPage, 500);
-  setTimeout(patchShowPage, 2000);
+  setTimeout(patchShowPage, 400);
 
-  // Patch renderAll
+  // renderAll: only soft-check, never force-rewrite dashboard every tick
   function patchRenderAll() {
     if (window.__sosTeacherRenderAllPatched) return;
     if (typeof window.renderAll !== "function") return;
@@ -26704,18 +26877,16 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       const r = prev.apply(this, arguments);
       try {
         applyTeacherModeNav();
+        // only update teacher dash if visible AND data changed (no force)
         if (document.getElementById("page-teacher-dashboard")?.classList.contains("active")) {
-          renderTeacherDashboard();
-        }
-        if (isTeacherModeActive() && document.getElementById("page-dashboard")?.classList.contains("active")) {
-          window.showPage("teacher-dashboard");
+          renderTeacherDashboard(false);
         }
       } catch (e) {}
       return r;
     };
   }
   patchRenderAll();
-  setTimeout(patchRenderAll, 500);
+  setTimeout(patchRenderAll, 400);
 
   function patchSettings() {
     if (window.__sosTeacherSettingsPatched) return;
@@ -26729,22 +26900,61 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     };
   }
   patchSettings();
-  setTimeout(patchSettings, 800);
+  setTimeout(patchSettings, 600);
 
-  // Boot: load school system + apply nav
+  // viewClassMembers: enrich then re-open content names
+  const _vcm = window.viewClassMembers;
+  if (typeof _vcm === "function") {
+    window.viewClassMembers = function(classId) {
+      const cls = window.__sosClasses[classId];
+      const uids = cls ? Object.keys(cls.students || {}).concat(Object.keys(cls.teacherUids || {})) : [];
+      const run = function() { _vcm(classId); };
+      if (uids.length && typeof enrichProfilesForUids === "function") {
+        enrichProfilesForUids(uids).then(run).catch(run);
+      } else run();
+    };
+  }
+
+  // renderSchoolClasses: enrich once
+  const _rsc = window.renderSchoolClasses;
+  if (typeof _rsc === "function") {
+    window.renderSchoolClasses = function() {
+      _rsc();
+      try {
+        const list = Object.values(window.__sosClasses || {});
+        const uids = [];
+        list.forEach(c => Object.keys(c.students || {}).forEach(u => uids.push(u)));
+        if (uids.length && typeof enrichProfilesForUids === "function") {
+          enrichProfilesForUids(uids).then(function() {
+            // only re-render list box without full school UI thrash
+            _rsc();
+          }).catch(function(){});
+        }
+      } catch (e) {}
+    };
+  }
+
   setTimeout(function() {
-    try { schoolLocalLoad(); } catch (e) {}
+    try { if (typeof schoolLocalLoad === "function") schoolLocalLoad(); } catch (e) {}
     try { applyTeacherModeNav(); } catch (e) {}
-    try {
-      if (typeof loadSchoolSystem === "function" && currentUser && !previewMode) {
-        loadSchoolSystem(false);
-      }
-    } catch (e) {}
-  }, 1200);
+  }, 1000);
+})();
 
-  setInterval(function() {
-    try { applyTeacherModeNav(); } catch (e) {}
-  }, 10000);
+/* Disable fly-in animation spam on teacher/admin school panels when content updates */
+(function(){
+  var st = document.createElement("style");
+  st.textContent = `
+    #page-teacher-dashboard.page.active .panel,
+    #page-teacher-dashboard.page.active .stat,
+    #page-teacher-dashboard.page.active .item,
+    #page-teacher-dashboard.page.active .hero,
+    #page-admin.page.active .panel,
+    #page-admin.page.active .stat,
+    #page-admin.page.active .item {
+      animation: none !important;
+    }
+  `;
+  document.head.appendChild(st);
 })();
 
 
