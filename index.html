@@ -5249,6 +5249,125 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
       background: linear-gradient(135deg, rgba(167,139,250,.16), rgba(79,124,255,.08));
       border: 1px solid rgba(167,139,250,.28); font-size: 12px;
     }
+    body.teacher-mode .content {
+      max-width: 1400px;
+    }
+    body.teacher-mode #fab,
+    body.teacher-mode #quickMenu {
+      display: none !important;
+    }
+    #page-teacher-dashboard .td-onboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+    #page-teacher-dashboard .td-step {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.07);
+      text-align: left;
+    }
+    #page-teacher-dashboard .td-step b {
+      display: block;
+      font-size: 12px;
+      color: #c4b5fd;
+      margin-bottom: 6px;
+      letter-spacing: .04em;
+    }
+    #page-teacher-dashboard .td-step span {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    #page-teacher-dashboard .td-activity {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border-left: 3px solid rgba(167,139,250,.55);
+      background: rgba(255,255,255,.03);
+      margin-bottom: 8px;
+    }
+    #page-teacher-dashboard .td-activity .when {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    #page-teacher-dashboard .td-att-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      margin-bottom: 6px;
+    }
+    #page-teacher-dashboard .td-att-btns {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    #page-teacher-dashboard .td-att-btns button {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      color: #94a3b8;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    #page-teacher-dashboard .td-att-btns button.on-p {
+      background: rgba(34,197,94,.2);
+      border-color: rgba(34,197,94,.45);
+      color: #4ade80;
+    }
+    #page-teacher-dashboard .td-att-btns button.on-a {
+      background: rgba(239,68,68,.2);
+      border-color: rgba(239,68,68,.45);
+      color: #f87171;
+    }
+    #page-teacher-dashboard .td-att-btns button.on-e {
+      background: rgba(251,191,36,.2);
+      border-color: rgba(251,191,36,.45);
+      color: #fbbf24;
+    }
+    #page-teacher-dashboard .td-share-box {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(251,191,36,.08);
+      border: 1px solid rgba(251,191,36,.25);
+      font-size: 13px;
+      line-height: 1.5;
+      color: #fde68a;
+      white-space: pre-wrap;
+      font-family: ui-monospace, monospace;
+    }
+    #teacherSidebarNav .td-count-badge {
+      margin-left: auto;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 99px;
+      background: rgba(167,139,250,.25);
+      color: #e9d5ff;
+      font-size: 10px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #page-teacher-dashboard .td-class-item .td-count {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      color: #a78bfa;
+      background: rgba(167,139,250,.12);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
     .td-student-row {
       display: flex; align-items: center; gap: 12px;
       padding: 10px 12px; border-radius: 14px;
@@ -6559,7 +6678,8 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               <div class="td-tabs" role="tablist">
                 <button type="button" class="td-tab active" data-td-tab="overview" onclick="tdSetTab('overview')">Übersicht</button>
                 <button type="button" class="td-tab" data-td-tab="students" onclick="tdSetTab('students')">Schüler</button>
-                <button type="button" class="td-tab" data-td-tab="announce" onclick="tdSetTab('announce')">Ankündigungen</button>
+                <button type="button" class="td-tab" data-td-tab="attend" onclick="tdSetTab('attend')">Anwesenheit</button>
+                <button type="button" class="td-tab" data-td-tab="announce" onclick="tdSetTab('announce')">Infos</button>
                 <button type="button" class="td-tab" data-td-tab="tasks" onclick="tdSetTab('tasks')">Aufgaben</button>
                 <button type="button" class="td-tab" data-td-tab="codes" onclick="tdSetTab('codes')">Codes</button>
               </div>
@@ -6572,6 +6692,16 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
                   <button type="button" class="btn text-[11px]" onclick="tdExportStudents()">CSV exportieren</button>
                 </div>
                 <div id="tdStudentsList"></div>
+              </div>
+              <div id="tdPanelAttend" class="td-panel" style="display:none">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <div class="tiny muted" id="tdAttendMeta">Anwesenheit heute</div>
+                  <div class="flex gap-2">
+                    <button type="button" class="btn text-[11px]" onclick="tdMarkAllPresent()">Alle da</button>
+                    <button type="button" class="btn text-[11px]" onclick="tdSaveAttendance()">Speichern</button>
+                  </div>
+                </div>
+                <div id="tdAttendList"></div>
               </div>
               <div id="tdPanelAnnounce" class="td-panel" style="display:none">
                 <div class="field"><label>An Klasse</label>
@@ -6604,8 +6734,10 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               <div id="tdPanelCodes" class="td-panel" style="display:none">
                 <div class="flex flex-wrap gap-2 mb-3">
                   <button type="button" class="btn btn-primary text-[11px]" onclick="tdCopyAllCodes()">Alle kopieren</button>
+                  <button type="button" class="btn text-[11px]" onclick="tdShareSelectedCode()">Einladungstext</button>
                   <button type="button" class="btn text-[11px]" onclick="tdRegenSelectedCode()">Code erneuern</button>
                 </div>
+                <div id="tdSharePreview" class="td-share-box mb-4" style="display:none"></div>
                 <div id="tdCodesBoard"></div>
               </div>
             </div>
@@ -27064,6 +27196,8 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
   var _tdAnnouncements = [];
   var _tdTasks = [];
 
+  var _tdAttendance = {}; // { "classId|YYYY-MM-DD": { uid: "P"|"A"|"E" } }
+
   function loadTdStore() {
     try {
       _tdAnnouncements = JSON.parse(localStorage.getItem("schoolosTeacherAnnounce") || "[]");
@@ -27073,6 +27207,18 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       _tdTasks = JSON.parse(localStorage.getItem("schoolosTeacherTasks") || "[]");
       if (!Array.isArray(_tdTasks)) _tdTasks = [];
     } catch (e) { _tdTasks = []; }
+    try {
+      _tdAttendance = JSON.parse(localStorage.getItem("schoolosTeacherAttend") || "{}");
+      if (!_tdAttendance || typeof _tdAttendance !== "object") _tdAttendance = {};
+    } catch (e) { _tdAttendance = {}; }
+  }
+  function saveAttendance() {
+    try { localStorage.setItem("schoolosTeacherAttend", JSON.stringify(_tdAttendance)); } catch (e) {}
+  }
+  function attendKey(classId) {
+    var d = new Date();
+    var iso = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    return classId + "|" + iso;
   }
   function saveAnnounce() {
     try { localStorage.setItem("schoolosTeacherAnnounce", JSON.stringify(_tdAnnouncements.slice(0, 100))); } catch (e) {}
@@ -27135,6 +27281,21 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       var sub = document.querySelector(".sidebar .brand-sub");
       if (title) title.textContent = active ? "Lehrer-OS" : "SchoolOS";
       if (sub) sub.textContent = active ? "Unterricht & Klassen" : "School OS";
+    } catch (e) {}
+    try {
+      var homeBtn = document.querySelector('#teacherSidebarNav .nav-btn[data-page="teacher-dashboard"]');
+      if (homeBtn && active) {
+        var n = myClassesList().length;
+        var label = homeBtn.querySelector("span:not(.nav-icon):not(.td-count-badge)");
+        var badge = homeBtn.querySelector(".td-count-badge");
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "td-count-badge";
+          homeBtn.appendChild(badge);
+        }
+        badge.textContent = String(n);
+        badge.style.display = n ? "" : "none";
+      }
     } catch (e) {}
     // Student admin btn: hide in teacher-mode (replaced by teacher nav)
     try {
@@ -27211,14 +27372,10 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     document.querySelectorAll("#page-teacher-dashboard .td-tab").forEach(function(b) {
       b.classList.toggle("active", b.getAttribute("data-td-tab") === _tdTab);
     });
-    ["overview","students","announce","tasks","codes"].forEach(function(t) {
-      var el = document.getElementById("tdPanel" + t.charAt(0).toUpperCase() + t.slice(1));
-      if (el) el.style.display = t === _tdTab ? "" : "none";
-    });
-    // panel id mapping
     var map = {
       overview: "tdPanelOverview",
       students: "tdPanelStudents",
+      attend: "tdPanelAttend",
       announce: "tdPanelAnnounce",
       tasks: "tdPanelTasks",
       codes: "tdPanelCodes"
@@ -27259,9 +27416,8 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
         '<div class="td-class-icon">' + escapeHTML(initial) + '</div>' +
         '<div class="min-w-0 flex-1">' +
         '<div class="item-title truncate">' + escapeHTML(c.name || c.id) + '</div>' +
-        '<div class="item-meta truncate">' + n + ' Schüler' + (sch ? ' · ' + escapeHTML(sch) : '') + '</div>' +
-        '</div></div>';
-    }).join("");
+        '<div class="item-meta truncate">' + (sch ? escapeHTML(sch) : 'Klasse') + '</div>' +
+        '</div><span class="td-count">' + n + '</span></div>'}).join("");
   };
 
   function renderOverview() {
@@ -27270,44 +27426,68 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     var c = window.__sosClasses[_tdSelectedClassId];
     var classes = myClassesList();
     if (!c) {
-      box.innerHTML = '<div class="td-empty"><strong>Willkommen im Lehrer-OS</strong>' +
-        (classes.length
-          ? 'Wähle links eine Klasse, um Schüler, Codes und Ankündigungen zu verwalten.'
-          : 'Lege zuerst eine Klasse an – danach erscheinen hier alle Werkzeuge.') +
-        '<div class="mt-4"><button type="button" class="btn btn-primary" onclick="tdOpenCreateClass()">＋ Klasse anlegen</button></div></div>';
+      if (!classes.length) {
+        box.innerHTML = '<div class="td-empty"><strong>Willkommen im Lehrer-OS</strong>In drei Schritten startklar:' +
+          '<div class="td-onboard">' +
+          '<div class="td-step"><b>1 · KLASSE</b><span>Lege deine erste Klasse an und erhalte einen Einladungscode.</span></div>' +
+          '<div class="td-step"><b>2 · SCHÜLER</b><span>Code teilen oder Schüler per Name zuordnen.</span></div>' +
+          '<div class="td-step"><b>3 · UNTERRICHT</b><span>Anwesenheit, Infos und Aufgaben pro Klasse.</span></div>' +
+          '</div>' +
+          '<div class="mt-4"><button type="button" class="btn btn-primary" onclick="tdOpenCreateClass()">＋ Erste Klasse anlegen</button></div></div>';
+      } else {
+        box.innerHTML = '<div class="td-empty"><strong>Klasse wählen</strong>Links eine Klasse antippen – dann siehst du Schüler, Codes und Tools.</div>';
+      }
       return;
     }
     var students = Object.keys(c.students || {});
     var sch = window.__sosSchools[c.schoolId]?.name || "–";
     var ann = _tdAnnouncements.filter(function(a){ return a.classId === c.id; }).length;
     var tasks = _tdTasks.filter(function(t){ return t.classId === c.id && !t.done; }).length;
-    var preview = students.slice(0, 6).map(function(uid) {
+    var ak = attendKey(c.id);
+    var att = _tdAttendance[ak] || {};
+    var present = Object.keys(att).filter(function(u){ return att[u]==="P"; }).length;
+    var preview = students.slice(0, 5).map(function(uid) {
       var a = resolveAccountLabel(uid);
       return '<div class="td-student"><div class="td-av">' + escapeHTML((a.title||"?").charAt(0).toUpperCase()) +
         '</div><div class="item-main min-w-0"><div class="item-title truncate">' + escapeHTML(a.title) +
         '</div><div class="item-meta truncate">' + escapeHTML(a.meta) + '</div></div></div>';
     }).join("");
+    var feed = [];
+    _tdAnnouncements.filter(function(a){ return a.classId === c.id; }).slice(0,4).forEach(function(a) {
+      feed.push({ t: a.at||0, html: '<div class="td-activity"><div class="text-sm text-slate-200">' + escapeHTML(a.text||"") +
+        '</div><div class="when">Info · ' + escapeHTML(new Date(a.at).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})) + '</div></div>' });
+    });
+    _tdTasks.filter(function(t){ return t.classId === c.id; }).slice(0,4).forEach(function(t) {
+      feed.push({ t: t.at||0, html: '<div class="td-activity" style="border-left-color:rgba(79,124,255,.55)"><div class="text-sm text-slate-200">' +
+        (t.done?"✓ ":"") + escapeHTML(t.title||"") +
+        '</div><div class="when">Aufgabe' + (t.due?" · fällig "+escapeHTML(t.due):"") + '</div></div>' });
+    });
+    feed.sort(function(a,b){ return b.t - a.t; });
+    var feedHtml = feed.slice(0,6).map(function(x){ return x.html; }).join("") ||
+      '<div class="tiny muted">Noch keine Aktivität – sende eine Info oder lege eine Aufgabe an.</div>';
     box.innerHTML =
       '<div class="td-mini-stats">' +
         '<div class="td-mini-stat"><b>' + students.length + '</b><span>Schüler</span></div>' +
-        '<div class="td-mini-stat"><b>' + ann + '</b><span>Infos</span></div>' +
+        '<div class="td-mini-stat"><b>' + present + '/' + students.length + '</b><span>Heute da</span></div>' +
         '<div class="td-mini-stat"><b>' + tasks + '</b><span>Offen</span></div>' +
       '</div>' +
-      '<div class="flex flex-wrap items-center gap-3 mb-4">' +
+      '<div class="flex flex-wrap items-center gap-3 mb-3">' +
         '<span class="td-code">' + escapeHTML(c.inviteCode || "–") + '</span>' +
-        '<button type="button" class="btn text-[11px]" onclick="tdCopySelectedCode()">Code kopieren</button>' +
-        '<button type="button" class="btn text-[11px]" onclick="tdRegenSelectedCode()">Neu erzeugen</button>' +
+        '<button type="button" class="btn text-[11px]" onclick="tdCopySelectedCode()">Kopieren</button>' +
+        '<button type="button" class="btn text-[11px]" onclick="tdShareSelectedCode()">Einladungstext</button>' +
       '</div>' +
-      '<div class="text-sm text-slate-400 mb-3">Schule: <span class="text-slate-200">' + escapeHTML(sch) + '</span></div>' +
-      '<div class="panel-title mb-2">Schüler-Vorschau</div>' +
-      (preview || '<div class="td-empty">Noch keine Schüler – Code teilen oder zuordnen</div>') +
-      (students.length > 6 ? '<button type="button" class="btn mt-2 text-[11px]" onclick="tdSetTab(\'students\')">Alle ' + students.length + ' Schüler</button>' : '') +
-      '<div class="flex flex-wrap gap-2 mt-4">' +
-        '<button type="button" class="btn btn-primary text-[11px]" onclick="tdOpenAssignStudent()">Schüler zuordnen</button>' +
-        '<button type="button" class="btn text-[11px]" onclick="tdSetTab(\'announce\')">Ankündigung</button>' +
+      '<div class="text-sm text-slate-400 mb-4">Schule: <span class="text-slate-200">' + escapeHTML(sch) + '</span> · ' + ann + ' Infos</div>' +
+      '<div class="flex flex-wrap gap-2 mb-4">' +
+        '<button type="button" class="btn btn-primary text-[11px]" onclick="tdSetTab(\'attend\')">Anwesenheit</button>' +
+        '<button type="button" class="btn text-[11px]" onclick="tdOpenAssignStudent()">Schüler +</button>' +
+        '<button type="button" class="btn text-[11px]" onclick="tdSetTab(\'announce\')">Info senden</button>' +
         '<button type="button" class="btn text-[11px]" onclick="tdSetTab(\'tasks\')">Aufgabe</button>' +
-        '<button type="button" class="btn text-[11px]" onclick="viewClassMembers(\'' + escapeHTML(c.id) + '\')">Mitglieder-Dialog</button>' +
-      '</div>';
+        '<button type="button" class="btn text-[11px]" onclick="tdSetTab(\'students\')">Alle Schüler</button>' +
+      '</div>' +
+      '<div class="panel-title mb-2">Schüler</div>' +
+      (preview || '<div class="td-empty">Noch keine Schüler – Code teilen</div>') +
+      (students.length > 5 ? '<button type="button" class="btn mt-2 text-[11px]" onclick="tdSetTab(\'students\')">Alle ' + students.length + ' anzeigen</button>' : '') +
+      '<div class="panel-title mt-5 mb-2">Aktivität</div>' + feedHtml;
   }
 
   window.tdFilterStudents = function() {
@@ -27407,6 +27587,106 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
         '<button type="button" class="btn text-[10px]" onclick="navigator.clipboard.writeText(\'' + escapeHTML(c.inviteCode||"") + '\');toast(\'Kopiert\')">Kopieren</button></div>';
     }).join("");
   }
+
+  window.tdSetAttend = function(uid, status) {
+    if (!_tdSelectedClassId) return;
+    loadTdStore();
+    var k = attendKey(_tdSelectedClassId);
+    if (!_tdAttendance[k]) _tdAttendance[k] = {};
+    if (_tdAttendance[k][uid] === status) delete _tdAttendance[k][uid];
+    else _tdAttendance[k][uid] = status;
+    saveAttendance();
+    renderAttend();
+    // soft update KPI without full re-render lag
+    try {
+      var c = window.__sosClasses[_tdSelectedClassId];
+      var n = Object.keys(c?.students||{}).length;
+      var att = _tdAttendance[k] || {};
+      var p = Object.keys(att).filter(function(u){ return att[u]==="P"; }).length;
+      var el = document.querySelector("#tdPanelOverview .td-mini-stat b");
+      // ignore
+    } catch (e) {}
+  };
+  window.tdMarkAllPresent = function() {
+    if (!_tdSelectedClassId) { toast("Klasse wählen"); return; }
+    loadTdStore();
+    var c = window.__sosClasses[_tdSelectedClassId];
+    if (!c) return;
+    var k = attendKey(_tdSelectedClassId);
+    _tdAttendance[k] = {};
+    Object.keys(c.students||{}).forEach(function(uid){ _tdAttendance[k][uid] = "P"; });
+    saveAttendance();
+    renderAttend();
+    toast("Alle als anwesend");
+  };
+  window.tdSaveAttendance = function() {
+    saveAttendance();
+    toast("Anwesenheit gespeichert");
+  };
+  function renderAttend() {
+    var box = document.getElementById("tdAttendList");
+    var meta = document.getElementById("tdAttendMeta");
+    if (!box) return;
+    var c = window.__sosClasses[_tdSelectedClassId];
+    if (!c) {
+      box.innerHTML = '<div class="td-empty"><strong>Klasse wählen</strong>Links eine Klasse auswählen.</div>';
+      if (meta) meta.textContent = "Anwesenheit";
+      return;
+    }
+    var uids = Object.keys(c.students||{});
+    var k = attendKey(c.id);
+    var att = _tdAttendance[k] || {};
+    var p = Object.keys(att).filter(function(u){ return att[u]==="P"; }).length;
+    var a = Object.keys(att).filter(function(u){ return att[u]==="A"; }).length;
+    var e = Object.keys(att).filter(function(u){ return att[u]==="E"; }).length;
+    if (meta) meta.textContent = "Heute · " + p + " da · " + a + " fehlt · " + e + " entschuldigt · " + uids.length + " gesamt";
+    if (!uids.length) {
+      box.innerHTML = '<div class="td-empty"><strong>Keine Schüler</strong>Zuerst Schüler zuordnen oder Code teilen.</div>';
+      return;
+    }
+    box.innerHTML = uids.map(function(uid) {
+      var lab = resolveAccountLabel(uid);
+      var st = att[uid] || "";
+      return '<div class="td-att-row">' +
+        '<div class="td-av">' + escapeHTML((lab.title||"?").charAt(0).toUpperCase()) + '</div>' +
+        '<div class="item-main min-w-0"><div class="item-title truncate">' + escapeHTML(lab.title) + '</div>' +
+        '<div class="item-meta truncate">' + escapeHTML(lab.meta) + '</div></div>' +
+        '<div class="td-att-btns">' +
+        '<button type="button" class="' + (st==="P"?"on-p":"") + '" title="Anwesend" onclick="tdSetAttend(\'' + escapeHTML(uid) + '\',\'P\')">✓</button>' +
+        '<button type="button" class="' + (st==="A"?"on-a":"") + '" title="Fehlt" onclick="tdSetAttend(\'' + escapeHTML(uid) + '\',\'A\')">✗</button>' +
+        '<button type="button" class="' + (st==="E"?"on-e":"") + '" title="Entschuldigt" onclick="tdSetAttend(\'' + escapeHTML(uid) + '\',\'E\')">E</button>' +
+        '</div></div>';
+    }).join("");
+  }
+  window.tdShareSelectedCode = function() {
+    var c = window.__sosClasses[_tdSelectedClassId];
+    if (!c || !c.inviteCode) { toast("Klasse mit Code wählen"); return; }
+    var sch = (window.__sosSchools[c.schoolId] && window.__sosSchools[c.schoolId].name) || "unserer Schule";
+    var textMsg = [
+      "Einladung zur Klasse " + (c.name || "") + " (" + sch + ")",
+      "",
+      "Code: " + c.inviteCode,
+      "",
+      "In SchoolOS unter Klasse beitreten eingeben."
+    ].join("\n");
+    // real newlines:
+    textMsg = "Einladung zur Klasse " + (c.name || "") + " (" + sch + ")\n\nCode: " + c.inviteCode + "\n\nIn SchoolOS unter Klasse beitreten eingeben.";
+    textMsg = ["Einladung zur Klasse " + (c.name || "") + " (" + sch + ")", "", "Code: " + c.inviteCode, "", "In SchoolOS unter Klasse beitreten eingeben."].join(String.fromCharCode(10));
+    var prev = document.getElementById("tdSharePreview");
+    if (prev) { prev.style.display = ""; prev.textContent = textMsg; }
+    navigator.clipboard.writeText(textMsg).then(function(){ toast("Einladungstext kopiert"); }).catch(function(){ toast("Text im Codes-Tab – manuell kopieren"); });
+    if (_tdTab !== "codes") {
+      _tdTab = "codes";
+      document.querySelectorAll("#page-teacher-dashboard .td-tab").forEach(function(b) {
+        b.classList.toggle("active", b.getAttribute("data-td-tab") === "codes");
+      });
+      var map = { overview:"tdPanelOverview", students:"tdPanelStudents", attend:"tdPanelAttend", announce:"tdPanelAnnounce", tasks:"tdPanelTasks", codes:"tdPanelCodes" };
+      Object.keys(map).forEach(function(k) {
+        var el = document.getElementById(map[k]);
+        if (el) el.style.display = k === "codes" ? "" : "none";
+      });
+    }
+  };
 
   window.tdPostAnnouncement = function() {
     var classId = document.getElementById("tdAnnounceClass")?.value || _tdSelectedClassId;
@@ -27717,7 +27997,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     _tdStudentRows.sort(function(a,b){ return a.title.localeCompare(b.title,"de"); });
 
     // ensure correct panel visibility
-    var map = { overview:"tdPanelOverview", students:"tdPanelStudents", announce:"tdPanelAnnounce", tasks:"tdPanelTasks", codes:"tdPanelCodes" };
+    var map = { overview:"tdPanelOverview", students:"tdPanelStudents", attend:"tdPanelAttend", announce:"tdPanelAnnounce", tasks:"tdPanelTasks", codes:"tdPanelCodes" };
     Object.keys(map).forEach(function(k) {
       var el = document.getElementById(map[k]);
       if (el) el.style.display = k === _tdTab ? "" : "none";
@@ -27728,6 +28008,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
 
     renderOverview();
     tdFilterStudents();
+    renderAttend();
     renderAnnounce();
     renderTasks();
     renderCodes();
