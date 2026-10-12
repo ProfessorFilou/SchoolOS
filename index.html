@@ -1345,35 +1345,16 @@
       backdrop-filter: blur(20px);
     }
 
-    /* Seasonal skins – sichtbare Rahmen & Glow */
-    body.season-winter #sos-particles { opacity: .85; }
-    body.season-winter .hero {
-      border: 1.5px solid rgba(125, 211, 252, .45) !important;
-      box-shadow:
-        0 28px 70px rgba(0,0,0,.45),
-        0 0 50px rgba(125, 211, 252, .18),
-        0 0 90px rgba(147, 197, 253, .1),
-        inset 0 0 40px rgba(186, 230, 253, .06) !important;
-    }
-    body.season-winter .panel {
-      border-color: rgba(125, 211, 252, .14) !important;
-    }
+    /* Seasonal skins */
+    body.season-winter #sos-particles { opacity: .7; }
     body.season-summer .hero {
-      border: 1.5px solid rgba(251, 191, 36, .4) !important;
-      box-shadow: 0 28px 70px rgba(0,0,0,.4), 0 0 80px rgba(251, 191, 36, .18) !important;
+      box-shadow: 0 28px 70px rgba(0,0,0,.4), 0 0 80px rgba(251, 191, 36, .12) !important;
     }
     body.season-autumn .hero {
-      border: 1.5px solid rgba(251, 146, 60, .4) !important;
-      box-shadow: 0 28px 70px rgba(0,0,0,.4), 0 0 60px rgba(251, 146, 60, .16) !important;
+      box-shadow: 0 28px 70px rgba(0,0,0,.4), 0 0 60px rgba(251, 146, 60, .12) !important;
     }
     body.season-spring .hero {
-      border: 1.5px solid rgba(52, 211, 153, .4) !important;
-      box-shadow: 0 28px 70px rgba(0,0,0,.4), 0 0 60px rgba(52, 211, 153, .16) !important;
-    }
-    /* Weihnachten-Extra: wenn Avatar-Rahmen xmas aktiv / Dez–6.Jan */
-    body.season-winter.sos-xmas-active .hero::before {
-      opacity: 1;
-      filter: drop-shadow(0 0 12px rgba(34,197,94,.5));
+      box-shadow: 0 28px 70px rgba(0,0,0,.4), 0 0 60px rgba(52, 211, 153, .12) !important;
     }
 
     /* Premium noise */
@@ -3781,7 +3762,7 @@
       position: fixed;
       right: 20px;
       top: 85px;
-      z-index: 6100;
+      z-index: 300;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -5746,114 +5727,274 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
     
 
     /* ===== Avatar Cosmetics (Discord-style frames) ===== */
+    /* ===== Discord-style Avatar Decorations (Rahmen ÜBER dem Bild) ===== */
     .avatar-frame {
       position: relative;
       display: inline-grid;
       place-items: center;
-      border-radius: inherit;
+      border-radius: 50%;
       flex-shrink: 0;
+      isolation: isolate;
+      overflow: visible !important;
     }
     .avatar-frame > .avatar-inner {
       width: 100%;
       height: 100%;
-      border-radius: inherit;
+      border-radius: 50%;
       overflow: hidden;
       display: grid;
       place-items: center;
       font-weight: 800;
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
     }
     .avatar-frame > .avatar-inner img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
     }
+    /* Ring sits ON TOP of the circular image – Discord decoration style */
     .avatar-frame .cosmetic-ring {
       position: absolute;
-      inset: -5px;
-      border-radius: 999px;
+      inset: -7px;
+      border-radius: 50%;
       pointer-events: none;
-      z-index: 2;
-      border: 2.5px solid transparent;
+      z-index: 10;
       box-sizing: border-box;
+      border: 3px solid transparent;
+      background: transparent;
+      /* soft outer glow */
+      filter: drop-shadow(0 0 6px rgba(0,0,0,.35));
+    }
+    /* Animated gradient stroke via pseudo */
+    .avatar-frame .cosmetic-ring::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      padding: 3px;
+      background: conic-gradient(from var(--dc-a, 0deg),
+        transparent 0 20%,
+        rgba(var(--accent-rgb), .95) 35%,
+        #a78bfa 50%,
+        #22d3ee 65%,
+        transparent 80% 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      opacity: 0;
+      transition: opacity .25s;
+      animation: dcRingSpin 4s linear infinite;
+    }
+    .avatar-frame.av-cos-xmas .cosmetic-ring::before,
+    .avatar-frame.av-cos-nikolaus .cosmetic-ring::before,
+    .avatar-frame.av-cos-schultag .cosmetic-ring::before,
+    .avatar-frame.av-cos-halloween .cosmetic-ring::before,
+    .avatar-frame.av-cos-silvester .cosmetic-ring::before,
+    .avatar-frame.av-cos-ostern .cosmetic-ring::before,
+    .avatar-frame.av-cos-owner .cosmetic-ring::before,
+    .avatar-frame[class*="av-cos-"]:not(.av-cos-none) .cosmetic-ring::before {
+      opacity: 1;
+    }
+    @property --dc-a {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    @keyframes dcRingSpin {
+      to { --dc-a: 360deg; }
+    }
+    /* Solid themed ring under the spinning gradient */
+    .avatar-frame .cosmetic-ring::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,.2);
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.25),
+        0 0 18px rgba(var(--accent-rgb), .25);
+      pointer-events: none;
     }
     .avatar-frame .cosmetic-emoji {
       position: absolute;
-      z-index: 3;
+      z-index: 12;
       font-size: 15px;
       line-height: 1;
       pointer-events: none;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,.55));
-      animation: cosEmojiBob 2.6s ease-in-out infinite;
+      animation: dcFloat 2.6s ease-in-out infinite;
     }
-    .avatar-frame .cosmetic-emoji.tl { top: -8px; left: -8px; }
-    .avatar-frame .cosmetic-emoji.tr { top: -8px; right: -8px; animation-delay: .3s; }
-    .avatar-frame .cosmetic-emoji.bl { bottom: -6px; left: -6px; animation-delay: .6s; }
-    .avatar-frame .cosmetic-emoji.br { bottom: -6px; right: -6px; font-size: 17px; animation-delay: .15s; }
-    @keyframes cosEmojiBob {
+    .avatar-frame .cosmetic-emoji.tl { top: -10px; left: -10px; }
+    .avatar-frame .cosmetic-emoji.tr { top: -10px; right: -10px; animation-delay: .35s; }
+    .avatar-frame .cosmetic-emoji.bl { bottom: -8px; left: -8px; animation-delay: .7s; }
+    .avatar-frame .cosmetic-emoji.br { bottom: -8px; right: -8px; font-size: 17px; animation-delay: .15s; }
+    @keyframes dcFloat {
       0%,100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-3px) scale(1.08); }
+      50% { transform: translateY(-4px) scale(1.1); }
     }
+    /* Theme-specific ring colors */
+    .av-cos-xmas .cosmetic-ring::after {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 2px rgba(239,68,68,.45), 0 0 22px rgba(34,197,94,.55), 0 0 36px rgba(239,68,68,.25);
+    }
+    .av-cos-xmas .cosmetic-ring::before {
+      background: conic-gradient(from var(--dc-a, 0deg), transparent 0 15%, #22c55e, #ef4444, #fbbf24, #22c55e, transparent 85% 100%);
+    }
+    .av-cos-nikolaus .cosmetic-ring::after {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 0 22px rgba(239,68,68,.55);
+    }
+    .av-cos-schultag .cosmetic-ring::after {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(147,197,253,.4), 0 0 18px rgba(59,130,246,.5);
+    }
+    .av-cos-halloween .cosmetic-ring::after {
+      border-color: #f97316;
+      box-shadow: 0 0 0 2px rgba(124,58,237,.4), 0 0 22px rgba(249,115,22,.5);
+    }
+    .av-cos-silvester .cosmetic-ring::after {
+      border-color: #facc15;
+      box-shadow: 0 0 0 2px rgba(167,139,250,.45), 0 0 24px rgba(250,204,21,.55);
+    }
+    .av-cos-ostern .cosmetic-ring::after {
+      border-color: #f472b6;
+      box-shadow: 0 0 0 2px rgba(167,139,250,.35), 0 0 20px rgba(244,114,182,.5);
+    }
+    .av-cos-owner .cosmetic-ring::after {
+      border-color: #fbbf24;
+      box-shadow: 0 0 0 2px rgba(251,191,36,.5), 0 0 28px rgba(251,191,36,.55), 0 0 48px rgba(245,158,11,.3);
+    }
+    .av-cos-owner .cosmetic-ring::before {
+      background: conic-gradient(from var(--dc-a, 0deg), transparent 0 10%, #fbbf24, #f59e0b, #fff7ed, #fbbf24, transparent 90% 100%);
+      opacity: 1;
+    }
+    /* Discord-like cosmetic picker cards */
+    .cosmetic-picker {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+    .cosmetic-chip {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 10px !important;
+      border-radius: 16px !important;
+      min-height: 96px;
+      background: rgba(0,0,0,.25) !important;
+      border: 1px solid rgba(255,255,255,.08) !important;
+      transition: transform .2s, border-color .2s, box-shadow .25s !important;
+    }
+    .cosmetic-chip:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--accent-rgb), .4) !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+    .cosmetic-chip.active {
+      border-color: rgba(var(--accent-rgb), .55) !important;
+      background: rgba(var(--accent-rgb), .14) !important;
+      box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .25), 0 0 24px rgba(var(--accent-rgb), .15);
+    }
+    .cosmetic-chip .dc-preview {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      position: relative;
+      background: linear-gradient(145deg, #334155, #1e293b);
+      display: grid; place-items: center;
+      font-size: 18px; font-weight: 800; color: #e2e8f0;
+    }
+    .cosmetic-chip .dc-preview .cosmetic-ring {
+      inset: -5px;
+    }
+    .cosmetic-chip .dc-label {
+      font-size: 11px; font-weight: 650; text-align: center; color: #cbd5e1;
+    }
+    .cosmetic-chip.locked { opacity: .4; filter: grayscale(.6); }
 
-    .av-cos-xmas .cosmetic-ring {
-      border: 3px solid #22c55e !important;
-      background: conic-gradient(from 0deg, rgba(34,197,94,.25), rgba(239,68,68,.3), rgba(34,197,94,.25));
-      box-shadow:
-        0 0 0 2px rgba(239,68,68,.45),
-        0 0 18px rgba(34,197,94,.55),
-        0 0 36px rgba(239,68,68,.28),
-        inset 0 0 12px rgba(34,197,94,.2);
-      animation: cosPulseGreen 2.2s ease-in-out infinite, cosSpinRing 8s linear infinite;
+    /* Discord-like inventory grid */
+    .dc-inv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
     }
-    .av-cos-nikolaus .cosmetic-ring {
-      border: 3px solid #ef4444 !important;
-      box-shadow:
-        0 0 0 2px rgba(255,255,255,.35),
-        0 0 18px rgba(239,68,68,.6),
-        0 0 32px rgba(255,255,255,.2);
-      animation: cosPulseRed 2s ease-in-out infinite;
+    .dc-inv-card {
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 14px 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      transition: transform .2s, border-color .2s, box-shadow .25s;
     }
-    .av-cos-schultag .cosmetic-ring {
-      border: 3px solid #3b82f6 !important;
-      box-shadow: 0 0 0 2px rgba(147,197,253,.4), 0 0 16px rgba(59,130,246,.55);
-      animation: cosPulseBlue 2.4s ease-in-out infinite;
+    .dc-inv-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--accent-rgb), .35);
+      box-shadow: 0 10px 28px rgba(0,0,0,.3);
     }
-    .av-cos-halloween .cosmetic-ring {
-      border: 3px solid #f97316 !important;
-      box-shadow: 0 0 0 2px rgba(124,58,237,.4), 0 0 20px rgba(249,115,22,.55), 0 0 32px rgba(124,58,237,.3);
-      animation: cosPulseOrange 1.9s ease-in-out infinite;
+    .dc-inv-icon { font-size: 28px; line-height: 1; }
+    .dc-inv-name { font-size: 12px; font-weight: 700; text-align: center; }
+    .dc-inv-meta { font-size: 10px; color: #94a3b8; text-align: center; }
+    .dc-inv-card .btn { margin-top: 4px; font-size: 11px; padding: 6px 12px; }
+
+    /* Discord-like admin catalog */
+    .dc-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.08);
+      margin-bottom: 10px;
     }
-    .av-cos-silvester .cosmetic-ring {
-      border: 3px solid #facc15 !important;
-      box-shadow: 0 0 0 2px rgba(167,139,250,.45), 0 0 20px rgba(250,204,21,.6), 0 0 40px rgba(167,139,250,.35);
-      animation: cosSparkle 1.6s ease-in-out infinite;
+    .dc-toggle .dc-toggle-text { min-width: 0; }
+    .dc-toggle .dc-toggle-title { font-size: 14px; font-weight: 700; }
+    .dc-toggle .dc-toggle-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .dc-switch {
+      position: relative; width: 44px; height: 24px; flex-shrink: 0;
+      border-radius: 999px; border: 0; cursor: pointer;
+      background: #475569; transition: background .2s;
     }
-    .av-cos-ostern .cosmetic-ring {
-      border: 3px solid #f472b6 !important;
-      box-shadow: 0 0 0 2px rgba(167,139,250,.35), 0 0 16px rgba(244,114,182,.55);
-      animation: cosPulsePink 2.2s ease-in-out infinite;
+    .dc-switch.on { background: #5865f2; }
+    .dc-switch::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: transform .2s cubic-bezier(.34,1.4,.64,1);
+      box-shadow: 0 2px 6px rgba(0,0,0,.3);
     }
-    @keyframes cosSpinRing {
-      to { transform: rotate(360deg); }
+    .dc-switch.on::after { transform: translateX(20px); }
+
+    .dc-kat-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 14px;
+      background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.07);
+      margin-bottom: 8px;
     }
-    .av-cos-owner .cosmetic-ring {
-      border: 2px solid rgba(251,191,36,.9);
-      box-shadow: 0 0 18px rgba(251,191,36,.6), 0 0 36px rgba(245,158,11,.35);
-      animation: cosPulseGold 2s ease-in-out infinite;
+    .dc-kat-item .dc-kat-ico {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: grid; place-items: center; font-size: 22px;
+      background: rgba(88,101,242,.2); flex-shrink: 0;
     }
+    .dc-kat-item .item-main { flex: 1; min-width: 0; }
+    .dc-type-pill {
+      display: inline-block; font-size: 9px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .06em;
+      padding: 2px 7px; border-radius: 6px;
+      background: rgba(88,101,242,.2); color: #a5b4fc;
+    }
+    .dc-type-pill.cosmetic { background: rgba(34,197,94,.15); color: #86efac; }
+    .dc-type-pill.badge { background: rgba(250,204,21,.15); color: #fde68a; }
+    .dc-type-pill.item { background: rgba(56,189,248,.15); color: #7dd3fc; }
+
+
 
     @keyframes cosPulseGreen {
-      0%,100% {
-        box-shadow:
-          0 0 0 2px rgba(239,68,68,.4),
-          0 0 14px rgba(34,197,94,.45),
-          0 0 28px rgba(239,68,68,.22);
-      }
-      50% {
-        box-shadow:
-          0 0 0 3px rgba(239,68,68,.65),
-          0 0 24px rgba(34,197,94,.75),
-          0 0 42px rgba(239,68,68,.4);
-      }
+      0%,100% { box-shadow: 0 0 10px rgba(34,197,94,.35); }
+      50% { box-shadow: 0 0 22px rgba(34,197,94,.7), 0 0 30px rgba(239,68,68,.3); }
     }
     @keyframes cosPulseRed {
       0%,100% { transform: scale(1); opacity: 1; }
@@ -6011,148 +6152,55 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
     }
 
 
-    /* FIX: Modal & Toast über Login */
-    #modalBg.modal-bg, .modal-bg { z-index: 6000 !important; }
-    #modalBg.modal-bg.open { display: grid !important; }
-    .avatar-frame .cosmetic-ring { border-radius: 50% !important; }
-
-    /* ===== Season Events: Advent / Ostern (echtes Page-CSS) ===== */
-    .season-event-page { position: relative; }
-    .season-hero {
-      border-radius: 24px;
-      padding: 22px 22px 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      overflow: hidden;
-      position: relative;
-    }
     .xmas-hero {
-      background:
-        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(34,197,94,.4), transparent 50%),
+      border-radius: 24px; padding: 22px; position: relative; overflow: hidden;
+      background: radial-gradient(ellipse 80% 60% at 10% 0%, rgba(34,197,94,.4), transparent 50%),
         radial-gradient(ellipse 70% 50% at 95% 20%, rgba(239,68,68,.32), transparent 45%),
-        radial-gradient(circle at 50% 120%, rgba(250,204,21,.18), transparent 40%),
-        linear-gradient(145deg, #0c1a12 0%, #1a0a0c 50%, #0a1218 100%);
-      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 70px rgba(34,197,94,.15), inset 0 1px 0 rgba(255,255,255,.08);
-    }
-    .xmas-hero::before {
-      content: "";
-      position: absolute; inset: -1px;
-      border-radius: inherit;
-      padding: 1.5px;
-      background: conic-gradient(from 0deg, transparent 0 30%, rgba(34,197,94,.7), rgba(239,68,68,.6), rgba(250,204,21,.5), transparent 100%);
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-      animation: selSpin 12s linear infinite;
-      pointer-events: none;
-      opacity: .7;
+        linear-gradient(145deg, #0c1a12, #1a0a0c 50%, #0a1218);
+      border: 1px solid rgba(34,197,94,.3);
+      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 60px rgba(34,197,94,.12);
     }
     .easter-hero {
-      background:
-        radial-gradient(ellipse 80% 60% at 12% -10%, rgba(244,114,182,.4), transparent 50%),
-        radial-gradient(ellipse 60% 50% at 90% 30%, rgba(167,139,250,.35), transparent 45%),
-        radial-gradient(circle at 40% 110%, rgba(52,211,153,.22), transparent 40%),
-        linear-gradient(145deg, #1a1020 0%, #121a18 55%, #1a1428 100%);
-      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 60px rgba(244,114,182,.15);
+      border-radius: 24px; padding: 22px; position: relative; overflow: hidden;
+      background: radial-gradient(ellipse 80% 60% at 12% -10%, rgba(244,114,182,.4), transparent 50%),
+        linear-gradient(145deg, #1a1020, #121a18 55%, #1a1428);
+      border: 1px solid rgba(244,114,182,.3);
     }
     .season-hero-inner { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
-    .season-hero-emoji { font-size: 42px; filter: drop-shadow(0 8px 20px rgba(0,0,0,.4)); animation: cosEmojiBob 2.8s ease-in-out infinite; }
-    .season-hero-title {
-      background: linear-gradient(180deg, #fff 25%, #fde68a 80%);
-      -webkit-background-clip: text; background-clip: text; color: transparent !important;
-      filter: drop-shadow(0 0 16px rgba(250,204,21,.25));
-    }
-    .season-easter .season-hero-title {
-      background: linear-gradient(180deg, #fff 20%, #f9a8d4 70%, #c4b5fd);
-      -webkit-background-clip: text; background-clip: text; color: transparent !important;
-    }
-    .season-hero-sub { color: rgba(255,255,255,.7); }
-    .season-meta { margin-top: 12px; font-size: 12px; color: rgba(255,255,255,.6); position: relative; z-index: 1; }
-    .xmas-panel {
-      background: linear-gradient(165deg, rgba(20,40,28,.82), rgba(30,12,14,.78)) !important;
-      border-color: rgba(34,197,94,.3) !important;
-      box-shadow: 0 16px 40px rgba(0,0,0,.3), 0 0 40px rgba(34,197,94,.08) !important;
-    }
-    .easter-panel {
-      background: linear-gradient(165deg, rgba(40,20,40,.82), rgba(20,35,30,.78)) !important;
-      border-color: rgba(244,114,182,.3) !important;
-    }
-    .season-door-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-      gap: 12px;
-    }
+    .season-hero-emoji { font-size: 42px; }
+    .season-hero-title { background: linear-gradient(180deg,#fff,#fde68a); -webkit-background-clip:text; background-clip:text; color:transparent!important; }
+    .season-hero-sub,.season-meta { color: rgba(255,255,255,.65); font-size: 13px; margin-top: 8px; }
+    .xmas-panel { border-color: rgba(34,197,94,.28)!important; background: linear-gradient(165deg,rgba(20,40,28,.8),rgba(30,12,14,.75))!important; }
+    .easter-panel { border-color: rgba(244,114,182,.28)!important; }
+    .season-door-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(84px,1fr)); gap: 12px; }
     .season-door {
-      min-height: 92px;
-      border-radius: 18px !important;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(0,0,0,.2)) !important;
-      border: 1px solid rgba(255,255,255,.12) !important;
-      box-shadow: 0 8px 24px rgba(0,0,0,.25);
-      transition: transform .25s cubic-bezier(.34,1.4,.64,1), box-shadow .25s, border-color .2s !important;
-      padding: 10px 6px !important;
+      min-height: 92px; border-radius: 18px!important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: linear-gradient(160deg,rgba(255,255,255,.08),rgba(0,0,0,.2))!important;
+      border: 1px solid rgba(255,255,255,.12)!important; padding: 10px 6px!important;
+      transition: transform .22s, box-shadow .22s, border-color .2s!important;
     }
-    .season-xmas .season-door:hover:not(:disabled) {
-      border-color: rgba(34,197,94,.5) !important;
-      box-shadow: 0 12px 28px rgba(0,0,0,.3), 0 0 24px rgba(34,197,94,.2);
-      transform: translateY(-4px) scale(1.04);
-    }
-    .season-easter .season-door:hover:not(:disabled) {
-      border-color: rgba(244,114,182,.5) !important;
-      box-shadow: 0 12px 28px rgba(0,0,0,.3), 0 0 24px rgba(244,114,182,.2);
-      transform: translateY(-4px) scale(1.04);
-    }
-    .season-door:disabled { opacity: .38; cursor: not-allowed; filter: grayscale(.3); }
-    .season-door.today {
-      border-color: rgba(250,204,21,.65) !important;
-      box-shadow: 0 0 0 2px rgba(250,204,21,.35), 0 0 28px rgba(250,204,21,.25) !important;
-      animation: cosPulseGreen 2.4s ease-in-out infinite;
-    }
-    .season-door.opened {
-      background: linear-gradient(160deg, rgba(34,197,94,.25), rgba(239,68,68,.12)) !important;
-      border-color: rgba(34,197,94,.45) !important;
-    }
-    .season-easter .season-door.opened {
-      background: linear-gradient(160deg, rgba(244,114,182,.25), rgba(167,139,250,.15)) !important;
-      border-color: rgba(244,114,182,.45) !important;
-    }
-    .season-door .door-num { font-size: 22px; font-weight: 800; font-family: "Space Grotesk", sans-serif; }
-    .season-door .door-icon { font-size: 24px; line-height: 1; }
-    .season-door .door-name { font-size: 9px; font-weight: 600; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .xmas-reward {
-      border: 1px solid rgba(34,197,94,.35) !important;
-      background: linear-gradient(145deg, rgba(20,50,30,.9), rgba(40,15,15,.85)) !important;
-      box-shadow: 0 0 40px rgba(34,197,94,.15);
-    }
-    .easter-reward {
-      border: 1px solid rgba(244,114,182,.35) !important;
-      background: linear-gradient(145deg, rgba(50,20,45,.9), rgba(20,40,35,.85)) !important;
-    }
-    /* App-wide event backgrounds */
+    .season-door:hover:not(:disabled) { transform: translateY(-3px) scale(1.04); border-color: rgba(34,197,94,.5)!important; }
+    .season-door:disabled { opacity: .38; cursor: not-allowed; }
+    .season-door.today { border-color: rgba(250,204,21,.65)!important; box-shadow: 0 0 24px rgba(250,204,21,.3)!important; }
+    .season-door.opened { background: linear-gradient(160deg,rgba(34,197,94,.25),rgba(239,68,68,.12))!important; }
+    .season-door .door-num { font-size: 20px; font-weight: 800; font-family: "Space Grotesk",sans-serif; }
+    .season-door .door-icon { font-size: 22px; }
+    .season-door .door-name { font-size: 9px; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     body.event-xmas-bg {
       background:
         radial-gradient(ellipse 95% 60% at 5% -15%, rgba(34,197,94,.28), transparent 42%),
         radial-gradient(ellipse 75% 50% at 98% 0%, rgba(239,68,68,.22), transparent 38%),
         radial-gradient(ellipse 55% 40% at 50% 105%, rgba(250,204,21,.12), transparent 45%),
-        radial-gradient(circle at 70% 40%, rgba(34,197,94,.06), transparent 30%),
-        var(--bg) !important;
-    }
-    body.event-xmas-bg .topbar {
-      border-bottom-color: rgba(34,197,94,.2) !important;
-      box-shadow: 0 12px 40px rgba(0,0,0,.25), 0 0 40px rgba(34,197,94,.08) !important;
-    }
-    body.event-xmas-bg .sidebar {
-      border-right-color: rgba(34,197,94,.15) !important;
+        var(--bg)!important;
     }
     body.event-easter-bg {
       background:
         radial-gradient(ellipse 95% 60% at 8% -12%, rgba(244,114,182,.26), transparent 42%),
         radial-gradient(ellipse 75% 50% at 95% 5%, rgba(167,139,250,.2), transparent 38%),
-        radial-gradient(ellipse 55% 40% at 50% 105%, rgba(52,211,153,.12), transparent 45%),
-        var(--bg) !important;
+        var(--bg)!important;
     }
-    #sos-xmas-snow {
-      position: fixed; inset: 0; pointer-events: none; z-index: 3; opacity: .75;
-    }
+    #sos-xmas-snow { position: fixed; inset: 0; pointer-events: none; z-index: 3; opacity: .75; }
+    #modalBg.modal-bg, .modal-bg { z-index: 6000 !important; }
 
   </style>
 </head>
@@ -6278,30 +6326,23 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
           <button type="button" id="btnEmailLogin" class="btn btn-primary" onclick="window.emailLogin && window.emailLogin()">
             Anmelden
           </button>
-
           <button type="button" id="btnEmailRegister" class="btn" onclick="window.emailRegister && window.emailRegister()">
             Registrieren
           </button>
         </div>
-
         <button type="button" id="btnMagicLink" class="btn w-full mt-2" onclick="window.magicLinkLogin && window.magicLinkLogin()" style="border-style:dashed">
-          ✉ Magic-Link an E-Mail senden
+          ✉ Magic-Link an E-Mail
         </button>
-        <p class="text-[10px] text-slate-500 text-center mt-1">Passwortlos anmelden – Link kommt per E-Mail</p>
-
+        <p class="text-[10px] text-slate-500 text-center mt-1">Passwortlos – Link per E-Mail</p>
       </div>
-
-      <!-- 2FA Code Panel (hidden until needed) -->
       <div id="twoFactorPanel" class="hidden mt-3 p-4 rounded-2xl border border-[rgba(var(--accent-rgb),.35)] bg-[rgba(var(--accent-rgb),.08)]">
         <div class="text-sm font-bold mb-1">Zwei-Faktor-Code</div>
-        <p class="text-[11px] text-slate-400 mb-3">Wir haben einen 6-stelligen Code an deine E-Mail gesendet. Bitte eingeben.</p>
-        <div class="field mb-2">
-          <label>Code</label>
+        <p class="text-[11px] text-slate-400 mb-3">6-stelligen Code eingeben</p>
+        <div class="field mb-2"><label>Code</label>
           <input id="twoFactorCode" class="input" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" class="btn btn-primary" onclick="window.verifyTwoFactorCode && window.verifyTwoFactorCode()">Bestätigen</button>
-          <button type="button" class="btn" onclick="window.resendTwoFactorCode && window.resendTwoFactorCode()">Erneut senden</button>
           <button type="button" class="btn" onclick="window.cancelTwoFactor && window.cancelTwoFactor()">Abbrechen</button>
         </div>
         <div id="twoFactorStatus" class="text-xs text-slate-400 mt-2"></div>
@@ -6504,20 +6545,14 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
         <div class="nav-label">Organisation</div>
 
         <button class="nav-btn" data-page="advent" onclick="showPage('advent')" id="navAdventBtn" style="display:none">
-          <span class="nav-icon">🎄</span>
-          <span>Advent</span>
+          <span class="nav-icon">🎄</span><span>Advent</span>
         </button>
-
         <button class="nav-btn" data-page="easter" onclick="showPage('easter')" id="navEasterBtn" style="display:none">
-          <span class="nav-icon">🐰</span>
-          <span>Ostern</span>
+          <span class="nav-icon">🐰</span><span>Ostern</span>
         </button>
-
         <button class="nav-btn" data-page="inventory" onclick="showPage('inventory')">
-          <span class="nav-icon">🎒</span>
-          <span>Inventar</span>
+          <span class="nav-icon">🎒</span><span>Inventar</span>
         </button>
-
         <button class="nav-btn" data-page="backpack" onclick="showPage('backpack')">
           <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#kb-bag"/></svg></span>
           <span>Rucksack</span>
@@ -7747,16 +7782,14 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
             <div class="season-hero-emoji">🎄</div>
             <div>
               <h2 class="text-2xl font-extrabold font-display season-hero-title">Adventskalender</h2>
-              <p class="text-sm season-hero-sub mt-1">24 Türchen · Cosmetics, Badges & Überraschungen</p>
+              <p class="text-sm season-hero-sub mt-1">24 Türchen · wie Discord Collectibles</p>
             </div>
           </div>
           <div id="adventMeta" class="season-meta"></div>
         </div>
-        <div class="panel panel-pad mb-4 season-panel xmas-panel">
-          <div id="adventGrid" class="season-door-grid"></div>
-        </div>
-        <div id="adventRewardToast" class="panel panel-pad season-reward xmas-reward" style="display:none">
-          <div class="panel-title mb-1">🎁 Heute freigeschaltet</div>
+        <div class="panel panel-pad mb-4 season-panel xmas-panel"><div id="adventGrid" class="season-door-grid"></div></div>
+        <div id="adventRewardToast" class="panel panel-pad xmas-reward" style="display:none">
+          <div class="panel-title mb-1">🎁 Freigeschaltet</div>
           <div id="adventRewardBody" class="text-sm"></div>
         </div>
       </section>
@@ -7767,16 +7800,14 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
             <div class="season-hero-emoji">🐰</div>
             <div>
               <h2 class="text-2xl font-extrabold font-display season-hero-title">Osterkalender</h2>
-              <p class="text-sm season-hero-sub mt-1">12 Nest-Türchen · Eier, Badges & Frühlings-Cosmetics</p>
+              <p class="text-sm season-hero-sub mt-1">12 Nester · Collectibles</p>
             </div>
           </div>
           <div id="easterMeta" class="season-meta"></div>
         </div>
-        <div class="panel panel-pad mb-4 season-panel easter-panel">
-          <div id="easterGrid" class="season-door-grid"></div>
-        </div>
-        <div id="easterRewardToast" class="panel panel-pad season-reward easter-reward" style="display:none">
-          <div class="panel-title mb-1">🥚 Heute gefunden</div>
+        <div class="panel panel-pad mb-4 season-panel easter-panel"><div id="easterGrid" class="season-door-grid"></div></div>
+        <div id="easterRewardToast" class="panel panel-pad easter-reward" style="display:none">
+          <div class="panel-title mb-1">🥚 Gefunden</div>
           <div id="easterRewardBody" class="text-sm"></div>
         </div>
       </section>
@@ -7784,19 +7815,19 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
       <section id="page-inventory" class="page">
         <div class="mb-4">
           <h2 class="text-2xl font-extrabold font-display">Inventar</h2>
-          <p class="text-sm text-slate-500 mt-1">Gesammelte Cosmetics, Badges und Items aus Events & Geschenken.</p>
+          <p class="text-sm text-slate-500 mt-1">Deine Collectibles – Rahmen tragen wie bei Discord</p>
         </div>
         <div class="panel panel-pad mb-4">
-          <div class="panel-title mb-2">Cosmetics / Rahmen</div>
-          <div id="invCosmetics" class="flex flex-wrap gap-2"></div>
+          <div class="panel-title mb-3">Avatar-Rahmen</div>
+          <div id="invCosmetics" class="dc-inv-grid"></div>
         </div>
         <div class="panel panel-pad mb-4">
-          <div class="panel-title mb-2">Badges</div>
-          <div id="invBadges" class="flex flex-wrap gap-2"></div>
+          <div class="panel-title mb-3">Badges</div>
+          <div id="invBadges" class="dc-inv-grid"></div>
         </div>
         <div class="panel panel-pad mb-4">
-          <div class="panel-title mb-2">Items</div>
-          <div id="invItems" class="flex flex-wrap gap-2"></div>
+          <div class="panel-title mb-3">Items</div>
+          <div id="invItems" class="dc-inv-grid"></div>
         </div>
       </section>
 
@@ -8018,68 +8049,74 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
         
         <div id="adminTabKatalog" style="display:none">
           <div class="panel panel-pad mb-4">
-            <div class="panel-title mb-2">Events steuern (Owner)</div>
-            <p class="text-xs text-slate-400 mb-3">Advent & Ostern jederzeit aktivieren – unabhängig vom Kalenderdatum. Nav erscheint dann für alle.</p>
-            <div class="flex flex-wrap gap-2 mb-3">
-              <button type="button" class="btn" id="btnToggleAdvent" onclick="window.toggleEventForce && window.toggleEventForce('advent')">🎄 Advent umschalten</button>
-              <button type="button" class="btn" id="btnToggleEaster" onclick="window.toggleEventForce && window.toggleEventForce('easter')">🐰 Ostern umschalten</button>
+            <div class="panel-title mb-3">Events (wie Feature-Flags)</div>
+            <div class="dc-toggle">
+              <div class="dc-toggle-text">
+                <div class="dc-toggle-title">🎄 Adventskalender</div>
+                <div class="dc-toggle-sub">Nav + Weihnachts-Look für alle Nutzer</div>
+              </div>
+              <button type="button" class="dc-switch" id="swAdvent" onclick="window.toggleEventForce && window.toggleEventForce('advent')"></button>
             </div>
-            <div id="eventForceStatus" class="text-xs text-slate-400 mb-2"></div>
+            <div class="dc-toggle">
+              <div class="dc-toggle-text">
+                <div class="dc-toggle-title">🐰 Osterkalender</div>
+                <div class="dc-toggle-sub">12 Nest-Türchen aktivieren</div>
+              </div>
+              <button type="button" class="dc-switch" id="swEaster" onclick="window.toggleEventForce && window.toggleEventForce('easter')"></button>
+            </div>
+            <div id="eventForceStatus" class="text-xs text-slate-400 mb-3"></div>
             <div class="flex flex-wrap gap-2">
-              <button type="button" class="btn btn-primary" onclick="window.seedCatalog100 && window.seedCatalog100()">📦 100 Katalog-Items einspielen</button>
-              <button type="button" class="btn" onclick="window.seedDefaultEventDays && window.seedDefaultEventDays()">Türchen-Defaults setzen</button>
+              <button type="button" class="btn btn-primary" onclick="window.seedCatalog100 && window.seedCatalog100()">📦 100 Items</button>
+              <button type="button" class="btn" onclick="window.seedDefaultEventDays && window.seedDefaultEventDays()">Türchen befüllen</button>
             </div>
           </div>
           <div class="panel panel-pad mb-4">
-            <div class="panel-title mb-2">Katalog · Items anlegen (Owner)</div>
-            <p class="text-xs text-slate-400 mb-3">Badges, Cosmetics, Sticker, Titel, Themes. Schüler sammeln sie in Events oder du vergibst sie.</p>
+            <div class="panel-title mb-2">Collectible anlegen</div>
             <div class="form-grid">
-              <div class="field"><label>Name</label><input id="katItemName" class="input" maxlength="40" placeholder="z. B. Schneeflocken-Rahmen"></div>
+              <div class="field"><label>Name</label><input id="katItemName" class="input" maxlength="40" placeholder="Schneeflocken-Rahmen"></div>
               <div class="field"><label>Typ</label>
                 <select id="katItemType" class="select">
-                  <option value="cosmetic">Cosmetic / Rahmen</option>
+                  <option value="cosmetic">Rahmen (Cosmetic)</option>
                   <option value="badge">Badge</option>
-                  <option value="item">Inventar-Item / Sticker</option>
-                  <option value="title">Titel (Profil)</option>
-                  <option value="theme">Theme-Unlock</option>
+                  <option value="item">Item</option>
                 </select>
               </div>
-              <div class="field"><label>Icon / Emoji</label><input id="katItemIcon" class="input" maxlength="8" placeholder="🎄"></div>
-              <div class="field"><label>ID (optional)</label><input id="katItemId" class="input" maxlength="32" placeholder="auto"></div>
-              <div class="field" style="grid-column:1/-1"><label>Beschreibung</label><input id="katItemDesc" class="input" maxlength="120" placeholder="Kurztext"></div>
-              <div class="field"><label>Cosmetic-Emojis (tl,tr,bl,br)</label><input id="katItemEmojis" class="input" placeholder='🎄|❄️' title="Zwei Emojis mit | getrennt"></div>
+              <div class="field"><label>Emoji</label><input id="katItemIcon" class="input" maxlength="8" placeholder="🎄"></div>
+              <div class="field"><label>ID</label><input id="katItemId" class="input" maxlength="32" placeholder="auto"></div>
+              <div class="field" style="grid-column:1/-1"><label>Beschreibung</label><input id="katItemDesc" class="input" maxlength="120"></div>
+              <div class="field"><label>Emojis tl|tr</label><input id="katItemEmojis" class="input" placeholder="🎄|❄️"></div>
               <div class="field"><label>Ring-Farbe</label><input id="katItemColor" class="input" placeholder="#22c55e"></div>
             </div>
-            <div class="flex flex-wrap gap-2 mt-2">
-              <button type="button" class="btn btn-primary" onclick="window.katSaveItem && window.katSaveItem()">Item speichern</button>
-              <button type="button" class="btn" onclick="window.katResetForm && window.katResetForm()">Leeren</button>
-            </div>
-            <div id="katItemsList" class="mt-4 space-y-2"></div>
+            <button type="button" class="btn btn-primary mt-2" onclick="window.katSaveItem && window.katSaveItem()">Speichern</button>
+            <div id="katItemsList" class="mt-4 max-h-72 overflow-y-auto"></div>
           </div>
           <div class="panel panel-pad mb-4">
-            <div class="panel-title mb-2">Event-Türchen belohnen</div>
-            <p class="text-xs text-slate-400 mb-3">Advent 1–24 oder Ostern 1–12 mit Katalog-Item verknüpfen.</p>
+            <div class="panel-title mb-2">An Nutzer vergeben</div>
+            <p class="text-xs text-slate-400 mb-2">Suche Person, wähle Collectible – landet im Inventar.</p>
+            <div class="form-grid">
+              <div class="field"><label>Suche (Name / @ / UID)</label>
+                <input id="katGrantSearch" class="input" placeholder="Tippen…" oninput="window.katGrantSearchUsers && window.katGrantSearchUsers()">
+                <div id="katGrantHits" class="mt-2 space-y-1"></div>
+              </div>
+              <div class="field"><label>UID</label><input id="katGrantUid" class="input" placeholder="Firebase UID"></div>
+              <div class="field"><label>Collectible</label><select id="katGrantItem" class="select"></select></div>
+            </div>
+            <button type="button" class="btn btn-primary mt-2" onclick="window.katGrantToUser && window.katGrantToUser()">🎁 Vergeben</button>
+          </div>
+          <div class="panel panel-pad mb-4">
+            <div class="panel-title mb-2">Türchen belohnen</div>
             <div class="form-grid">
               <div class="field"><label>Event</label>
-                <select id="advEventKind" class="select"><option value="advent">Advent (1–24)</option><option value="easter">Ostern (1–12)</option></select>
+                <select id="advEventKind" class="select"><option value="advent">Advent</option><option value="easter">Ostern</option></select>
               </div>
               <div class="field"><label>Tag</label><input id="advDay" class="input" type="number" min="1" max="24" value="1"></div>
               <div class="field"><label>Item</label><select id="advItemSelect" class="select"></select></div>
-              <div class="field"><label>Extra-Text</label><input id="advDayText" class="input" maxlength="80" placeholder="Frohe Überraschung!"></div>
+              <div class="field"><label>Text</label><input id="advDayText" class="input" maxlength="80"></div>
             </div>
             <button type="button" class="btn btn-primary mt-2" onclick="window.advSaveDay && window.advSaveDay()">Türchen speichern</button>
-            <div id="advDaysList" class="mt-4 space-y-1 text-sm max-h-48 overflow-y-auto"></div>
-          </div>
-          <div class="panel panel-pad mb-4">
-            <div class="panel-title mb-2">Item an Nutzer vergeben</div>
-            <div class="form-grid">
-              <div class="field"><label>UID</label><input id="katGrantUid" class="input" placeholder="Firebase UID"></div>
-              <div class="field"><label>Item</label><select id="katGrantItem" class="select"></select></div>
-            </div>
-            <button type="button" class="btn btn-primary mt-2" onclick="window.katGrantToUser && window.katGrantToUser()">Vergeben</button>
+            <div id="advDaysList" class="mt-3 text-sm max-h-40 overflow-y-auto"></div>
           </div>
         </div>
-
 <div id="adminTabTools" style="display:none">
           <div class="panel panel-pad mb-4">
             <div class="panel-title mb-3">KPIs & Graphen</div>
@@ -8386,16 +8423,6 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               </button>
               <div id="pwaStatus" class="tiny muted mt-2"></div>
             </div>
-
-            <div class="panel-title mt-5 mb-2">Sicherheit & Login</div>
-            <div id="lastLoginLine" class="text-xs text-slate-400 mb-2">Letzter Login: –</div>
-            <label class="flex items-start gap-3 cursor-pointer mb-3 p-3 rounded-xl border border-[rgba(255,255,255,.06)]">
-              <input type="checkbox" id="settingTwoFactor" onchange="window.setTwoFactorEmail && window.setTwoFactorEmail(this.checked)" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent)">
-              <span>
-                <span class="text-sm font-semibold text-slate-200">2FA per E-Mail-Code</span>
-                <span class="block tiny muted mt-0.5">Nach dem Passwort zusätzlich 6-stelligen Code bestätigen (wird an deine Login-E-Mail gesendet).</span>
-              </span>
-            </label>
 
             <div class="panel-title mt-5 mb-2">Privatsphäre & Konto</div>
             <div class="flex flex-wrap gap-2 mb-3">
@@ -9030,19 +9057,12 @@ const defaultData = {
   kudosToday: {},
 
   badges: {
-    earned: {},           // id -> { at, progress }
+    earned: {},
     seen: {}
   },
-
-  inventory: {
-    cosmetics: {},
-    badges: {},
-    items: {}
-  },
-  advent: {
-    year: 0,
-    opened: {}
-  },
+  inventory: { cosmetics: {}, badges: {}, items: {} },
+  advent: { year: 0, opened: {} },
+  easter: { year: 0, opened: {} },
 
   schedule: [],
   /** Default times per period row (1–12). Does not overwrite lesson-specific times. */
@@ -11434,19 +11454,10 @@ function authErrorMessage(error) {
       "Firebase akzeptiert diese E-Mail nicht. Bitte ohne Leerzeichen prüfen (name@domain.de).",
 
     "auth/unauthorized-continue-uri":
-      "Domain nicht in Firebase freigeschaltet. Authentication → Settings → Authorized domains: nur den Host eintragen (ohne https://).",
+      "Domain nicht in Firebase freigeschaltet (Authorized domains).",
 
     "auth/invalid-continue-uri":
-      "Ungültige Weiterleitungs-URL. Seite über https://… öffnen (nicht file://).",
-
-    "auth/operation-not-allowed":
-      "Diese Anmeldemethode ist in Firebase deaktiviert (Sign-in method prüfen).",
-
-    "auth/missing-continue-uri":
-      "Continue-URL fehlt – Seite bitte über eine echte Domain öffnen.",
-
-    "auth/invalid-action-code":
-      "Link ungültig oder abgelaufen – bitte neu anfordern.",
+      "Ungültige Weiterleitungs-URL – Reset wird ohne Continue-URL versucht.",
 
     "auth/weak-password":
       "Passwort zu schwach – mindestens 8 Zeichen, besser mit Zahl und Buchstaben.",
@@ -11766,15 +11777,25 @@ function updateAvatarDisplay(el, avatar, fallbackName, cosmeticId) {
 
 function decorateAvatarEl(el, cosId) {
   if (!el) return;
-  el.classList.remove("av-cos-xmas","av-cos-nikolaus","av-cos-schultag","av-cos-halloween","av-cos-silvester","av-cos-ostern","av-cos-owner");
-  // remove old rings
+  // remove any previous av-cos-* classes (incl. catalog ids)
+  try {
+    Array.from(el.classList).forEach(function(cl) {
+      if (cl.indexOf("av-cos-") === 0) el.classList.remove(cl);
+    });
+  } catch (e) {}
   el.querySelectorAll?.(".cosmetic-ring, .cosmetic-emoji")?.forEach(n => n.remove());
   const c = getCosmetic(cosId);
   if (!c || c.id === "none") return;
   el.classList.add("av-cos-" + c.id);
   el.style.position = el.style.position || "relative";
+  el.style.overflow = "visible";
   const ring = document.createElement("span");
   ring.className = "cosmetic-ring";
+  // custom catalog color
+  if (c._color) {
+    ring.style.setProperty("--cos-color", c._color);
+    ring.style.borderColor = c._color;
+  }
   el.appendChild(ring);
   (c.emojis || []).forEach(function(e) {
     const s = document.createElement("span");
@@ -11813,24 +11834,18 @@ const AVATAR_COSMETICS = [
 ];
 
 function getCosmetic(id) {
-  try {
-    if (typeof mergeCatalogCosmetics === "function") mergeCatalogCosmetics();
-  } catch (e) {}
+  try { if (typeof mergeCatalogCosmetics === "function") mergeCatalogCosmetics(); } catch (e) {}
   return AVATAR_COSMETICS.find(c => c.id === id) || AVATAR_COSMETICS[0];
 }
 
 function isCosmeticUnlocked(c) {
   if (!c || c.id === "none") return true;
   try {
-    if (typeof isMasterAdmin === "function" && isMasterAdmin()) return true; // owner can preview all
+    if (typeof isMasterAdmin === "function" && isMasterAdmin()) return true;
   } catch (e) {}
-  // Inventory-collected cosmetics always unlocked
   try {
     const inv = (typeof data !== "undefined" && data && data.inventory) || {};
-    const cos = inv.cosmetics || {};
-    if (c.id && cos[c.id]) return true;
-    // catalog custom ids also stored under cosmetics
-    if (c._fromCatalog && cos[c.id]) return true;
+    if (c.id && inv.cosmetics && inv.cosmetics[c.id]) return true;
   } catch (e) {}
   try {
     return !c.unlock || !!c.unlock(new Date());
@@ -11878,12 +11893,17 @@ function renderCosmeticPicker() {
   const box = document.getElementById("cosmeticPicker");
   if (!box) return;
   const cur = data?.settings?.avatarCosmetic || "none";
+  const letter = ((data?.settings?.name) || "?").charAt(0).toUpperCase();
   box.innerHTML = AVATAR_COSMETICS.map(c => {
     const unlocked = isCosmeticUnlocked(c);
     const active = cur === c.id;
+    const cosClass = c.id !== "none" ? " av-cos-" + c.id : "";
+    const em = (c.emojis || []).map(e => `<span class="cosmetic-emoji ${e.pos}">${e.ch}</span>`).join("");
+    const ring = c.id !== "none" ? `<span class="cosmetic-ring"></span>` : "";
     return `<button type="button" class="cosmetic-chip${active?" active":""}${!unlocked?" locked":""}"
-      onclick="setAvatarCosmetic('${c.id}')" ${!unlocked?'disabled':''} title="${unlocked ? c.name : c.name + ' (nicht in Saison)'}">
-      ${(c.emojis && c.emojis[0]) ? c.emojis[0].ch + " " : ""}${escapeHTML(c.name)}
+      onclick="setAvatarCosmetic('${c.id}')" ${!unlocked?'disabled':''} title="${unlocked ? c.name : c.name + ' (gesperrt)'}">
+      <div class="dc-preview avatar-frame${cosClass}" data-frame="1">${letter}${ring}${em}</div>
+      <span class="dc-label">${escapeHTML(c.name)}</span>
     </button>`;
   }).join("");
 }
@@ -16676,8 +16696,7 @@ window.exportBoardPdf = function() {
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SchoolOS Übersicht</title>
     <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111;max-width:800px;margin:auto}
     h1{font-size:20px} h2{font-size:14px;margin-top:24px;border-bottom:1px solid #ddd;padding-bottom:4px}
-    li{font-size:12px;margin:4px 0} .muted{color:#666;font-size:11px}
-    </style></head><body>
+    li{font-size:12px;margin:4px 0} .muted{color:#666;font-size:11px}</style></head><body>
     <h1>SchoolOS – ${escapeHTML(data.settings.name || "Übersicht")}</h1>
     <p class="muted">${escapeHTML(data.settings.className || "")} · ${new Date().toLocaleString("de-DE")}</p>
     <h2>Offene Aufgaben</h2><ul>${tasks.map(t => `<li>${escapeHTML(t.title)} <span class="muted">${escapeHTML(t.subject || "")} ${escapeHTML(t.date || "")}</span></li>`).join("") || "<li>–</li>"}</ul>
@@ -18411,15 +18430,14 @@ window.setAdminTab = function(tab) {
     tools: "adminTabTools",
     katalog: "adminTabKatalog"
   };
-  Object.entries(map).forEach(([k, id]) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = adminTab === k ? "" : "none";
-  });
-  // Katalog-Tab nur für Owner
   try {
     const kb = document.getElementById("adminTabKatalogBtn");
     if (kb) kb.style.display = (typeof isMasterAdmin === "function" && isMasterAdmin()) ? "" : "none";
   } catch (e) {}
+  Object.entries(map).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = adminTab === k ? "" : "none";
+  });
   // hide KPI row for teacher-only
   try {
     const kpi = document.querySelector("#page-admin .admin-kpi-row");
@@ -21337,15 +21355,8 @@ function openModal(title, body) {
     </div>
   `;
 
-  const bg = document.getElementById("modalBg");
-  // Immer über Login (#loginScreen z-index 500) und Intro
-  if (bg) {
-    if (bg.parentElement !== document.body) {
-      document.body.appendChild(bg);
-    }
-    bg.style.zIndex = "6000";
-    bg.classList.add("open");
-  }
+  document.getElementById("modalBg")
+    .classList.add("open");
 
   // Auto text limits on all modal fields
   applyFormLimits(modal);
@@ -25120,56 +25131,40 @@ window.closeMobileSidebar = function() {
   /* --- Season --- */
   (function applySeason(){
     try {
-      const now = new Date();
-      const m = now.getMonth(); // 0-11
-      const day = now.getDate();
+      const m = new Date().getMonth(); // 0-11
       let s = "spring";
       if (m === 11 || m <= 1) s = "winter";
       else if (m >= 5 && m <= 7) s = "summer";
       else if (m >= 8 && m <= 10) s = "autumn";
-      document.body.classList.remove("season-winter","season-summer","season-autumn","season-spring","sos-xmas-active");
+      document.body.classList.remove("season-winter","season-summer","season-autumn","season-spring");
       document.body.classList.add("season-" + s);
-      // Weihnachten: 1. Dez – 6. Jan → extra Glow + Rahmen
-      if (m === 11 || (m === 0 && day <= 6)) {
-        document.body.classList.add("sos-xmas-active");
-      }
-      // Winter: sichtbarer Schnee (mehr Flocken, klarer)
+      // optional winter snow flakes (very light)
       if (s === "winter" && !RM && !document.getElementById("sos-season-canvas")) {
         const c = document.createElement("canvas");
         c.id = "sos-season-canvas";
-        c.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.7";
+        c.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.55";
         document.body.prepend(c);
         const ctx = c.getContext("2d");
         let W, H, flakes = [];
         function resize(){ W=innerWidth; H=innerHeight; c.width=W; c.height=H;
-          const n = Math.min(70, Math.round(W/28));
-          flakes = Array.from({length: n}, () => ({
-            x: Math.random()*W, y: Math.random()*H, r: 1.2+Math.random()*2.8,
-            vy: 18+Math.random()*36, vx: -10+Math.random()*20, ph: Math.random()*6,
-            a: 0.45 + Math.random()*0.4
+          flakes = Array.from({length: Math.min(40, Math.round(W/40))}, () => ({
+            x: Math.random()*W, y: Math.random()*H, r: 1+Math.random()*2.2,
+            vy: 12+Math.random()*28, vx: -8+Math.random()*16, ph: Math.random()*6
           }));
         }
         resize(); addEventListener("resize", resize);
         let last = performance.now();
-        (function loop(nowT){
+        (function loop(now){
           requestAnimationFrame(loop);
           if (document.hidden) return;
-          const dt = Math.min(.05, (nowT-last)/1000); last = nowT;
+          const dt = Math.min(.05, (now-last)/1000); last = now;
           ctx.clearRect(0,0,W,H);
           for (const f of flakes) {
-            f.y += f.vy * dt; f.x += (f.vx + Math.sin(nowT/900 + f.ph)*8) * dt;
-            if (f.y > H+12) { f.y = -12; f.x = Math.random()*W; }
-            if (f.x < -12) f.x = W+12; if (f.x > W+12) f.x = -12;
-            ctx.beginPath();
-            ctx.fillStyle = "rgba(220,235,255," + f.a + ")";
+            f.y += f.vy * dt; f.x += (f.vx + Math.sin(now/1000 + f.ph)*6) * dt;
+            if (f.y > H+10) { f.y = -10; f.x = Math.random()*W; }
+            if (f.x < -10) f.x = W+10; if (f.x > W+10) f.x = -10;
+            ctx.beginPath(); ctx.fillStyle = "rgba(200,220,255,.7)";
             ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fill();
-            // leichter Glanz
-            if (f.r > 2.2) {
-              ctx.beginPath();
-              ctx.fillStyle = "rgba(255,255,255," + (f.a*0.5) + ")";
-              ctx.arc(f.x - f.r*0.25, f.y - f.r*0.25, f.r*0.35, 0, 6.28);
-              ctx.fill();
-            }
           }
         })(last);
       }
@@ -28559,1051 +28554,508 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
 
 
 
-/* ===== SchoolOS: Magic-Link · 2FA · Last-Login · Advent · Inventar · Katalog ===== */
+/* ===== SchoolOS Collectibles (Discord-style) + Events + Magic-Link ===== */
 (function(){
-  const LS_EMAIL = "sosMagicEmail";
-  const LS_2FA_PENDING = "sos2faPending";
-  const LS_LAST_LOGIN_SHOWN = "sosLastLoginShown";
+  window.__sosCatalog = window.__sosCatalog || { items:{}, advent:{}, easter:{}, events:{ advent:{force:false}, easter:{force:false} } };
 
-  function ensureInv() {
-    if (typeof data === "undefined" || !data) return { cosmetics:{}, badges:{}, items:{} };
-    data.inventory = data.inventory || { cosmetics:{}, badges:{}, items:{} };
+  function catalogRef(path){ return ref(db, "sosCatalog" + (path ? "/" + path : "")); }
+  function ensureInv(){
+    if (typeof data === "undefined" || !data) return {cosmetics:{},badges:{},items:{}};
+    data.inventory = data.inventory || {cosmetics:{},badges:{},items:{}};
     data.inventory.cosmetics = data.inventory.cosmetics || {};
     data.inventory.badges = data.inventory.badges || {};
     data.inventory.items = data.inventory.items || {};
-    data.advent = data.advent || { opened:{}, year: new Date().getFullYear() };
+    data.advent = data.advent || {year:0, opened:{}};
+    data.easter = data.easter || {year:0, opened:{}};
     return data.inventory;
   }
 
-  /* ---------- Catalog (RTDB + local cache) ---------- */
-
-  window.__sosCatalog = window.__sosCatalog || { items: {}, advent: {}, easter: {}, events: { advent: { force: false }, easter: { force: false } } };
-
-  function catalogRef(path) {
-    return ref(db, "sosCatalog" + (path ? "/" + path : ""));
-  }
-
-  window.loadSosCatalog = async function() {
+  window.loadSosCatalog = async function(){
     try {
       const snap = await get(catalogRef());
       const v = snap.val() || {};
       window.__sosCatalog.items = v.items || {};
       window.__sosCatalog.advent = v.advent || {};
       window.__sosCatalog.easter = v.easter || {};
-      window.__sosCatalog.events = v.events || { advent: { force: false }, easter: { force: false } };
-      try { mergeCatalogCosmetics(); } catch(e) {}
-      try { updateEventNavVisibility(); } catch(e) {}
-      try { if (typeof renderKatalogAdmin === "function") renderKatalogAdmin(); } catch(e) {}
-      try { if (typeof renderAdventPage === "function") renderAdventPage(); } catch(e) {}
-      try { if (typeof renderEasterPage === "function") renderEasterPage(); } catch(e) {}
-      try { if (typeof renderInventoryPage === "function") renderInventoryPage(); } catch(e) {}
-      try { updateEventForceStatus(); } catch(e) {}
-    } catch (e) { console.warn("catalog load", e); }
-  };
-
-  function isEventActive(kind) {
-    const ev = (window.__sosCatalog.events || {})[kind] || {};
-    if (ev.force) return true;
-    const d = new Date();
-    const m = d.getMonth();
-    const day = d.getDate();
-    if (kind === "advent") {
-      // Dec 1–24 natural, or force
-      return m === 11 && day >= 1 && day <= 24;
-    }
-    if (kind === "easter") {
-      // rough: March 15 – April 20
-      if (m === 2 && day >= 15) return true;
-      if (m === 3 && day <= 20) return true;
-      return false;
-    }
-    return false;
-  }
-
-  function eventProgressDay(kind) {
-    // When forced: unlock days progressively by day-of-month or all up to "virtual today"
-    const d = new Date();
-    if (kind === "advent") {
-      if ((window.__sosCatalog.events || {}).advent?.force) {
-        // forced: use day of month capped 24, min 1 — OR if outside Dec use full unlock mode via forceDay
-        const fd = Number((window.__sosCatalog.events || {}).advent?.forceDay);
-        if (fd > 0) return Math.min(24, fd);
-        if (d.getMonth() === 11) return Math.min(24, d.getDate());
-        return Math.min(24, d.getDate()); // outside Dec still open by calendar day number
-      }
-      if (d.getMonth() !== 11) return 0;
-      return Math.min(24, d.getDate());
-    }
-    if (kind === "easter") {
-      if ((window.__sosCatalog.events || {}).easter?.force) {
-        const fd = Number((window.__sosCatalog.events || {}).easter?.forceDay);
-        if (fd > 0) return Math.min(12, fd);
-        return Math.min(12, d.getDate());
-      }
-      if (!isEventActive("easter")) return 0;
-      // map date roughly into 1-12
-      return Math.min(12, ((d.getDate() - 1) % 12) + 1);
-    }
-    return 0;
-  }
-
-  window.updateEventNavVisibility = function() {
-    const a = document.getElementById("navAdventBtn");
-    const e = document.getElementById("navEasterBtn");
-    if (a) a.style.display = isEventActive("advent") ? "" : "none";
-    if (e) e.style.display = isEventActive("easter") ? "" : "none";
-    try {
-      const xmas = isEventActive("advent");
-      const easter = isEventActive("easter");
-      document.body.classList.toggle("event-xmas-bg", !!xmas);
-      document.body.classList.toggle("event-easter-bg", !!easter && !xmas);
-      if (xmas) ensureXmasSnow();
-      else {
-        const s = document.getElementById("sos-xmas-snow");
-        if (s) s.remove();
-      }
-    } catch (err) {}
-  };
-
-  function ensureXmasSnow() {
-    if (document.getElementById("sos-xmas-snow")) return;
-    try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch(e) {}
-    const c = document.createElement("canvas");
-    c.id = "sos-xmas-snow";
-    document.body.appendChild(c);
-    const ctx = c.getContext("2d");
-    let W, H, flakes = [];
-    function resize() {
-      W = innerWidth; H = innerHeight;
-      c.width = W; c.height = H;
-      const n = Math.min(80, Math.round(W / 22));
-      flakes = Array.from({ length: n }, function() {
-        return {
-          x: Math.random() * W, y: Math.random() * H,
-          r: 1 + Math.random() * 3, vy: 20 + Math.random() * 40,
-          vx: -12 + Math.random() * 24, a: 0.4 + Math.random() * 0.5, ph: Math.random() * 6
-        };
-      });
-    }
-    resize();
-    addEventListener("resize", resize);
-    let last = performance.now();
-    (function loop(now) {
-      if (!document.getElementById("sos-xmas-snow")) return;
-      requestAnimationFrame(loop);
-      if (document.hidden) return;
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      ctx.clearRect(0, 0, W, H);
-      for (const f of flakes) {
-        f.y += f.vy * dt;
-        f.x += (f.vx + Math.sin(now / 800 + f.ph) * 10) * dt;
-        if (f.y > H + 10) { f.y = -10; f.x = Math.random() * W; }
-        if (f.x < -10) f.x = W + 10;
-        if (f.x > W + 10) f.x = -10;
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(230,240,255," + f.a + ")";
-        ctx.arc(f.x, f.y, f.r, 0, 6.28);
-        ctx.fill();
-      }
-    })(last);
-  }
-
-  window.updateEventForceStatus = function() {
-    const el = document.getElementById("eventForceStatus");
-    if (!el) return;
-    const ev = window.__sosCatalog.events || {};
-    el.innerHTML = "Advent: <strong>" + (ev.advent?.force ? "FORCIERT AN" : (isEventActive("advent") ? "saisonal an" : "aus")) +
-      "</strong> · Ostern: <strong>" + (ev.easter?.force ? "FORCIERT AN" : (isEventActive("easter") ? "saisonal an" : "aus")) + "</strong>" +
-      (ev.advent?.force ? " · Advent-Tag-Cap: " + eventProgressDay("advent") : "") +
-      (ev.easter?.force ? " · Ostern-Tag-Cap: " + eventProgressDay("easter") : "");
-  };
-
-  window.toggleEventForce = async function(kind) {
-    if (typeof isMasterAdmin !== "function" || !isMasterAdmin()) { toast("Nur Owner"); return; }
-    window.__sosCatalog.events = window.__sosCatalog.events || {};
-    window.__sosCatalog.events[kind] = window.__sosCatalog.events[kind] || {};
-    const cur = !!window.__sosCatalog.events[kind].force;
-    window.__sosCatalog.events[kind].force = !cur;
-    if (!cur) {
-      // when enabling force, set forceDay high so testing is useful
-      const max = kind === "advent" ? 24 : 12;
-      const ans = prompt("Bis zu welchem Tag freischalten? (1–" + max + ")\nTipp: " + max + " = alle Türchen offen", String(max));
-      const n = Math.min(max, Math.max(1, Number(ans) || new Date().getDate()));
-      window.__sosCatalog.events[kind].forceDay = n;
-    } else {
-      delete window.__sosCatalog.events[kind].forceDay;
-    }
-    try {
-      await set(catalogRef("events/" + kind), window.__sosCatalog.events[kind]);
-      toast(kind + (window.__sosCatalog.events[kind].force ? " AKTIV (Force)" : " aus"));
+      window.__sosCatalog.events = v.events || { advent:{force:false}, easter:{force:false} };
+      mergeCatalogCosmetics();
       updateEventNavVisibility();
       updateEventForceStatus();
-      renderAdventPage();
-      renderEasterPage();
-    } catch (e) {
-      console.warn(e);
-      toast("Speichern fehlgeschlagen – Firebase-Regeln für sosCatalog prüfen");
-    }
+      try { renderKatalogAdmin(); } catch(e){}
+      try { renderAdventPage(); renderEasterPage(); renderInventoryPage(); } catch(e){}
+    } catch(e){ console.warn("catalog", e); }
   };
 
-  window.mergeCatalogCosmetics = function mergeCatalogCosmetics() {
+  window.mergeCatalogCosmetics = function(){
     if (typeof AVATAR_COSMETICS === "undefined") return;
-    const items = window.__sosCatalog.items || {};
-    Object.keys(items).forEach(function(id) {
-      const it = items[id];
+    Object.keys(window.__sosCatalog.items || {}).forEach(function(id){
+      const it = window.__sosCatalog.items[id];
       if (!it || it.type !== "cosmetic") return;
       if (AVATAR_COSMETICS.some(c => c.id === id)) return;
-      const parts = String(it.emojis || it.icon || "✨").split("|").map(s => s.trim()).filter(Boolean);
-      const emojis = [];
+      const parts = String(it.emojis || it.icon || "✨").split("|").map(s=>s.trim()).filter(Boolean);
       const pos = ["tl","tr","bl","br"];
-      parts.forEach(function(ch, i){ emojis.push({ ch: ch, pos: pos[i % 4] }); });
+      const emojis = parts.map(function(ch,i){ return {ch:ch, pos:pos[i%4]}; });
       AVATAR_COSMETICS.push({
-        id: id,
-        name: it.name || id,
-        unlock: function(){ return true; },
-        emojis: emojis.length ? emojis : [{ ch: it.icon || "✨", pos: "tr" }],
-        _fromCatalog: true,
-        _color: it.color || ""
+        id, name: it.name||id, unlock: function(){ return true; },
+        emojis: emojis.length ? emojis : [{ch: it.icon||"✨", pos:"tr"}],
+        _fromCatalog: true, _color: it.color||""
       });
     });
   };
 
-  /* ----- Seed 100 catalog items ----- */
-  window.seedCatalog100 = async function() {
-    if (!isMasterAdmin()) { toast("Nur Owner"); return; }
-    if (!confirm("100 Katalog-Items einspielen? Bestehende mit gleicher ID werden überschrieben.")) return;
-    const pool = [];
-    const cosmetics = [
-      ["🎄","Tannen-Rahmen","#22c55e","🎄|❄️"],["🎅","Nikolaus-Rahmen","#ef4444","🎅|🎁"],["❄️","Eis-Rahmen","#38bdf8","❄️|✨"],
+  function isEventActive(kind){
+    const ev = (window.__sosCatalog.events||{})[kind]||{};
+    if (ev.force) return true;
+    const d = new Date(), m = d.getMonth(), day = d.getDate();
+    if (kind === "advent") return m === 11 && day >= 1 && day <= 24;
+    if (kind === "easter") return (m===2 && day>=15) || (m===3 && day<=20);
+    return false;
+  }
+  function eventProgressDay(kind){
+    const d = new Date();
+    const max = kind==="advent"?24:12;
+    const ev = (window.__sosCatalog.events||{})[kind]||{};
+    if (ev.force){
+      const fd = Number(ev.forceDay);
+      if (fd>0) return Math.min(max, fd);
+      return Math.min(max, d.getDate());
+    }
+    if (!isEventActive(kind)) return 0;
+    if (kind==="advent") return Math.min(24, d.getDate());
+    return Math.min(12, ((d.getDate()-1)%12)+1);
+  }
+
+  window.updateEventNavVisibility = function(){
+    const a = document.getElementById("navAdventBtn");
+    const e = document.getElementById("navEasterBtn");
+    const xmas = isEventActive("advent");
+    const eas = isEventActive("easter");
+    if (a) a.style.display = xmas ? "" : "none";
+    if (e) e.style.display = eas ? "" : "none";
+    try {
+      document.body.classList.toggle("event-xmas-bg", !!xmas);
+      document.body.classList.toggle("event-easter-bg", !!eas && !xmas);
+      if (xmas) ensureXmasSnow(); else document.getElementById("sos-xmas-snow")?.remove();
+    } catch(err){}
+  };
+  window.updateEventForceStatus = function(){
+    const el = document.getElementById("eventForceStatus");
+    const ev = window.__sosCatalog.events||{};
+    const swA = document.getElementById("swAdvent");
+    const swE = document.getElementById("swEaster");
+    if (swA) swA.classList.toggle("on", !!(ev.advent?.force || isEventActive("advent")));
+    if (swE) swE.classList.toggle("on", !!(ev.easter?.force || isEventActive("easter")));
+    if (el) el.textContent = "Advent: " + (ev.advent?.force ? "FORCIERT (bis Tag "+(ev.advent.forceDay||"?")+")" : (isEventActive("advent")?"saisonal":"aus")) +
+      " · Ostern: " + (ev.easter?.force ? "FORCIERT" : (isEventActive("easter")?"saisonal":"aus"));
+  };
+
+  window.toggleEventForce = async function(kind){
+    if (typeof isMasterAdmin !== "function" || !isMasterAdmin()){ toast("Nur Owner"); return; }
+    window.__sosCatalog.events = window.__sosCatalog.events || {};
+    window.__sosCatalog.events[kind] = window.__sosCatalog.events[kind] || {};
+    const cur = !!window.__sosCatalog.events[kind].force;
+    window.__sosCatalog.events[kind].force = !cur;
+    if (!cur){
+      const max = kind==="advent"?24:12;
+      const ans = prompt("Bis Tag freischalten (1–"+max+")? Tipp: "+max+" = alle", String(max));
+      window.__sosCatalog.events[kind].forceDay = Math.min(max, Math.max(1, Number(ans)||max));
+    } else delete window.__sosCatalog.events[kind].forceDay;
+    try {
+      await set(catalogRef("events/"+kind), window.__sosCatalog.events[kind]);
+      toast(kind + (window.__sosCatalog.events[kind].force ? " an" : " aus"));
+      updateEventNavVisibility(); updateEventForceStatus();
+      renderAdventPage(); renderEasterPage();
+    } catch(e){ toast("Speichern fehlgeschlagen – Rules für sosCatalog?"); }
+  };
+
+  function ensureXmasSnow(){
+    if (document.getElementById("sos-xmas-snow")) return;
+    try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch(e){}
+    const c = document.createElement("canvas"); c.id = "sos-xmas-snow"; document.body.appendChild(c);
+    const ctx = c.getContext("2d"); let W,H,flakes=[];
+    function resize(){ W=innerWidth; H=innerHeight; c.width=W; c.height=H;
+      flakes = Array.from({length: Math.min(70, Math.round(W/24))}, ()=>({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,vy:18+Math.random()*36,vx:-10+Math.random()*20,a:.4+Math.random()*.5,ph:Math.random()*6}));
+    }
+    resize(); addEventListener("resize", resize);
+    let last = performance.now();
+    (function loop(now){
+      if (!document.getElementById("sos-xmas-snow")) return;
+      requestAnimationFrame(loop); if (document.hidden) return;
+      const dt=Math.min(.05,(now-last)/1000); last=now; ctx.clearRect(0,0,W,H);
+      for (const f of flakes){
+        f.y+=f.vy*dt; f.x+=(f.vx+Math.sin(now/800+f.ph)*10)*dt;
+        if (f.y>H+10){f.y=-10;f.x=Math.random()*W;}
+        ctx.beginPath(); ctx.fillStyle="rgba(230,240,255,"+f.a+")"; ctx.arc(f.x,f.y,f.r,0,6.28); ctx.fill();
+      }
+    })(last);
+  }
+
+  /* Catalog CRUD */
+  window.katSaveItem = async function(){
+    if (!isMasterAdmin()){ toast("Nur Owner"); return; }
+    const name=(document.getElementById("katItemName")?.value||"").trim().slice(0,40);
+    const type=document.getElementById("katItemType")?.value||"item";
+    const icon=(document.getElementById("katItemIcon")?.value||"🎁").trim().slice(0,8);
+    let id=(document.getElementById("katItemId")?.value||"").trim().toLowerCase().replace(/[^a-z0-9_\-]/g,"");
+    const desc=(document.getElementById("katItemDesc")?.value||"").trim().slice(0,120);
+    const emojis=(document.getElementById("katItemEmojis")?.value||"").trim();
+    const color=(document.getElementById("katItemColor")?.value||"").trim();
+    if (!name){ toast("Name nötig"); return; }
+    if (!id) id="c_"+Date.now().toString(36);
+    const entry={id,name,type,icon,desc,emojis,color,at:Date.now(),by:currentUser?.uid||"owner"};
+    window.__sosCatalog.items[id]=entry;
+    try {
+      await set(catalogRef("items/"+id), entry);
+      toast("Gespeichert: "+name); mergeCatalogCosmetics(); renderKatalogAdmin();
+      try { renderCosmeticPicker(); } catch(e){}
+    } catch(e){ toast("Fehler (Rules?)"); }
+  };
+  window.katDeleteItem = async function(id){
+    if (!isMasterAdmin()) return;
+    if (!confirm("Löschen?")) return;
+    delete window.__sosCatalog.items[id];
+    try { await remove(catalogRef("items/"+id)); } catch(e){}
+    renderKatalogAdmin(); toast("Gelöscht");
+  };
+
+  window.renderKatalogAdmin = function(){
+    const list=document.getElementById("katItemsList");
+    const items=window.__sosCatalog.items||{};
+    const ids=Object.keys(items).sort();
+    if (list){
+      if (!ids.length) list.innerHTML='<div class="empty">Noch leer – „100 Items“ oder manuell anlegen.</div>';
+      else list.innerHTML=ids.map(function(id){
+        const it=items[id];
+        return '<div class="dc-kat-item"><div class="dc-kat-ico">'+escapeHTML(it.icon||"✨")+'</div>'+
+          '<div class="item-main"><div class="item-title">'+escapeHTML(it.name||id)+
+          ' <span class="dc-type-pill '+escapeHTML(it.type||"")+'">'+escapeHTML(it.type||"")+'</span></div>'+
+          '<div class="item-meta">'+escapeHTML(id)+(it.desc?" · "+escapeHTML(it.desc):"")+'</div></div>'+
+          '<button type="button" class="btn text-[10px] btn-danger" onclick="katDeleteItem(\''+escapeHTML(id)+'\')">✕</button></div>';
+      }).join("");
+    }
+    const opts='<option value="">—</option>'+ids.map(function(id){
+      const it=items[id]; return '<option value="'+escapeHTML(id)+'">'+escapeHTML((it.icon||"")+" "+(it.name||id))+'</option>';
+    }).join("");
+    const sel=document.getElementById("advItemSelect"); if(sel) sel.innerHTML=opts;
+    const gsel=document.getElementById("katGrantItem"); if(gsel) gsel.innerHTML=opts;
+    updateEventForceStatus();
+  };
+
+  window.katGrantSearchUsers = function(){
+    const q=(document.getElementById("katGrantSearch")?.value||"").trim().toLowerCase();
+    const box=document.getElementById("katGrantHits"); if(!box) return;
+    if (!q){ box.innerHTML=""; return; }
+    let hits=[];
+    try {
+      const pool = typeof peoplePool==="function" ? peoplePool() : [];
+      hits = pool.filter(function(p){
+        return String(p.name||"").toLowerCase().includes(q)||String(p.username||"").toLowerCase().includes(q)||String(p.uid||"").toLowerCase().includes(q);
+      }).slice(0,8);
+    } catch(e){}
+    box.innerHTML = hits.map(function(p){
+      const t = (p.name||p.username||p.uid||"?");
+      return '<button type="button" class="item w-full text-left" onclick="document.getElementById(\'katGrantUid\').value=\''+escapeHTML(p.uid)+'\';toast(\'Gewählt: '+escapeHTML(t)+'\')">'+
+        '<div class="item-main"><div class="item-title">'+escapeHTML(t)+'</div><div class="item-meta">'+escapeHTML(p.uid)+'</div></div></button>';
+    }).join("") || '<div class="tiny muted">Keine Treffer – UID manuell einfügen</div>';
+  };
+
+  window.katGrantToUser = async function(){
+    if (!isMasterAdmin()){ toast("Nur Owner"); return; }
+    const uid=(document.getElementById("katGrantUid")?.value||"").trim();
+    const itemId=document.getElementById("katGrantItem")?.value||"";
+    if (!uid||!itemId){ toast("UID + Item"); return; }
+    const it=window.__sosCatalog.items[itemId]; if(!it){ toast("Item unbekannt"); return; }
+    let folder="items"; if(it.type==="cosmetic") folder="cosmetics"; else if(it.type==="badge") folder="badges";
+    try {
+      await set(ref(db,"userInventory/"+uid+"/"+folder+"/"+itemId), {id:itemId,name:it.name,icon:it.icon,at:Date.now(),by:currentUser?.uid||"owner"});
+      toast("🎁 Vergeben: "+it.name);
+    } catch(e){ toast("Vergabe fehlgeschlagen"); }
+  };
+
+  window.advSaveDay = async function(){
+    if (!isMasterAdmin()) return;
+    const kind=document.getElementById("advEventKind")?.value||"advent";
+    const max=kind==="advent"?24:12;
+    const day=Math.min(max, Math.max(1, Number(document.getElementById("advDay")?.value)||1));
+    const itemId=document.getElementById("advItemSelect")?.value||"";
+    const text=(document.getElementById("advDayText")?.value||"").trim().slice(0,80);
+    const entry={day,itemId,text,at:Date.now()};
+    window.__sosCatalog[kind]=window.__sosCatalog[kind]||{};
+    window.__sosCatalog[kind][String(day)]=entry;
+    try { await set(catalogRef(kind+"/"+day), entry); toast("Türchen "+day+" ok"); } catch(e){ toast("Fehler"); }
+  };
+
+  window.seedCatalog100 = async function(){
+    if (!isMasterAdmin()) return;
+    if (!confirm("100 Collectibles einspielen?")) return;
+    const pool=[];
+    const cosmetics=[["🎄","Tannen-Rahmen","#22c55e","🎄|❄️"],["🎅","Nikolaus-Rahmen","#ef4444","🎅|🎁"],["❄️","Eis-Rahmen","#38bdf8","❄️|✨"],
       ["🦌","Rentier-Rahmen","#a78bfa","🦌|⭐"],["⭐","Sternen-Rahmen","#fbbf24","⭐|✨"],["🕯️","Kerzen-Rahmen","#f59e0b","🕯️|✨"],
       ["🐰","Hasen-Rahmen","#f472b6","🐰|🥚"],["🌷","Tulpen-Rahmen","#fb7185","🌷|🌸"],["🥚","Ei-Rahmen","#a3e635","🥚|✨"],
       ["👑","König-Rahmen","#fbbf24","👑|✨"],["💎","Diamant-Rahmen","#22d3ee","💎|✨"],["🌙","Mond-Rahmen","#818cf8","🌙|⭐"],
       ["🔥","Feuer-Rahmen","#f97316","🔥|✨"],["🌊","Wellen-Rahmen","#06b6d4","🌊|💙"],["🍀","Glücks-Rahmen","#22c55e","🍀|✨"],
       ["🎭","Masken-Rahmen","#c084fc","🎭|✨"],["🦄","Einhorn-Rahmen","#e879f9","🦄|💜"],["🚀","Raketen-Rahmen","#60a5fa","🚀|⭐"],
       ["📚","Bücher-Rahmen","#818cf8","📚|✏️"],["🎓","Abi-Rahmen","#fbbf24","🎓|📜"],["⚽","Sport-Rahmen","#4ade80","⚽|🏆"],
-      ["🎨","Kunst-Rahmen","#f472b6","🎨|✨"],["🧪","Labor-Rahmen","#2dd4bf","🧪|🔬"],["🎸","Musik-Rahmen","#a78bfa","🎸|🎵"]
-    ];
-    cosmetics.forEach(function(c, i) {
-      pool.push({ id: "cos_" + (i+1), name: c[1], type: "cosmetic", icon: c[0], color: c[2], emojis: c[3], desc: "Cosmetic aus dem Katalog" });
-    });
-    const badges = ["🏆 Champion","🌟 Superstar","💪 Durchhalter","🧠 Genie","⚡ Blitz","🎯 Treffer","🔥 Hot Streak",
-      "🌈 Regenbogen","🕊️ Frieden","🧩 Puzzle-Profi","📎 Organisiert","🕒 Pünktlich","📝 Notiz-König","🎒 Rucksack-Held",
-      "📖 Leseratte","🧪 Forscher","🎨 Kreativ","🎵 Musiker","🏃 Sportlich","💻 Coder","🗣️ Redner","🤝 Teamplayer",
-      "🌱 Neo","🛡️ Beschützer","✨ Magier","🎂 Geburtstag","🎃 Halloween","🎄 Weihnacht","🐰 Ostern","☀️ Sommer"];
-    badges.forEach(function(b, i) {
-      const parts = b.split(" ");
-      pool.push({ id: "bdg_" + (i+1), name: parts.slice(1).join(" ") || b, type: "badge", icon: parts[0], desc: "Badge: " + b });
-    });
-    const items = ["🎁 Geschenk","🍪 Plätzchen","🧣 Schal","🧤 Handschuhe","⛄ Schneemann","🔔 Glocke","🕯️ Kerze",
-      "⭐ Stern","❄️ Flocke","🎀 Schleife","🪄 Zauberstab","📖 Märchen","🫖 Tee","🧩 Puzzle-Teil","🎯 Dart",
-      "💎 Kristall","🧸 Teddy","🚂 Zug","🎠 Karussell","🍦 Eis","🎈 Ballon","🧁 Cupcake","🍓 Beere","🍊 Orange",
-      "🌻 Sonnenblume","🌸 Blüte","🌿 Blatt","🪴 Pflanze","🔑 Schlüssel","🗝️ Altschlüssel","📦 Paket","✉️ Brief",
-      "🪄 Stab","🛡️ Schild","⚔️ Schwert","🏹 Bogen","🔮 Kugel","🧿 Amulett","📿 Kette","💍 Ring","👑 Mini-Krone",
-      "🎩 Hut","🕶️ Sonnenbrille","🧢 Cap","👟 Sneaker","🎒 Mini-Rucksack","📱 Handy-Skin","🕹️ Stick","🎲 Würfel",
-      "🃏 Karte"];
-    items.forEach(function(it, i) {
-      const parts = it.split(" ");
-      pool.push({ id: "itm_" + (i+1), name: parts.slice(1).join(" ") || it, type: "item", icon: parts[0], desc: "Sammel-Item" });
-    });
-    // pad to 100
-    let n = pool.length;
-    while (pool.length < 100) {
-      n++;
-      pool.push({ id: "extra_" + n, name: "Überraschung #" + n, type: "item", icon: "✨", desc: "Extra Katalog-Item" });
-    }
-    pool.length = 100;
-    const updates = {};
-    pool.forEach(function(it) {
-      it.at = Date.now();
-      it.by = currentUser?.uid || "owner";
-      window.__sosCatalog.items[it.id] = it;
-      updates[it.id] = it;
-    });
+      ["🎨","Kunst-Rahmen","#f472b6","🎨|✨"],["🧪","Labor-Rahmen","#2dd4bf","🧪|🔬"],["🎸","Musik-Rahmen","#a78bfa","🎸|🎵"]];
+    cosmetics.forEach(function(c,i){ pool.push({id:"cos_"+(i+1),name:c[1],type:"cosmetic",icon:c[0],color:c[2],emojis:c[3],desc:"Avatar-Rahmen"}); });
+    const badges=["🏆 Champion","🌟 Superstar","💪 Durchhalter","🧠 Genie","⚡ Blitz","🎯 Treffer","🔥 Hot Streak","🌈 Regenbogen","🕊️ Frieden","🧩 Puzzle-Profi","📎 Organisiert","🕒 Pünktlich","📝 Notiz-König","🎒 Held","📖 Leseratte","🧪 Forscher","🎨 Kreativ","🎵 Musiker","🏃 Sportlich","💻 Coder","🗣️ Redner","🤝 Teamplayer","🌱 Neo","🛡️ Schutz","✨ Magier","🎂 Geburtstag","🎃 Halloween","🎄 Weihnacht","🐰 Ostern","☀️ Sommer"];
+    badges.forEach(function(b,i){ const p=b.split(" "); pool.push({id:"bdg_"+(i+1),name:p.slice(1).join(" "),type:"badge",icon:p[0],desc:"Badge"}); });
+    const items=["🎁 Geschenk","🍪 Plätzchen","🧣 Schal","🧤 Handschuhe","⛄ Schneemann","🔔 Glocke","🕯️ Kerze","⭐ Stern","❄️ Flocke","🎀 Schleife","🪄 Stab","📖 Märchen","🫖 Tee","🧩 Puzzle","🎯 Dart","💎 Kristall","🧸 Teddy","🚂 Zug","🎠 Karussell","🍦 Eis","🎈 Ballon","🧁 Cupcake","🍓 Beere","🍊 Orange","🌻 Blume","🌸 Blüte","🌿 Blatt","🔑 Schlüssel","📦 Paket","✉️ Brief","🪙 Münze","🧿 Amulett","🪄 Scroll","⚔️ Schwert","🛡️ Schild","🏹 Bogen","🧪 Trank","📿 Kette","💍 Ring","🎩 Hut","👓 Brille","🧢 Cap","👟 Sneaker","🎧 Headset","📱 Gadget","⌚ Uhr"];
+    items.forEach(function(it,i){ const p=it.split(" "); pool.push({id:"itm_"+(i+1),name:p.slice(1).join(" ")||it,type:"item",icon:p[0],desc:"Item"}); });
+    while (pool.length < 100) pool.push({id:"extra_"+(pool.length+1),name:"Überraschung #"+(pool.length+1),type:"item",icon:"✨",desc:"Extra"});
+    const updates={}; const now=Date.now();
+    pool.slice(0,100).forEach(function(it){ it.at=now; it.by=currentUser?.uid||"owner"; window.__sosCatalog.items[it.id]=it; updates[it.id]=it; });
     try {
       await update(catalogRef("items"), updates);
-      mergeCatalogCosmetics();
-      renderKatalogAdmin();
-      toast("100 Items im Katalog ✓");
-    } catch (e) {
-      console.warn(e);
-      toast("Fehler – ggf. Rules für sosCatalog/items");
-    }
+      toast("100 Collectibles im Katalog"); mergeCatalogCosmetics(); renderKatalogAdmin();
+    } catch(e){ toast("Fehler – sosCatalog Rules?"); }
   };
 
-  window.seedDefaultEventDays = async function() {
+  window.seedDefaultEventDays = async function(){
     if (!isMasterAdmin()) return;
-    const items = Object.keys(window.__sosCatalog.items || {});
-    if (items.length < 12) { toast("Zuerst Katalog befüllen (100 Items)"); return; }
-    const adv = {}, eas = {};
-    for (let d = 1; d <= 24; d++) {
-      const id = items[(d - 1) % items.length];
-      adv[String(d)] = { day: d, itemId: id, text: "Advent Türchen " + d, at: Date.now() };
+    const items=Object.keys(window.__sosCatalog.items||{});
+    if (items.length<12){ toast("Zuerst 100 Items einspielen"); return; }
+    const adv={}, eas={};
+    for (let d=1;d<=24;d++){ const id=items[(d-1)%items.length]; adv[String(d)]={day:d,itemId:id,text:"Advent "+d,at:Date.now()}; }
+    for (let d=1;d<=12;d++){ const id=items[(d+10)%items.length]; eas[String(d)]={day:d,itemId:id,text:"Ostern "+d,at:Date.now()}; }
+    window.__sosCatalog.advent=adv; window.__sosCatalog.easter=eas;
+    try { await set(catalogRef("advent"),adv); await set(catalogRef("easter"),eas); toast("Türchen gesetzt"); } catch(e){ toast("Fehler"); }
+  };
+
+  /* Advent / Easter doors */
+  function resolveReward(kind, day){
+    const cfg=((window.__sosCatalog[kind])||{})[String(day)];
+    if (cfg&&cfg.itemId&&window.__sosCatalog.items[cfg.itemId]){
+      const it=window.__sosCatalog.items[cfg.itemId];
+      return {id:it.id,name:it.name,icon:it.icon||"🎁",type:it.type||"item",text:cfg.text||""};
     }
-    for (let d = 1; d <= 12; d++) {
-      const id = items[(d + 10) % items.length];
-      eas[String(d)] = { day: d, itemId: id, text: "Osternest " + d, at: Date.now() };
-    }
-    window.__sosCatalog.advent = adv;
-    window.__sosCatalog.easter = eas;
-    try {
-      await set(catalogRef("advent"), adv);
-      await set(catalogRef("easter"), eas);
-      renderKatalogAdmin();
-      toast("Türchen Advent+Ostern gesetzt");
-    } catch (e) { toast("Fehler beim Speichern"); }
-  };
-
-  window.katResetForm = function() {
-    ["katItemName","katItemIcon","katItemId","katItemDesc","katItemEmojis","katItemColor"].forEach(function(id){
-      const el = document.getElementById(id); if (el) el.value = "";
-    });
-    const t = document.getElementById("katItemType"); if (t) t.value = "cosmetic";
-  };
-
-  window.katSaveItem = async function() {
-    if (typeof isMasterAdmin !== "function" || !isMasterAdmin()) { toast("Nur Owner"); return; }
-    const name = (document.getElementById("katItemName")?.value || "").trim().slice(0, 40);
-    const type = document.getElementById("katItemType")?.value || "item";
-    const icon = (document.getElementById("katItemIcon")?.value || "🎁").trim().slice(0, 8);
-    let id = (document.getElementById("katItemId")?.value || "").trim().toLowerCase().replace(/[^a-z0-9_\-]/g,"");
-    const desc = (document.getElementById("katItemDesc")?.value || "").trim().slice(0, 120);
-    const emojis = (document.getElementById("katItemEmojis")?.value || "").trim();
-    const color = (document.getElementById("katItemColor")?.value || "").trim();
-    if (!name) { toast("Name nötig"); return; }
-    if (!id) id = "c_" + Date.now().toString(36);
-    const entry = { id, name, type, icon, desc, emojis, color, at: Date.now(), by: currentUser?.uid || "owner" };
-    window.__sosCatalog.items[id] = entry;
-    try {
-      await set(catalogRef("items/" + id), entry);
-      toast("Item gespeichert: " + name);
-      mergeCatalogCosmetics();
-      renderKatalogAdmin();
-      katResetForm();
-    } catch (e) {
-      console.warn(e);
-      toast("Speichern fehlgeschlagen (Rechte?)");
-    }
-  };
-
-  window.katDeleteItem = async function(id) {
-    if (!isMasterAdmin()) return;
-    if (!confirm("Item löschen?")) return;
-    delete window.__sosCatalog.items[id];
-    try { await remove(catalogRef("items/" + id)); } catch(e) {}
-    renderKatalogAdmin();
-    toast("Gelöscht");
-  };
-
-  window.advSaveDay = async function() {
-    if (!isMasterAdmin()) { toast("Nur Owner"); return; }
-    const kind = document.getElementById("advEventKind")?.value || "advent";
-    const max = kind === "easter" ? 12 : 24;
-    const day = Math.min(max, Math.max(1, Number(document.getElementById("advDay")?.value) || 1));
-    const itemId = document.getElementById("advItemSelect")?.value || "";
-    const text = (document.getElementById("advDayText")?.value || "").trim().slice(0, 80);
-    const entry = { day, itemId, text, at: Date.now() };
-    if (kind === "easter") {
-      window.__sosCatalog.easter[String(day)] = entry;
-      await set(catalogRef("easter/" + day), entry);
-    } else {
-      window.__sosCatalog.advent[String(day)] = entry;
-      await set(catalogRef("advent/" + day), entry);
-    }
-    toast((kind === "easter" ? "Ostern" : "Advent") + " Tag " + day + " gespeichert");
-    renderKatalogAdmin();
-  };
-
-  window.katGrantToUser = async function() {
-    if (!isMasterAdmin()) { toast("Nur Owner"); return; }
-    const uid = (document.getElementById("katGrantUid")?.value || "").trim();
-    const itemId = document.getElementById("katGrantItem")?.value || "";
-    if (!uid || !itemId) { toast("UID und Item"); return; }
-    const it = window.__sosCatalog.items[itemId];
-    if (!it) { toast("Item unbekannt"); return; }
-    try {
-      let folder = "items";
-      if (it.type === "cosmetic") folder = "cosmetics";
-      else if (it.type === "badge") folder = "badges";
-      else if (it.type === "title") folder = "titles";
-      else if (it.type === "theme") folder = "themes";
-      await set(ref(db, "userInventory/" + uid + "/" + folder + "/" + itemId), {
-        id: itemId, name: it.name, icon: it.icon, type: it.type, at: Date.now(), by: currentUser?.uid || "owner"
-      });
-      toast("Vergeben an " + uid.slice(0, 8) + "…");
-    } catch (e) { console.warn(e); toast("Vergabe fehlgeschlagen"); }
-  };
-
-  window.renderKatalogAdmin = function() {
-    const list = document.getElementById("katItemsList");
-    const items = window.__sosCatalog.items || {};
-    const ids = Object.keys(items).sort();
-    if (list) {
-      if (!ids.length) list.innerHTML = '<div class="empty">Noch keine Items – „100 Katalog-Items“ oder manuell anlegen.</div>';
-      else list.innerHTML = '<div class="tiny muted mb-2">' + ids.length + " Items</div>" + ids.slice(0, 80).map(function(id) {
-        const it = items[id];
-        return '<div class="item"><div class="item-main"><div class="item-title">' +
-          escapeHTML((it.icon||"") + " " + (it.name||id)) + '</div><div class="item-meta">' +
-          escapeHTML(it.type + " · " + id) + (it.desc ? " · " + escapeHTML(it.desc) : "") +
-          '</div></div><button type="button" class="btn text-[10px] btn-danger" onclick="katDeleteItem(\'' +
-          escapeHTML(id) + '\')">✕</button></div>';
-      }).join("") + (ids.length > 80 ? '<div class="tiny muted">… und ' + (ids.length-80) + ' weitere</div>' : "");
-    }
-    const sel = document.getElementById("advItemSelect");
-    const gsel = document.getElementById("katGrantItem");
-    const opts = '<option value="">— keins —</option>' + ids.map(function(id){
-      const it = items[id];
-      return '<option value="' + escapeHTML(id) + '">' + escapeHTML((it.icon||"") + " " + (it.name||id)) + '</option>';
-    }).join("");
-    if (sel) sel.innerHTML = opts;
-    if (gsel) gsel.innerHTML = opts;
-    const advBox = document.getElementById("advDaysList");
-    if (advBox) {
-      const adv = window.__sosCatalog.advent || {};
-      const eas = window.__sosCatalog.easter || {};
-      let html = "";
-      Object.keys(adv).map(Number).sort((a,b)=>a-b).forEach(function(d){
-        const e = adv[String(d)]; const it = items[e.itemId] || {};
-        html += '<div class="tiny">🎄 ' + d + ': ' + escapeHTML((it.icon||"🎁") + " " + (it.name||e.itemId||"—")) + '</div>';
-      });
-      Object.keys(eas).map(Number).sort((a,b)=>a-b).forEach(function(d){
-        const e = eas[String(d)]; const it = items[e.itemId] || {};
-        html += '<div class="tiny">🐰 ' + d + ': ' + escapeHTML((it.icon||"🥚") + " " + (it.name||e.itemId||"—")) + '</div>';
-      });
-      advBox.innerHTML = html || '<div class="tiny muted">Keine Türchen konfiguriert.</div>';
-    }
-    updateEventForceStatus();
-  };
-
-  const DEFAULT_ADV_REWARDS = [
-    { icon:"🎄", name:"Tannenbaum", type:"item" },{ icon:"❄️", name:"Schneeflocke", type:"item" },
-    { icon:"🎁", name:"Geschenk", type:"item" },{ icon:"⭐", name:"Stern", type:"item" },
-    { icon:"🕯️", name:"Kerze", type:"item" },{ icon:"🍪", name:"Plätzchen", type:"item" },
-    { icon:"🦌", name:"Rentier", type:"item" },{ icon:"🎅", name:"Nikolaus-Badge", type:"badge" },
-    { icon:"✨", name:"Glitzer", type:"item" },{ icon:"🔔", name:"Glocke", type:"item" },
-    { icon:"🧤", name:"Handschuhe", type:"item" },{ icon:"🧣", name:"Schal", type:"item" },
-    { icon:"🎿", name:"Ski", type:"item" },{ icon:"⛄", name:"Schneemann", type:"item" },
-    { icon:"🎀", name:"Schleife", type:"item" },{ icon:"🪄", name:"Zauberstab", type:"item" },
-    { icon:"🌟", name:"Goldstern", type:"item" },{ icon:"🎵", name:"Carol", type:"item" },
-    { icon:"🫖", name:"Tee", type:"item" },{ icon:"📖", name:"Wintergeschichte", type:"item" },
-    { icon:"🧩", name:"Puzzle", type:"item" },{ icon:"🎯", name:"Ziel", type:"item" },
-    { icon:"💎", name:"Kristall", type:"item" },{ icon:"👑", name:"Kronen-Rahmen", type:"cosmetic" }
-  ];
-  const DEFAULT_EASTER_REWARDS = [
-    { icon:"🥚", name:"Osterei", type:"item" },{ icon:"🐰", name:"Hase", type:"badge" },
-    { icon:"🌷", name:"Tulpe", type:"item" },{ icon:"🐣", name:"Küken", type:"item" },
-    { icon:"🌸", name:"Blüte", type:"item" },{ icon:"🧺", name:"Korb", type:"item" },
-    { icon:"🍬", name:"Bonbon", type:"item" },{ icon:"🦋", name:"Schmetterling", type:"item" },
-    { icon:"🌿", name:"Grün", type:"item" },{ icon:"🎀", name:"Schleife", type:"item" },
-    { icon:"✨", name:"Frühling", type:"item" },{ icon:"👑", name:"Osterkrone", type:"cosmetic" }
-  ];
-
-  function giveReward(reward, source) {
+    const icons=kind==="advent"?["🎄","❄️","🎁","⭐","🕯️","🍪"]:["🥚","🐰","🌷","🌸","🐣","🎀"];
+    return {id:kind+"_"+day, name:(kind==="advent"?"Türchen ":"Nest ")+day, icon:icons[(day-1)%icons.length], type:"item", text:""};
+  }
+  window.openAdventDoor = function(day){ openDoor("advent", day); };
+  window.openEasterDoor = function(day){ openDoor("easter", day); };
+  function openDoor(kind, day){
     ensureInv();
-    const inv = data.inventory;
-    if (reward.type === "cosmetic") {
-      inv.cosmetics[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
+    if (!isEventActive(kind)){ toast("Event nicht aktiv – Owner kann forcen"); return; }
+    const maxDay=eventProgressDay(kind);
+    if (day>maxDay){ toast("Noch verschlossen"); return; }
+    const store=kind==="advent"?data.advent:data.easter;
+    if (store.opened[day]){ toast("Schon geöffnet"); return; }
+    const reward=resolveReward(kind, day);
+    store.opened[day]={at:Date.now(), reward};
+    const inv=ensureInv();
+    if (reward.type==="cosmetic"){
+      inv.cosmetics[reward.id]={id:reward.id,name:reward.name,icon:reward.icon,at:Date.now(),source:kind};
       mergeCatalogCosmetics();
-    } else if (reward.type === "badge") {
-      inv.badges[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
-      data.badges = data.badges || { earned:{}, seen:{} };
-      data.badges.earned = data.badges.earned || {};
-      data.badges.earned[reward.id] = { at: Date.now(), title: reward.name, icon: reward.icon };
-    } else if (reward.type === "title") {
-      inv.titles = inv.titles || {};
-      inv.titles[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
-    } else if (reward.type === "theme") {
-      inv.themes = inv.themes || {};
-      inv.themes[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
+    } else if (reward.type==="badge"){
+      inv.badges[reward.id]={id:reward.id,name:reward.name,icon:reward.icon,at:Date.now(),source:kind};
+      data.badges=data.badges||{earned:{}}; data.badges.earned=data.badges.earned||{};
+      data.badges.earned[reward.id]={at:Date.now(),title:reward.name,icon:reward.icon};
     } else {
-      inv.items[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source, qty: (inv.items[reward.id]?.qty || 0) + 1 };
+      inv.items[reward.id]={id:reward.id,name:reward.name,icon:reward.icon,at:Date.now(),source:kind,qty:(inv.items[reward.id]?.qty||0)+1};
     }
+    try { if (typeof save==="function") save(); } catch(e){}
+    try { if (currentUser&&!previewMode) set(ref(db,"userInventory/"+currentUser.uid), data.inventory).catch(()=>{}); } catch(e){}
+    toast((reward.icon||"🎁")+" "+reward.name);
+    const bodyId=kind==="advent"?"adventRewardBody":"easterRewardBody";
+    const toastId=kind==="advent"?"adventRewardToast":"easterRewardToast";
+    const rb=document.getElementById(bodyId); const rt=document.getElementById(toastId);
+    if (rb) rb.innerHTML='<span style="font-size:28px">'+escapeHTML(reward.icon||"")+'</span> <strong>'+escapeHTML(reward.name)+'</strong>';
+    if (rt) rt.style.display="";
+    if (kind==="advent") renderAdventPage(); else renderEasterPage();
+    renderInventoryPage(); try{renderCosmeticPicker();}catch(e){}
   }
 
-  function resolveDoorReward(kind, day, defaults) {
-    const map = kind === "easter" ? (window.__sosCatalog.easter || {}) : (window.__sosCatalog.advent || {});
-    const cfg = map[String(day)];
-    if (cfg && cfg.itemId && window.__sosCatalog.items[cfg.itemId]) {
-      const it = window.__sosCatalog.items[cfg.itemId];
-      return { id: it.id, name: it.name, icon: it.icon || "🎁", type: it.type || "item", text: cfg.text || "" };
-    }
-    const def = defaults[(day - 1) % defaults.length];
-    return { id: kind + "_" + day + "_" + (data.advent?.year || new Date().getFullYear()), name: def.name, icon: def.icon, type: def.type, text: "" };
-  }
-
-  window.openAdventDoor = async function(day) {
-    if (!isEventActive("advent")) { toast("Advent ist nicht aktiv – Owner kann es forcen"); return; }
-    ensureInv();
-    data.advent = data.advent || { opened:{}, year: new Date().getFullYear() };
-    const y = new Date().getFullYear();
-    if (data.advent.year !== y) data.advent = { opened:{}, year: y };
-    const maxDay = eventProgressDay("advent");
-    if (day > maxDay) { toast("Türchen " + day + " noch verschlossen (frei bis Tag " + maxDay + ")"); return; }
-    if (data.advent.opened[day]) { toast("Bereits geöffnet"); return; }
-    const reward = resolveDoorReward("advent", day, DEFAULT_ADV_REWARDS);
-    data.advent.opened[day] = { at: Date.now(), reward: reward };
-    giveReward(reward, "advent");
-    try { if (typeof save === "function") save(); else persistLocalOnly(); } catch(e) {}
-    try { syncInventoryCloud(); } catch(e) {}
-    toast((reward.icon || "🎁") + " " + reward.name);
-    const rb = document.getElementById("adventRewardBody");
-    const rt = document.getElementById("adventRewardToast");
-    if (rb) rb.innerHTML = '<span style="font-size:32px">' + escapeHTML(reward.icon||"🎁") + '</span> <strong>' + escapeHTML(reward.name) + '</strong>' + (reward.text ? '<div class="text-slate-400 mt-1">' + escapeHTML(reward.text) + '</div>' : '');
-    if (rt) rt.style.display = "";
-    renderAdventPage(); renderInventoryPage();
-    try { renderCosmeticPicker(); } catch(e) {}
-    try { renderBadgesGrid(); } catch(e) {}
-  };
-
-  window.openEasterDoor = async function(day) {
-    if (!isEventActive("easter")) { toast("Ostern ist nicht aktiv – Owner kann es forcen"); return; }
-    ensureInv();
-    data.easter = data.easter || { opened:{}, year: new Date().getFullYear() };
-    const y = new Date().getFullYear();
-    if (data.easter.year !== y) data.easter = { opened:{}, year: y };
-    const maxDay = eventProgressDay("easter");
-    if (day > maxDay) { toast("Nest " + day + " noch versteckt (frei bis " + maxDay + ")"); return; }
-    if (data.easter.opened[day]) { toast("Bereits gefunden"); return; }
-    const reward = resolveDoorReward("easter", day, DEFAULT_EASTER_REWARDS);
-    data.easter.opened[day] = { at: Date.now(), reward: reward };
-    giveReward(reward, "easter");
-    try { if (typeof save === "function") save(); else persistLocalOnly(); } catch(e) {}
-    try { syncInventoryCloud(); } catch(e) {}
-    toast((reward.icon || "🥚") + " " + reward.name);
-    const rb = document.getElementById("easterRewardBody");
-    const rt = document.getElementById("easterRewardToast");
-    if (rb) rb.innerHTML = '<span style="font-size:32px">' + escapeHTML(reward.icon||"🥚") + '</span> <strong>' + escapeHTML(reward.name) + '</strong>';
-    if (rt) rt.style.display = "";
-    renderEasterPage(); renderInventoryPage();
-  };
-
-  function renderDoorGrid(gridId, metaId, kind, total, defaults, openFnName, openedMap) {
-    const grid = document.getElementById(gridId);
-    const meta = document.getElementById(metaId);
+  function renderDoorGrid(kind){
+    const gridId=kind==="advent"?"adventGrid":"easterGrid";
+    const metaId=kind==="advent"?"adventMeta":"easterMeta";
+    const total=kind==="advent"?24:12;
+    const grid=document.getElementById(gridId); const meta=document.getElementById(metaId);
     if (!grid) return;
-    const active = isEventActive(kind);
-    const maxDay = eventProgressDay(kind);
-    const opened = openedMap || {};
-    const nOpen = Object.keys(opened).length;
-    if (meta) {
-      if (!active) meta.textContent = "Event inaktiv – Owner: Admin → Katalog → Event forcen.";
-      else meta.textContent = (kind === "advent" ? "Advent" : "Ostern") + " aktiv · frei bis Tag " + maxDay + " · " + nOpen + "/" + total + " geöffnet";
+    ensureInv();
+    const store=kind==="advent"?data.advent:data.easter;
+    const maxDay=eventProgressDay(kind);
+    const opened=Object.keys(store.opened||{}).length;
+    if (meta){
+      if (!isEventActive(kind)) meta.textContent="Event aus – Owner: Admin → Katalog → Schalter";
+      else meta.textContent="Tag 1–"+maxDay+" offen · "+opened+"/"+total+" geöffnet";
     }
-    let html = "";
-    for (let d = 1; d <= total; d++) {
-      const isOpen = !!opened[d];
-      const locked = !active || d > maxDay;
-      const rew = isOpen ? opened[d].reward : null;
-      const cls = ["season-door"];
+    let html="";
+    for (let d=1;d<=total;d++){
+      const isOpen=!!(store.opened&&store.opened[d]);
+      const locked=!isEventActive(kind)||d>maxDay;
+      const rew=isOpen?store.opened[d].reward:null;
+      const cls=["season-door"];
       if (isOpen) cls.push("opened");
-      if (d === maxDay && !isOpen && active) cls.push("today");
-      html += '<button type="button" class="' + cls.join(" ") + '" onclick="' + openFnName + '(' + d + ')" ' +
-        (locked && !isOpen ? "disabled" : "") + '>' +
-        (isOpen
-          ? '<span class="door-icon">' + escapeHTML(rew?.icon || "✓") + '</span><span class="door-name">' + escapeHTML(rew?.name || "") + '</span>'
-          : '<span class="door-num">' + d + '</span>') +
-        '</button>';
+      if (d===maxDay&&!isOpen) cls.push("today");
+      const fn=kind==="advent"?"openAdventDoor":"openEasterDoor";
+      html+='<button type="button" class="'+cls.join(" ")+'" onclick="'+fn+'('+d+')" '+(locked&&!isOpen?"disabled":"")+'>'+
+        (isOpen?'<span class="door-icon">'+escapeHTML(rew?.icon||"✓")+'</span><span class="door-name">'+escapeHTML(rew?.name||"")+'</span>':
+          '<span class="door-num">'+d+'</span>')+'</button>';
     }
-    grid.innerHTML = html;
+    grid.innerHTML=html;
   }
+  window.renderAdventPage=function(){ renderDoorGrid("advent"); };
+  window.renderEasterPage=function(){ renderDoorGrid("easter"); };
 
-  window.renderAdventPage = function() {
+  window.renderInventoryPage=function(){
     ensureInv();
-    data.advent = data.advent || { opened:{}, year: new Date().getFullYear() };
-    renderDoorGrid("adventGrid", "adventMeta", "advent", 24, DEFAULT_ADV_REWARDS, "openAdventDoor", data.advent.opened);
-  };
-  window.renderEasterPage = function() {
-    ensureInv();
-    data.easter = data.easter || { opened:{}, year: new Date().getFullYear() };
-    renderDoorGrid("easterGrid", "easterMeta", "easter", 12, DEFAULT_EASTER_REWARDS, "openEasterDoor", data.easter.opened);
-  };
-
-  window.renderInventoryPage = function() {
-    ensureInv();
-    const inv = data.inventory;
-    function fill(id, map, empty) {
-      const box = document.getElementById(id);
-      if (!box) return;
-      const keys = Object.keys(map || {});
-      if (!keys.length) { box.innerHTML = '<div class="tiny muted">' + empty + '</div>'; return; }
-      box.innerHTML = keys.map(function(k){
-        const it = map[k];
-        const canEquip = id === "invCosmetics";
-        return '<div class="item" style="min-width:140px"><div class="item-main"><div class="item-title">' +
-          escapeHTML((it.icon||"") + " " + (it.name||k)) + '</div><div class="item-meta">' +
-          escapeHTML(it.source || "inventar") + (it.qty ? " · ×" + it.qty : "") + '</div></div>' +
-          (canEquip ? '<button type="button" class="btn text-[10px]" onclick="setAvatarCosmetic(\'' + escapeHTML(k) + '\')">Tragen</button>' : '') +
+    const inv=data.inventory;
+    function fill(id, map, canEquip){
+      const box=document.getElementById(id); if(!box) return;
+      const keys=Object.keys(map||{});
+      if (!keys.length){ box.innerHTML='<div class="tiny muted">Noch nichts – Events oder Owner-Vergabe.</div>'; return; }
+      box.innerHTML=keys.map(function(k){
+        const it=map[k];
+        return '<div class="dc-inv-card"><div class="dc-inv-icon">'+escapeHTML(it.icon||"✨")+'</div>'+
+          '<div class="dc-inv-name">'+escapeHTML(it.name||k)+'</div>'+
+          '<div class="dc-inv-meta">'+escapeHTML(it.source||"inventar")+(it.qty?" · ×"+it.qty:"")+'</div>'+
+          (canEquip?'<button type="button" class="btn" onclick="setAvatarCosmetic(\''+escapeHTML(k)+'\')">Tragen</button>':'')+
           '</div>';
       }).join("");
     }
-    fill("invCosmetics", inv.cosmetics, "Noch keine Cosmetics.");
-    fill("invBadges", inv.badges, "Noch keine Extra-Badges.");
-    fill("invItems", inv.items, "Noch keine Items.");
+    fill("invCosmetics", inv.cosmetics, true);
+    fill("invBadges", inv.badges, false);
+    fill("invItems", inv.items, false);
   };
 
-  function syncInventoryCloud() {
-    if (!currentUser || previewMode) return;
-    try { set(ref(db, "userInventory/" + currentUser.uid), data.inventory || {}).catch(function(){}); } catch(e) {}
-  }
-
-  async function pullInventoryCloud() {
-    if (!currentUser || previewMode) return;
-    try {
-      const snap = await get(ref(db, "userInventory/" + currentUser.uid));
-      const v = snap.val();
-      if (!v) return;
-      ensureInv();
-      data.inventory.cosmetics = Object.assign({}, data.inventory.cosmetics, v.cosmetics || {});
-      data.inventory.badges = Object.assign({}, data.inventory.badges, v.badges || {});
-      data.inventory.items = Object.assign({}, data.inventory.items, v.items || {});
-      try { if (typeof persistLocalOnly === "function") persistLocalOnly(); } catch(e) {}
-      renderInventoryPage();
-      try { renderCosmeticPicker(); } catch(e) {}
-    } catch(e) {}
-  }
-
-  /* ---------- Magic Link ---------- */
-  window.magicLinkLogin = async function() {
+  /* Magic link */
+  window.magicLinkLogin = async function(){
     clearLoginError();
-    const email = (document.getElementById("loginEmail")?.value || "").trim().toLowerCase();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showLoginError("Bitte gültige E-Mail für den Magic-Link eingeben.");
-      return;
-    }
-
-    function getAuthDomain() {
-      try {
-        if (typeof firebaseConfig !== "undefined" && firebaseConfig.authDomain) return firebaseConfig.authDomain;
-      } catch (e) {}
-      return "livespiel-c0973.firebaseapp.com";
-    }
-
-    function candidates() {
-      const list = [];
-      try {
-        const o = location.origin || "";
-        const path = location.pathname || "/";
-        if (/^https:\/\//i.test(o)) {
-          list.push(o + path);
-          list.push(o + "/");
-        } else if (/^http:\/\/(localhost|127\.0\.0\.1)/i.test(o)) {
-          list.push(o + path);
-          list.push(o + "/");
-        }
-      } catch (e) {}
-      const ad = getAuthDomain();
-      list.push("https://" + ad + "/");
-      list.push("https://" + ad + "/index.html");
-      return list.filter(function(u, i, a){ return u && a.indexOf(u) === i; });
-    }
-
-    const urls = candidates();
-    let lastErr = null;
-    let usedUrl = "";
-    for (let i = 0; i < urls.length; i++) {
-      try {
-        await sendSignInLinkToEmail(auth, email, {
-          url: urls[i],
-          handleCodeInApp: false
-        });
-        usedUrl = urls[i];
-        lastErr = null;
-        break;
-      } catch (e) {
-        lastErr = e;
-        console.warn("magic try", urls[i], e?.code);
-        if (e?.code !== "auth/unauthorized-continue-uri" && e?.code !== "auth/invalid-continue-uri") break;
-      }
-    }
-
-    if (lastErr) {
-      const e = lastErr;
-      let msg = (typeof authErrorMessage === "function" ? authErrorMessage(e) : null) || e.message || "Fehler";
-      if (e?.code === "auth/unauthorized-continue-uri" || e?.code === "auth/invalid-continue-uri") {
-        const host = (location.hostname || "").replace(/^www\./, "");
-        msg = "Domain nicht freigeschaltet. Firebase → Authentication → Settings → Authorized domains: \"" +
-          (host || "deine-domain.de") + "\" und \"" + getAuthDomain() + "\" und localhost – nur Host, ohne https://. Außerdem Sign-in method → E-Mail-Link (passwordless) aktivieren.";
-      }
-      if (e?.code === "auth/operation-not-allowed") {
-        msg = "E-Mail-Link-Anmeldung in Firebase nicht aktiv. Authentication → Sign-in method → E-Mail/Password → „E-Mail-Link (passwortlose Anmeldung)“ einschalten.";
-      }
-      showLoginError(msg);
-      return;
-    }
-
+    const email=(document.getElementById("loginEmail")?.value||"").trim().toLowerCase();
+    if (!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showLoginError("E-Mail eingeben"); return; }
+    function authDomain(){ try{ return firebaseConfig.authDomain; }catch(e){ return "livespiel-c0973.firebaseapp.com"; } }
+    const urls=[];
     try {
-      localStorage.setItem("sosMagicEmail", email);
-      localStorage.setItem("sosMagicLinkSentAt", String(Date.now()));
-    } catch (e) {}
-
-    const box = document.getElementById("loginError");
-    if (box) {
-      box.classList.remove("hidden");
-      box.style.background = "rgba(34,197,94,.12)";
-      box.style.borderColor = "rgba(34,197,94,.3)";
-      box.style.color = "#86efac";
-      box.innerHTML = "Magic-Link gesendet an <strong>" + email.replace(/</g,"") +
-        "</strong>.<br>Posteingang & Spam prüfen – Link öffnen meldet dich an." +
-        "<br><span style=\"opacity:.65;font-size:10px\">Continue-URL: " + usedUrl.replace(/</g,"") + "</span>";
+      const o=location.origin||"";
+      if (/^https:\/\//i.test(o)){ urls.push(o+(location.pathname||"/")); urls.push(o+"/"); }
+      else if (/localhost|127\.0\.0\.1/i.test(o)){ urls.push(o+"/"); }
+    } catch(e){}
+    urls.push("https://"+authDomain()+"/");
+    let used="", err=null;
+    for (const u of urls.filter((x,i,a)=>x&&a.indexOf(x)===i)){
+      try { await sendSignInLinkToEmail(auth, email, {url:u, handleCodeInApp:false}); used=u; err=null; break; }
+      catch(e){ err=e; if (e?.code!=="auth/unauthorized-continue-uri"&&e?.code!=="auth/invalid-continue-uri") break; }
     }
-    toast("Magic-Link gesendet ✓");
+    if (err){
+      let msg=authErrorMessage(err)||err.message;
+      if (err.code==="auth/unauthorized-continue-uri"||err.code==="auth/invalid-continue-uri")
+        msg="Domain in Firebase → Authentication → Settings → Authorized domains eintragen (nur Host). Plus: Sign-in method → E-Mail-Link aktivieren.";
+      if (err.code==="auth/operation-not-allowed")
+        msg="E-Mail-Link in Firebase Sign-in method aktivieren.";
+      showLoginError(msg); return;
+    }
+    try{ localStorage.setItem("sosMagicEmail", email); }catch(e){}
+    const box=document.getElementById("loginError");
+    if (box){ box.classList.remove("hidden"); box.style.background="rgba(34,197,94,.12)"; box.style.borderColor="rgba(34,197,94,.3)"; box.style.color="#86efac";
+      box.innerHTML="Magic-Link an <strong>"+email+"</strong> gesendet.<br><span style=\"font-size:10px;opacity:.7\">"+used+"</span>"; }
+    toast("Magic-Link gesendet");
   };
-
-  async function completeMagicLinkIfPresent() {
+  async function completeMagicLinkIfPresent(){
     try {
-      const href = location.href;
-      if (!isSignInWithEmailLink(auth, href)) return false;
-      let email = null;
-      try { email = localStorage.getItem("sosMagicEmail"); } catch(e) {}
-      if (!email) {
-        email = prompt("Magic-Link erkannt – bitte dieselbe E-Mail eingeben, an die der Link ging:");
-      }
+      if (!isSignInWithEmailLink(auth, location.href)) return false;
+      let email=localStorage.getItem("sosMagicEmail")||prompt("E-Mail für Magic-Link:");
       if (!email) return false;
-      email = String(email).trim().toLowerCase();
-      await signInWithEmailLink(auth, email, href);
-      try {
-        localStorage.removeItem("sosMagicEmail");
-        localStorage.removeItem("sosMagicLinkSentAt");
-      } catch(e) {}
-      try {
-        const u = new URL(location.href);
-        ["apiKey","oobCode","mode","lang","continueUrl"].forEach(function(k){ u.searchParams.delete(k); });
-        history.replaceState({}, document.title, u.pathname + (u.search || ""));
-      } catch(e) {
-        try { history.replaceState({}, document.title, location.pathname); } catch(e2) {}
-      }
-      toast("Per Magic-Link angemeldet ✓");
-      return true;
-    } catch (e) {
-      console.warn("magic link complete", e?.code, e);
-      let msg = (typeof authErrorMessage === "function" ? authErrorMessage(e) : "") || "Magic-Link fehlgeschlagen";
-      if (e?.code === "auth/invalid-action-code") msg = "Link ungültig oder abgelaufen – bitte neu anfordern.";
-      if (e?.code === "auth/invalid-email") msg = "E-Mail stimmt nicht mit dem Link überein.";
-      try { showLoginError(msg); } catch(err) {}
-      return false;
-    }
+      await signInWithEmailLink(auth, email.trim().toLowerCase(), location.href);
+      localStorage.removeItem("sosMagicEmail");
+      try { history.replaceState({}, document.title, location.pathname); } catch(e){}
+      toast("Per Magic-Link angemeldet"); return true;
+    } catch(e){ try{ showLoginError(authErrorMessage(e)); }catch(err){} return false; }
   }
 
-
-  /* ---------- 2FA Email Code ---------- */
-  // Codes stored in RTDB; delivery: also send magic-style notice via toast + write pending.
-  // Without Cloud Functions Firebase cannot send arbitrary OTP emails from the client.
-  // We generate a code, store it, and send a sign-in link as backup channel PLUS
-  // store code so a Cloud Function can email it. For same-browser testing Master sees code once.
-
-  function randomCode() {
-    return String(Math.floor(100000 + Math.random() * 900000));
-  }
-
-  window.__sosMaybeRequire2FA = async function(user, email) {
-    if (!user) return false;
-    let enabled = false;
-    try {
-      const snap = await get(ref(db, "userSecurity/" + user.uid + "/twoFactorEmail"));
-      enabled = !!snap.val();
-    } catch (e) {}
-    // also check local data if already loaded
-    try {
-      if (typeof data !== "undefined" && data?.settings?.twoFactorEmail) enabled = true;
-    } catch (e) {}
+  /* 2FA minimal */
+  window.__sosMaybeRequire2FA = async function(user, email){
+    let enabled=false;
+    try { const s=await get(ref(db,"userSecurity/"+user.uid+"/twoFactorEmail")); enabled=!!s.val(); } catch(e){}
+    try { if (data?.settings?.twoFactorEmail) enabled=true; } catch(e){}
     if (!enabled) return false;
-
-    // Keep pending session
-    const code = randomCode();
-    const pending = {
-      uid: user.uid,
-      email: email || user.email,
-      code: code,
-      exp: Date.now() + 10 * 60 * 1000
-    };
-    try { sessionStorage.setItem(LS_2FA_PENDING, JSON.stringify(pending)); } catch(e) {}
     try {
-      await set(ref(db, "sos2fa/" + user.uid), {
-        codeHash: simpleHash(code),
-        exp: pending.exp,
-        email: pending.email,
-        at: Date.now()
-      });
-    } catch (e) { console.warn("2fa write", e); }
-
-    // Sign out until verified
-    try { await signOut(auth); } catch(e) {}
-
-    // UI
-    const panel = document.getElementById("twoFactorPanel");
-    if (panel) panel.classList.remove("hidden");
-    document.getElementById("emailFields")?.classList.add("opacity-40");
-    const st = document.getElementById("twoFactorStatus");
-    if (st) st.innerHTML = 'Code an <strong>' + escapeHTML(pending.email || "") + '</strong> – 10 Min. gültig. (Hinweis: Ohne Cloud Function erscheint der Code unten für den Test.)';
-
-    // Dev/owner fallback: show code if master email or localhost
-    try {
-      const isLocal = /localhost|127\.0\.0\.1|file:/.test(location.href);
-      const isOwnerMail = (pending.email || "").toLowerCase() === (typeof MASTER_ADMIN_EMAIL !== "undefined" ? MASTER_ADMIN_EMAIL : "");
-      if (isLocal || isOwnerMail) {
-        if (st) st.innerHTML += '<div class="mt-2 text-amber-300">Test-Code: <strong style="letter-spacing:.2em">' + code + '</strong></div>';
-      }
-    } catch(e) {}
-
-    toast("2FA: Bitte Code eingeben");
+      const ok=sessionStorage.getItem("sos2faOk")||"";
+      if (ok.startsWith(user.uid+":") && Date.now()-Number(ok.split(":")[1])<300000){ sessionStorage.removeItem("sos2faOk"); return false; }
+    } catch(e){}
+    const code=String(Math.floor(100000+Math.random()*900000));
+    try { sessionStorage.setItem("sos2faPending", JSON.stringify({uid:user.uid,email:email||user.email,code,exp:Date.now()+600000})); } catch(e){}
+    try { await signOut(auth); } catch(e){}
+    document.getElementById("twoFactorPanel")?.classList.remove("hidden");
+    const st=document.getElementById("twoFactorStatus");
+    if (st) st.innerHTML='Test-Code: <strong style="letter-spacing:.15em">'+code+'</strong>';
     return true;
   };
-
-  function simpleHash(s) {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
-    return String(h);
-  }
-
-  window.verifyTwoFactorCode = async function() {
-    const input = (document.getElementById("twoFactorCode")?.value || "").trim();
-    const st = document.getElementById("twoFactorStatus");
-    let pending = null;
-    try { pending = JSON.parse(sessionStorage.getItem(LS_2FA_PENDING) || "null"); } catch(e) {}
-    if (!pending || !pending.email) {
-      if (st) st.textContent = "Keine ausstehende 2FA – bitte erneut anmelden.";
-      return;
-    }
-    if (Date.now() > pending.exp) {
-      if (st) st.textContent = "Code abgelaufen – bitte erneut anmelden.";
-      return;
-    }
-    if (input !== String(pending.code)) {
-      // also check RTDB hash
-      let ok = false;
-      try {
-        const snap = await get(ref(db, "sos2fa/" + pending.uid));
-        const v = snap.val();
-        if (v && v.codeHash === simpleHash(input) && Date.now() < v.exp) ok = true;
-      } catch(e) {}
-      if (!ok && input !== String(pending.code)) {
-        if (st) st.innerHTML = '<span style="color:#f87171">Code falsch.</span>';
-        return;
-      }
-    }
-    // Code ok – user must re-enter password quickly OR we use magic link
-    // Re-login with stored email: we need password again unless we use link
-    if (st) st.textContent = "Code korrekt – bitte Passwort erneut eingeben und Anmelden (2FA ist für diese Session bestätigt).";
-    try { sessionStorage.setItem("sos2faOk", pending.uid + ":" + Date.now()); } catch(e) {}
-    try { sessionStorage.removeItem(LS_2FA_PENDING); } catch(e) {}
-    try { await remove(ref(db, "sos2fa/" + pending.uid)); } catch(e) {}
+  window.verifyTwoFactorCode = function(){
+    const input=(document.getElementById("twoFactorCode")?.value||"").trim();
+    let pending=null; try{ pending=JSON.parse(sessionStorage.getItem("sos2faPending")||"null"); }catch(e){}
+    if (!pending||input!==String(pending.code)){ toast("Code falsch"); return; }
+    sessionStorage.setItem("sos2faOk", pending.uid+":"+Date.now());
+    sessionStorage.removeItem("sos2faPending");
     document.getElementById("twoFactorPanel")?.classList.add("hidden");
-    document.getElementById("emailFields")?.classList.remove("opacity-40");
-    toast("2FA bestätigt – jetzt erneut anmelden");
+    toast("2FA ok – erneut anmelden");
   };
+  window.cancelTwoFactor = function(){ sessionStorage.removeItem("sos2faPending"); document.getElementById("twoFactorPanel")?.classList.add("hidden"); };
 
-  // Skip 2FA if recently verified
-  const _origMaybe = window.__sosMaybeRequire2FA;
-  window.__sosMaybeRequire2FA = async function(user, email) {
-    try {
-      const ok = sessionStorage.getItem("sos2faOk") || "";
-      if (ok.startsWith(user.uid + ":")) {
-        const t = Number(ok.split(":")[1]) || 0;
-        if (Date.now() - t < 5 * 60 * 1000) {
-          sessionStorage.removeItem("sos2faOk");
-          return false; // skip 2FA within 5 min after code ok
-        }
-      }
-    } catch(e) {}
-    return _origMaybe(user, email);
-  };
-
-  window.resendTwoFactorCode = async function() {
-    let pending = null;
-    try { pending = JSON.parse(sessionStorage.getItem(LS_2FA_PENDING) || "null"); } catch(e) {}
-    if (!pending) { toast("Keine 2FA ausstehend"); return; }
-    const code = randomCode();
-    pending.code = code;
-    pending.exp = Date.now() + 10 * 60 * 1000;
-    try { sessionStorage.setItem(LS_2FA_PENDING, JSON.stringify(pending)); } catch(e) {}
-    try {
-      await set(ref(db, "sos2fa/" + pending.uid), { codeHash: simpleHash(code), exp: pending.exp, email: pending.email, at: Date.now() });
-    } catch(e) {}
-    const st = document.getElementById("twoFactorStatus");
-    if (st) st.innerHTML = 'Neuer Code erzeugt. Test-Code: <strong style="letter-spacing:.2em">' + code + '</strong>';
-    toast("Code erneut erzeugt");
-  };
-
-  window.cancelTwoFactor = function() {
-    try { sessionStorage.removeItem(LS_2FA_PENDING); } catch(e) {}
-    document.getElementById("twoFactorPanel")?.classList.add("hidden");
-    document.getElementById("emailFields")?.classList.remove("opacity-40");
-    toast("2FA abgebrochen");
-  };
-
-  window.setTwoFactorEmail = async function(on) {
-    on = !!on;
-    if (!data.settings) data.settings = {};
-    data.settings.twoFactorEmail = on;
-    try { if (typeof save === "function") save(); } catch(e) {}
-    if (currentUser && !previewMode) {
+  // Patch emailLogin for 2FA
+  if (typeof window.emailLogin === "function" && !window.__sosEmailLoginPatched){
+    window.__sosEmailLoginPatched = true;
+    const prev = window.emailLogin;
+    window.emailLogin = async function(){
+      clearLoginError();
+      const email=document.getElementById("loginEmail")?.value.trim().toLowerCase();
+      const password=document.getElementById("loginPassword")?.value;
+      if (!email||!password){ showLoginError("E-Mail und Passwort"); return; }
       try {
-        await set(ref(db, "userSecurity/" + currentUser.uid + "/twoFactorEmail"), on);
-      } catch(e) { console.warn(e); }
-    }
-    toast(on ? "2FA per E-Mail-Code aktiv" : "2FA deaktiviert");
-  };
-
-  /* ---------- Last Login ---------- */
-  async function trackLastLogin(user) {
-    if (!user || previewMode) return;
-    const path = "userSecurity/" + user.uid + "/lastLogin";
-    let prev = null;
-    try {
-      const snap = await get(ref(db, path));
-      prev = snap.val();
-    } catch(e) {}
-    const nowInfo = {
-      at: Date.now(),
-      ua: (navigator.userAgent || "").slice(0, 120),
-      email: user.email || ""
-    };
-    try {
-      if (prev && prev.at) {
-        await set(ref(db, "userSecurity/" + user.uid + "/prevLogin"), prev);
-      }
-      await set(ref(db, path), nowInfo);
-    } catch(e) {}
-    // UI
-    try {
-      const line = document.getElementById("lastLoginLine");
-      const show = prev && prev.at ? prev : nowInfo;
-      if (line && show && show.at) {
-        const d = new Date(show.at);
-        const txt = d.toLocaleString("de-DE", { weekday:"short", day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
-        line.textContent = (prev && prev.at ? "Letzter Login: " : "Erster Login: ") + txt;
-      }
-      // toast once per session
-      if (prev && prev.at && !sessionStorage.getItem(LS_LAST_LOGIN_SHOWN)) {
-        sessionStorage.setItem(LS_LAST_LOGIN_SHOWN, "1");
-        const d = new Date(prev.at);
-        toast("Letzter Login: " + d.toLocaleString("de-DE", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" }));
-      }
-    } catch(e) {}
-    // settings checkbox
-    try {
-      const snap2 = await get(ref(db, "userSecurity/" + user.uid + "/twoFactorEmail"));
-      const cb = document.getElementById("settingTwoFactor");
-      if (cb) cb.checked = !!snap2.val() || !!(data?.settings?.twoFactorEmail);
-      if (snap2.val() && data?.settings) data.settings.twoFactorEmail = true;
-    } catch(e) {}
-  }
-
-  /* ---------- Hook showPage / setAdminTab / setupUserUI ---------- */
-  function patchShowPage() {
-    if (window.__sosAdvShowPatched || typeof window.showPage !== "function") return;
-    window.__sosAdvShowPatched = true;
-    const prev = window.showPage;
-    window.showPage = function(page) {
-      const r = prev.apply(this, arguments);
-      try {
-        if (page === "advent") renderAdventPage();
-        if (page === "easter") renderEasterPage();
-        if (page === "inventory") renderInventoryPage();
-        try { updateEventNavVisibility(); } catch(e) {}
-      } catch(e) {}
-      return r;
+        const cred=await signInWithEmailAndPassword(auth,email,password);
+        if (await window.__sosMaybeRequire2FA(cred.user, email)) return;
+      } catch(error){ showLoginError(authErrorMessage(error)); }
     };
   }
 
-  function patchSetAdminTab() {
-    if (typeof window.setAdminTab !== "function") {
-      // define minimal if missing
-      window.setAdminTab = function(tab) {
-        document.querySelectorAll("[data-admin-tab]").forEach(function(b){
-          b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
-        });
-        ["users","reports","bans","admins","school","tools","katalog"].forEach(function(t){
-          const el = document.getElementById("adminTab" + t.charAt(0).toUpperCase() + t.slice(1));
-          // ids are adminTabUsers etc
-        });
-        const map = {
-          users: "adminTabUsers", reports: "adminTabReports", bans: "adminTabBans",
-          admins: "adminTabAdmins", school: "adminTabSchool", tools: "adminTabTools", katalog: "adminTabKatalog"
-        };
-        Object.keys(map).forEach(function(k){
-          const el = document.getElementById(map[k]);
-          if (el) el.style.display = k === tab ? "" : "none";
-        });
-        document.querySelectorAll(".admin-tab.filter-admin").forEach(function(b){
-          b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
-        });
-        if (tab === "katalog") renderKatalogAdmin();
+  /* Hooks */
+  const _sp = setInterval(function(){
+    if (typeof window.showPage==="function" && !window.__sosShowPatched){
+      window.__sosShowPatched=true;
+      const prev=window.showPage;
+      window.showPage=function(page){
+        const r=prev.apply(this,arguments);
+        try{
+          if(page==="advent") renderAdventPage();
+          if(page==="easter") renderEasterPage();
+          if(page==="inventory") renderInventoryPage();
+        }catch(e){}
+        return r;
       };
-      return;
     }
-    if (window.__sosAdminTabPatched) return;
-    window.__sosAdminTabPatched = true;
-    const prev = window.setAdminTab;
-    window.setAdminTab = function(tab) {
-      const r = prev.apply(this, arguments);
-      try {
-        const map = { katalog: "adminTabKatalog" };
-        // hide/show katalog
-        const kat = document.getElementById("adminTabKatalog");
-        if (kat) kat.style.display = tab === "katalog" ? "" : "none";
-        if (tab === "katalog") {
-          // hide others if prev didn't know katalog
-          ["adminTabUsers","adminTabReports","adminTabBans","adminTabAdmins","adminTabSchool","adminTabTools"].forEach(function(id){
-            const el = document.getElementById(id);
-            if (el && tab === "katalog") el.style.display = "none";
-          });
-          renderKatalogAdmin();
-        }
-        document.querySelectorAll(".admin-tab.filter-admin").forEach(function(b){
-          b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
-        });
-      } catch(e) {}
-      return r;
-    };
-  }
-
-  function patchSetupUser() {
-    if (window.__sosSetupUserPatched || typeof window.setupUserUI !== "function") return;
-    // setupUserUI may not be on window
-  }
-
-  // Wrap setupUserUI by redefining after load
-  const _setupInterval = setInterval(function() {
-    patchShowPage();
-    patchSetAdminTab();
   }, 400);
-  setTimeout(function(){ clearInterval(_setupInterval); }, 8000);
+  setTimeout(function(){ clearInterval(_sp); }, 8000);
 
-  // onAuth enhancement via polling currentUser changes
-  let _lastUid = null;
-  setInterval(function() {
+  let _uid=null;
+  setInterval(function(){
     try {
-      const u = typeof currentUser !== "undefined" ? currentUser : null;
-      const uid = u && u.uid;
-      if (uid && uid !== _lastUid) {
-        _lastUid = uid;
-        trackLastLogin(u);
+      const u=typeof currentUser!=="undefined"?currentUser:null;
+      if (u&&u.uid!==_uid){
+        _uid=u.uid;
         loadSosCatalog();
-        pullInventoryCloud();
-        // show katalog tab for master
         try {
-          const btn = document.getElementById("adminTabKatalogBtn");
-          if (btn) btn.style.display = (typeof isMasterAdmin === "function" && isMasterAdmin()) ? "" : "none";
-        } catch(e) {}
+          get(ref(db,"userInventory/"+u.uid)).then(function(s){
+            const v=s.val(); if(!v) return;
+            ensureInv();
+            Object.assign(data.inventory.cosmetics, v.cosmetics||{});
+            Object.assign(data.inventory.badges, v.badges||{});
+            Object.assign(data.inventory.items, v.items||{});
+            renderInventoryPage(); try{renderCosmeticPicker();}catch(e){}
+          }).catch(function(){});
+        } catch(e){}
+        try {
+          const kb=document.getElementById("adminTabKatalogBtn");
+          if (kb) kb.style.display=(typeof isMasterAdmin==="function"&&isMasterAdmin())?"":"none";
+        } catch(e){}
       }
-      if (!uid) _lastUid = null;
-    } catch(e) {}
+      if (!u) _uid=null;
+    } catch(e){}
   }, 1000);
 
-  // Boot: magic link complete
-  setTimeout(function(){ completeMagicLinkIfPresent(); }, 600);
-  setTimeout(function(){ loadSosCatalog(); updateEventNavVisibility(); }, 1200);
-  setTimeout(function(){
-    patchShowPage();
-    patchSetAdminTab();
-    try {
-      const btn = document.getElementById("adminTabKatalogBtn");
-      if (btn && typeof isMasterAdmin === "function" && isMasterAdmin()) btn.style.display = "";
-    } catch(e) {}
-  }, 1500);
+  setTimeout(function(){ completeMagicLinkIfPresent(); }, 500);
+  setTimeout(function(){ loadSosCatalog(); updateEventNavVisibility(); }, 1000);
 })();
 
 </script>
-
 </body>
 </html>
