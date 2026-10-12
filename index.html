@@ -3781,7 +3781,7 @@
       position: fixed;
       right: 20px;
       top: 85px;
-      z-index: 300;
+      z-index: 6100;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -6140,6 +6140,27 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
           </button>
         </div>
 
+        <button type="button" id="btnMagicLink" class="btn w-full mt-2" onclick="window.magicLinkLogin && window.magicLinkLogin()" style="border-style:dashed">
+          ✉ Magic-Link an E-Mail senden
+        </button>
+        <p class="text-[10px] text-slate-500 text-center mt-1">Passwortlos anmelden – Link kommt per E-Mail</p>
+
+      </div>
+
+      <!-- 2FA Code Panel (hidden until needed) -->
+      <div id="twoFactorPanel" class="hidden mt-3 p-4 rounded-2xl border border-[rgba(var(--accent-rgb),.35)] bg-[rgba(var(--accent-rgb),.08)]">
+        <div class="text-sm font-bold mb-1">Zwei-Faktor-Code</div>
+        <p class="text-[11px] text-slate-400 mb-3">Wir haben einen 6-stelligen Code an deine E-Mail gesendet. Bitte eingeben.</p>
+        <div class="field mb-2">
+          <label>Code</label>
+          <input id="twoFactorCode" class="input" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="btn btn-primary" onclick="window.verifyTwoFactorCode && window.verifyTwoFactorCode()">Bestätigen</button>
+          <button type="button" class="btn" onclick="window.resendTwoFactorCode && window.resendTwoFactorCode()">Erneut senden</button>
+          <button type="button" class="btn" onclick="window.cancelTwoFactor && window.cancelTwoFactor()">Abbrechen</button>
+        </div>
+        <div id="twoFactorStatus" class="text-xs text-slate-400 mt-2"></div>
       </div>
 
       <div class="relative my-4">
@@ -6337,6 +6358,16 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
 
       <div class="nav-group">
         <div class="nav-label">Organisation</div>
+
+        <button class="nav-btn" data-page="advent" onclick="showPage('advent')" id="navAdventBtn">
+          <span class="nav-icon">🎄</span>
+          <span>Advent</span>
+        </button>
+
+        <button class="nav-btn" data-page="inventory" onclick="showPage('inventory')">
+          <span class="nav-icon">🎒</span>
+          <span>Inventar</span>
+        </button>
 
         <button class="nav-btn" data-page="backpack" onclick="showPage('backpack')">
           <span class="nav-icon"><svg viewBox="0 0 24 24"><use href="#kb-bag"/></svg></span>
@@ -7560,7 +7591,42 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
            ADMIN
       ======================================================== -->
 
-      <section id="page-admin" class="page">
+      
+      <section id="page-advent" class="page">
+        <div class="mb-4">
+          <h2 class="text-2xl font-extrabold font-display">Adventskalender</h2>
+          <p class="text-sm text-slate-500 mt-1">Jeden Tag im Dezember eine Überraschung – Cosmetics, Badges & Items.</p>
+        </div>
+        <div class="panel panel-pad mb-4">
+          <div id="adventMeta" class="text-sm text-slate-400 mb-3"></div>
+          <div id="adventGrid" class="grid gap-2" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))"></div>
+        </div>
+        <div id="adventRewardToast" class="panel panel-pad" style="display:none">
+          <div class="panel-title mb-1">Heute freigeschaltet</div>
+          <div id="adventRewardBody" class="text-sm"></div>
+        </div>
+      </section>
+
+      <section id="page-inventory" class="page">
+        <div class="mb-4">
+          <h2 class="text-2xl font-extrabold font-display">Inventar</h2>
+          <p class="text-sm text-slate-500 mt-1">Gesammelte Cosmetics, Badges und Items.</p>
+        </div>
+        <div class="panel panel-pad mb-4">
+          <div class="panel-title mb-2">Cosmetics / Rahmen</div>
+          <div id="invCosmetics" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div class="panel panel-pad mb-4">
+          <div class="panel-title mb-2">Badges</div>
+          <div id="invBadges" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div class="panel panel-pad mb-4">
+          <div class="panel-title mb-2">Items</div>
+          <div id="invItems" class="flex flex-wrap gap-2"></div>
+        </div>
+      </section>
+
+<section id="page-admin" class="page">
 
         <div class="admin-header mb-5">
           <div class="admin-header-top">
@@ -7601,6 +7667,7 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
           <button class="admin-tab filter-admin" data-admin-tab="admins" onclick="setAdminTab('admins')">Admins</button>
           <button class="admin-tab filter-admin" data-admin-tab="school" onclick="setAdminTab('school')">Schule</button>
           <button class="admin-tab filter-admin" data-admin-tab="tools" onclick="setAdminTab('tools')">Tools</button>
+          <button class="admin-tab filter-admin" data-admin-tab="katalog" onclick="setAdminTab('katalog')" id="adminTabKatalogBtn" style="display:none">Katalog</button>
         </div>
 
         <div id="adminTabUsers">
@@ -7774,7 +7841,54 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
           </div>
         </div>
 
-        <div id="adminTabTools" style="display:none">
+        
+        <div id="adminTabKatalog" style="display:none">
+          <div class="panel panel-pad mb-4">
+            <div class="panel-title mb-2">Katalog · Items anlegen (Owner)</div>
+            <p class="text-xs text-slate-400 mb-3">Badges, Cosmetics und Inventar-Items. Schüler sammeln sie im Adventskalender oder du vergibst sie manuell.</p>
+            <div class="form-grid">
+              <div class="field"><label>Name</label><input id="katItemName" class="input" maxlength="40" placeholder="z. B. Schneeflocken-Rahmen"></div>
+              <div class="field"><label>Typ</label>
+                <select id="katItemType" class="select">
+                  <option value="cosmetic">Cosmetic / Rahmen</option>
+                  <option value="badge">Badge</option>
+                  <option value="item">Inventar-Item</option>
+                </select>
+              </div>
+              <div class="field"><label>Icon / Emoji</label><input id="katItemIcon" class="input" maxlength="8" placeholder="🎄"></div>
+              <div class="field"><label>ID (optional)</label><input id="katItemId" class="input" maxlength="32" placeholder="auto"></div>
+              <div class="field" style="grid-column:1/-1"><label>Beschreibung</label><input id="katItemDesc" class="input" maxlength="120" placeholder="Kurztext"></div>
+              <div class="field"><label>Cosmetic-Emojis (tl,tr,bl,br)</label><input id="katItemEmojis" class="input" placeholder='🎄|❄️' title="Zwei Emojis mit | getrennt"></div>
+              <div class="field"><label>Ring-Farbe</label><input id="katItemColor" class="input" placeholder="#22c55e"></div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <button type="button" class="btn btn-primary" onclick="window.katSaveItem && window.katSaveItem()">Item speichern</button>
+              <button type="button" class="btn" onclick="window.katResetForm && window.katResetForm()">Leeren</button>
+            </div>
+            <div id="katItemsList" class="mt-4 space-y-2"></div>
+          </div>
+          <div class="panel panel-pad mb-4">
+            <div class="panel-title mb-2">Adventskalender · Türchen belohnen</div>
+            <p class="text-xs text-slate-400 mb-3">Tag 1–24 mit einem Katalog-Item verknüpfen. Leer = Standard-Überraschung.</p>
+            <div class="form-grid">
+              <div class="field"><label>Tag (1–24)</label><input id="advDay" class="input" type="number" min="1" max="24" value="1"></div>
+              <div class="field"><label>Item-ID</label><select id="advItemSelect" class="select"></select></div>
+              <div class="field"><label>Extra-Text</label><input id="advDayText" class="input" maxlength="80" placeholder="Frohe Überraschung!"></div>
+            </div>
+            <button type="button" class="btn btn-primary mt-2" onclick="window.advSaveDay && window.advSaveDay()">Türchen speichern</button>
+            <div id="advDaysList" class="mt-4 space-y-1 text-sm"></div>
+          </div>
+          <div class="panel panel-pad mb-4">
+            <div class="panel-title mb-2">Item an Nutzer vergeben</div>
+            <div class="form-grid">
+              <div class="field"><label>UID</label><input id="katGrantUid" class="input" placeholder="Firebase UID"></div>
+              <div class="field"><label>Item</label><select id="katGrantItem" class="select"></select></div>
+            </div>
+            <button type="button" class="btn btn-primary mt-2" onclick="window.katGrantToUser && window.katGrantToUser()">Vergeben</button>
+          </div>
+        </div>
+
+<div id="adminTabTools" style="display:none">
           <div class="panel panel-pad mb-4">
             <div class="panel-title mb-3">KPIs & Graphen</div>
             <div id="adminKpis" class="text-sm text-slate-300 space-y-1"></div>
@@ -8080,6 +8194,16 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
               </button>
               <div id="pwaStatus" class="tiny muted mt-2"></div>
             </div>
+
+            <div class="panel-title mt-5 mb-2">Sicherheit & Login</div>
+            <div id="lastLoginLine" class="text-xs text-slate-400 mb-2">Letzter Login: –</div>
+            <label class="flex items-start gap-3 cursor-pointer mb-3 p-3 rounded-xl border border-[rgba(255,255,255,.06)]">
+              <input type="checkbox" id="settingTwoFactor" onchange="window.setTwoFactorEmail && window.setTwoFactorEmail(this.checked)" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent)">
+              <span>
+                <span class="text-sm font-semibold text-slate-200">2FA per E-Mail-Code</span>
+                <span class="block tiny muted mt-0.5">Nach dem Passwort zusätzlich 6-stelligen Code bestätigen (wird an deine Login-E-Mail gesendet).</span>
+              </span>
+            </label>
 
             <div class="panel-title mt-5 mb-2">Privatsphäre & Konto</div>
             <div class="flex flex-wrap gap-2 mb-3">
@@ -8539,6 +8663,9 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   sendPasswordResetEmail,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
   updatePassword,
   updateEmail,
   verifyBeforeUpdateEmail,
@@ -8713,6 +8840,16 @@ const defaultData = {
   badges: {
     earned: {},           // id -> { at, progress }
     seen: {}
+  },
+
+  inventory: {
+    cosmetics: {},
+    badges: {},
+    items: {}
+  },
+  advent: {
+    year: 0,
+    opened: {}
   },
 
   schedule: [],
@@ -11475,6 +11612,9 @@ const AVATAR_COSMETICS = [
 ];
 
 function getCosmetic(id) {
+  try {
+    if (typeof mergeCatalogCosmetics === "function") mergeCatalogCosmetics();
+  } catch (e) {}
   return AVATAR_COSMETICS.find(c => c.id === id) || AVATAR_COSMETICS[0];
 }
 
@@ -11482,6 +11622,14 @@ function isCosmeticUnlocked(c) {
   if (!c || c.id === "none") return true;
   try {
     if (typeof isMasterAdmin === "function" && isMasterAdmin()) return true; // owner can preview all
+  } catch (e) {}
+  // Inventory-collected cosmetics always unlocked
+  try {
+    const inv = (typeof data !== "undefined" && data && data.inventory) || {};
+    const cos = inv.cosmetics || {};
+    if (c.id && cos[c.id]) return true;
+    // catalog custom ids also stored under cosmetics
+    if (c._fromCatalog && cos[c.id]) return true;
   } catch (e) {}
   try {
     return !c.unlock || !!c.unlock(new Date());
@@ -18074,12 +18222,18 @@ window.setAdminTab = function(tab) {
     bans: "adminTabBans",
     admins: "adminTabAdmins",
     school: "adminTabSchool",
-    tools: "adminTabTools"
+    tools: "adminTabTools",
+    katalog: "adminTabKatalog"
   };
   Object.entries(map).forEach(([k, id]) => {
     const el = document.getElementById(id);
     if (el) el.style.display = adminTab === k ? "" : "none";
   });
+  // Katalog-Tab nur für Owner
+  try {
+    const kb = document.getElementById("adminTabKatalogBtn");
+    if (kb) kb.style.display = (typeof isMasterAdmin === "function" && isMasterAdmin()) ? "" : "none";
+  } catch (e) {}
   // hide KPI row for teacher-only
   try {
     const kpi = document.querySelector("#page-admin .admin-kpi-row");
@@ -18090,6 +18244,7 @@ window.setAdminTab = function(tab) {
   if (adminTab === "school") {
     try { loadSchoolSystem(true); } catch (e) {}
   }
+  if (adminTab === "katalog" && typeof renderKatalogAdmin === "function") renderKatalogAdmin();
 };
 
 window.refreshAdminAll = function() {
@@ -28215,6 +28370,708 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
   }, 900);
 })();
 
+
+
+
+/* ===== SchoolOS: Magic-Link · 2FA · Last-Login · Advent · Inventar · Katalog ===== */
+(function(){
+  const LS_EMAIL = "sosMagicEmail";
+  const LS_2FA_PENDING = "sos2faPending";
+  const LS_LAST_LOGIN_SHOWN = "sosLastLoginShown";
+
+  function ensureInv() {
+    if (typeof data === "undefined" || !data) return { cosmetics:{}, badges:{}, items:{} };
+    data.inventory = data.inventory || { cosmetics:{}, badges:{}, items:{} };
+    data.inventory.cosmetics = data.inventory.cosmetics || {};
+    data.inventory.badges = data.inventory.badges || {};
+    data.inventory.items = data.inventory.items || {};
+    data.advent = data.advent || { opened:{}, year: new Date().getFullYear() };
+    return data.inventory;
+  }
+
+  /* ---------- Catalog (RTDB + local cache) ---------- */
+  window.__sosCatalog = window.__sosCatalog || { items: {}, advent: {} };
+
+  function catalogRef(path) {
+    return ref(db, "sosCatalog" + (path ? "/" + path : ""));
+  }
+
+  window.loadSosCatalog = async function() {
+    try {
+      const snap = await get(catalogRef());
+      const v = snap.val() || {};
+      window.__sosCatalog.items = v.items || {};
+      window.__sosCatalog.advent = v.advent || {};
+      // merge custom cosmetics into AVATAR_COSMETICS runtime
+      try { mergeCatalogCosmetics(); } catch(e) {}
+      try { if (typeof renderKatalogAdmin === "function") renderKatalogAdmin(); } catch(e) {}
+      try { if (typeof renderAdventPage === "function") renderAdventPage(); } catch(e) {}
+      try { if (typeof renderInventoryPage === "function") renderInventoryPage(); } catch(e) {}
+    } catch (e) { console.warn("catalog load", e); }
+  };
+
+  window.mergeCatalogCosmetics = function mergeCatalogCosmetics() {
+    if (typeof AVATAR_COSMETICS === "undefined") return;
+    const items = window.__sosCatalog.items || {};
+    Object.keys(items).forEach(function(id) {
+      const it = items[id];
+      if (!it || it.type !== "cosmetic") return;
+      if (AVATAR_COSMETICS.some(c => c.id === id)) return;
+      const parts = String(it.emojis || it.icon || "✨").split("|").map(s => s.trim()).filter(Boolean);
+      const emojis = [];
+      const pos = ["tl","tr","bl","br"];
+      parts.forEach(function(ch, i){ emojis.push({ ch: ch, pos: pos[i % 4] }); });
+      AVATAR_COSMETICS.push({
+        id: id,
+        name: it.name || id,
+        unlock: function(){ return true; }, // gated by inventory via isCosmeticUnlocked
+        emojis: emojis.length ? emojis : [{ ch: it.icon || "✨", pos: "tr" }],
+        _fromCatalog: true,
+        _color: it.color || ""
+      });
+    });
+  }
+
+  window.katResetForm = function() {
+    ["katItemName","katItemIcon","katItemId","katItemDesc","katItemEmojis","katItemColor"].forEach(function(id){
+      const el = document.getElementById(id); if (el) el.value = "";
+    });
+    const t = document.getElementById("katItemType"); if (t) t.value = "cosmetic";
+  };
+
+  window.katSaveItem = async function() {
+    if (typeof isMasterAdmin !== "function" || !isMasterAdmin()) { toast("Nur Owner"); return; }
+    const name = (document.getElementById("katItemName")?.value || "").trim().slice(0, 40);
+    const type = document.getElementById("katItemType")?.value || "item";
+    const icon = (document.getElementById("katItemIcon")?.value || "🎁").trim().slice(0, 8);
+    let id = (document.getElementById("katItemId")?.value || "").trim().toLowerCase().replace(/[^a-z0-9_\-]/g,"");
+    const desc = (document.getElementById("katItemDesc")?.value || "").trim().slice(0, 120);
+    const emojis = (document.getElementById("katItemEmojis")?.value || "").trim();
+    const color = (document.getElementById("katItemColor")?.value || "").trim();
+    if (!name) { toast("Name nötig"); return; }
+    if (!id) id = "c_" + Date.now().toString(36);
+    const entry = { id, name, type, icon, desc, emojis, color, at: Date.now(), by: currentUser?.uid || "owner" };
+    window.__sosCatalog.items[id] = entry;
+    try {
+      await set(catalogRef("items/" + id), entry);
+      toast("Item gespeichert: " + name);
+      mergeCatalogCosmetics();
+      renderKatalogAdmin();
+      katResetForm();
+    } catch (e) {
+      console.warn(e);
+      toast("Speichern fehlgeschlagen (Rechte?)");
+    }
+  };
+
+  window.katDeleteItem = async function(id) {
+    if (!isMasterAdmin()) return;
+    if (!confirm("Item löschen?")) return;
+    delete window.__sosCatalog.items[id];
+    try { await remove(catalogRef("items/" + id)); } catch(e) {}
+    renderKatalogAdmin();
+    toast("Gelöscht");
+  };
+
+  window.advSaveDay = async function() {
+    if (!isMasterAdmin()) { toast("Nur Owner"); return; }
+    const day = Math.min(24, Math.max(1, Number(document.getElementById("advDay")?.value) || 1));
+    const itemId = document.getElementById("advItemSelect")?.value || "";
+    const text = (document.getElementById("advDayText")?.value || "").trim().slice(0, 80);
+    const entry = { day, itemId, text, at: Date.now() };
+    window.__sosCatalog.advent[String(day)] = entry;
+    try {
+      await set(catalogRef("advent/" + day), entry);
+      toast("Türchen " + day + " gespeichert");
+      renderKatalogAdmin();
+    } catch (e) { toast("Fehler"); }
+  };
+
+  window.katGrantToUser = async function() {
+    if (!isMasterAdmin()) { toast("Nur Owner"); return; }
+    const uid = (document.getElementById("katGrantUid")?.value || "").trim();
+    const itemId = document.getElementById("katGrantItem")?.value || "";
+    if (!uid || !itemId) { toast("UID und Item"); return; }
+    const it = window.__sosCatalog.items[itemId];
+    if (!it) { toast("Item unbekannt"); return; }
+    try {
+      const path = "userInventory/" + uid + "/" + it.type + "s/" + itemId;
+      // normalize type folder
+      let folder = "items";
+      if (it.type === "cosmetic") folder = "cosmetics";
+      else if (it.type === "badge") folder = "badges";
+      await set(ref(db, "userInventory/" + uid + "/" + folder + "/" + itemId), {
+        id: itemId, name: it.name, icon: it.icon, at: Date.now(), by: currentUser?.uid || "owner"
+      });
+      toast("Vergeben an " + uid.slice(0, 8) + "…");
+    } catch (e) { console.warn(e); toast("Vergabe fehlgeschlagen"); }
+  };
+
+  window.renderKatalogAdmin = function() {
+    const list = document.getElementById("katItemsList");
+    const items = window.__sosCatalog.items || {};
+    const ids = Object.keys(items).sort();
+    if (list) {
+      if (!ids.length) list.innerHTML = '<div class="empty">Noch keine Items – oben anlegen.</div>';
+      else list.innerHTML = ids.map(function(id) {
+        const it = items[id];
+        return '<div class="item"><div class="item-main"><div class="item-title">' +
+          escapeHTML((it.icon||"") + " " + (it.name||id)) + '</div><div class="item-meta">' +
+          escapeHTML(it.type + " · " + id) + (it.desc ? " · " + escapeHTML(it.desc) : "") +
+          '</div></div><button type="button" class="btn text-[10px] btn-danger" onclick="katDeleteItem(\'' +
+          escapeHTML(id) + '\')">✕</button></div>';
+      }).join("");
+    }
+    const sel = document.getElementById("advItemSelect");
+    const gsel = document.getElementById("katGrantItem");
+    const opts = '<option value="">— keins —</option>' + ids.map(function(id){
+      const it = items[id];
+      return '<option value="' + escapeHTML(id) + '">' + escapeHTML((it.icon||"") + " " + (it.name||id)) + '</option>';
+    }).join("");
+    if (sel) sel.innerHTML = opts;
+    if (gsel) gsel.innerHTML = opts;
+    const advBox = document.getElementById("advDaysList");
+    if (advBox) {
+      const adv = window.__sosCatalog.advent || {};
+      const days = Object.keys(adv).map(Number).sort((a,b)=>a-b);
+      if (!days.length) advBox.innerHTML = '<div class="tiny muted">Keine Türchen konfiguriert – Defaults greifen.</div>';
+      else advBox.innerHTML = days.map(function(d){
+        const e = adv[String(d)];
+        const it = items[e.itemId] || {};
+        return '<div class="tiny">Tag ' + d + ': ' + escapeHTML((it.icon||"🎁") + " " + (it.name||e.itemId||"—")) +
+          (e.text ? " · " + escapeHTML(e.text) : "") + '</div>';
+      }).join("");
+    }
+  };
+
+  /* ---------- Advent ---------- */
+  const DEFAULT_ADV_REWARDS = [
+    { icon:"🎄", name:"Tannenbaum-Sticker", type:"item" },
+    { icon:"❄️", name:"Schneeflocke", type:"item" },
+    { icon:"🎁", name:"Geschenk", type:"item" },
+    { icon:"⭐", name:"Stern", type:"item" },
+    { icon:"🕯️", name:"Kerze", type:"item" },
+    { icon:"🍪", name:"Plätzchen", type:"item" },
+    { icon:"🦌", name:"Rentier", type:"item" },
+    { icon:"🎅", name:"Nikolaus-Badge", type:"badge" },
+    { icon:"✨", name:"Glitzer", type:"item" },
+    { icon:"🔔", name:"Glocke", type:"item" },
+    { icon:"🧤", name:"Handschuhe", type:"item" },
+    { icon:"🧣", name:"Schal", type:"item" },
+    { icon:"🎿", name:"Ski", type:"item" },
+    { icon:"⛄", name:"Schneemann", type:"item" },
+    { icon:"🎀", name:"Schleife", type:"item" },
+    { icon:"🪄", name:"Zauberstab", type:"item" },
+    { icon:"🌟", name:"Goldstern", type:"item" },
+    { icon:"🎵", name:"Carol", type:"item" },
+    { icon:"🫖", name:"Tee", type:"item" },
+    { icon:"📖", name:"Wintergeschichte", type:"item" },
+    { icon:"🧩", name:"Puzzle", type:"item" },
+    { icon:"🎯", name:"Ziel", type:"item" },
+    { icon:"💎", name:"Kristall", type:"item" },
+    { icon:"👑", name:"Kronen-Rahmen", type:"cosmetic" }
+  ];
+
+  function adventYear() { return new Date().getFullYear(); }
+  function todayAdventDay() {
+    const d = new Date();
+    if (d.getMonth() !== 11) return 0; // only December
+    return Math.min(24, d.getDate());
+  }
+
+  window.openAdventDoor = async function(day) {
+    ensureInv();
+    const y = adventYear();
+    if (data.advent.year !== y) { data.advent = { opened:{}, year: y }; }
+    const maxDay = todayAdventDay();
+    if (!maxDay) { toast("Adventskalender nur im Dezember"); return; }
+    if (day > maxDay) { toast("Noch nicht so weit – Tag " + day + " ist noch verschlossen"); return; }
+    if (data.advent.opened[day]) { toast("Bereits geöffnet"); return; }
+
+    const cfg = (window.__sosCatalog.advent || {})[String(day)];
+    let reward;
+    if (cfg && cfg.itemId && window.__sosCatalog.items[cfg.itemId]) {
+      const it = window.__sosCatalog.items[cfg.itemId];
+      reward = { id: it.id, name: it.name, icon: it.icon || "🎁", type: it.type || "item", text: cfg.text || "" };
+    } else {
+      const def = DEFAULT_ADV_REWARDS[(day - 1) % DEFAULT_ADV_REWARDS.length];
+      reward = { id: "adv_" + y + "_" + day, name: def.name, icon: def.icon, type: def.type, text: "" };
+    }
+
+    data.advent.opened[day] = { at: Date.now(), reward: reward };
+    const inv = ensureInv();
+    if (reward.type === "cosmetic") {
+      inv.cosmetics[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: "advent" };
+      // register cosmetic if catalog
+      mergeCatalogCosmetics();
+    } else if (reward.type === "badge") {
+      inv.badges[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: "advent" };
+      data.badges = data.badges || { earned:{}, seen:{} };
+      data.badges.earned = data.badges.earned || {};
+      data.badges.earned[reward.id] = { at: Date.now(), title: reward.name, icon: reward.icon };
+    } else {
+      inv.items[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: "advent", qty: (inv.items[reward.id]?.qty || 0) + 1 };
+    }
+    try { if (typeof save === "function") save(); else persistLocalOnly(); } catch(e) {}
+    try { syncInventoryCloud(); } catch(e) {}
+    toast((reward.icon || "🎁") + " " + reward.name + " freigeschaltet!");
+    const rb = document.getElementById("adventRewardBody");
+    const rt = document.getElementById("adventRewardToast");
+    if (rb) rb.innerHTML = '<span style="font-size:28px">' + escapeHTML(reward.icon||"🎁") + '</span> <strong>' +
+      escapeHTML(reward.name) + '</strong>' + (reward.text ? '<div class="text-slate-400 mt-1">' + escapeHTML(reward.text) + '</div>' : '');
+    if (rt) rt.style.display = "";
+    renderAdventPage();
+    renderInventoryPage();
+    try { renderCosmeticPicker(); } catch(e) {}
+    try { renderBadgesGrid(); } catch(e) {}
+  };
+
+  window.renderAdventPage = function() {
+    const grid = document.getElementById("adventGrid");
+    const meta = document.getElementById("adventMeta");
+    if (!grid) return;
+    ensureInv();
+    const y = adventYear();
+    if (data.advent.year !== y) data.advent = { opened:{}, year: y };
+    const maxDay = todayAdventDay();
+    const opened = Object.keys(data.advent.opened || {}).length;
+    if (meta) {
+      if (!maxDay) meta.textContent = "Adventskalender ist im Dezember aktiv (1.–24.). Du kannst deine bisherigen Sammelstücke unter Inventar sehen.";
+      else meta.textContent = "Dezember " + y + " · Heute Tag " + maxDay + " · " + opened + "/24 geöffnet";
+    }
+    let html = "";
+    for (let d = 1; d <= 24; d++) {
+      const isOpen = !!(data.advent.opened && data.advent.opened[d]);
+      const locked = !maxDay || d > maxDay;
+      const rew = isOpen ? data.advent.opened[d].reward : null;
+      const label = isOpen ? (rew?.icon || "✓") : String(d);
+      const cls = isOpen ? "opacity-90" : locked ? "opacity-40" : "";
+      html += '<button type="button" class="btn ' + cls + '" style="min-height:72px;flex-direction:column;border-radius:16px;' +
+        (isOpen ? "border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)" : "") +
+        (d === maxDay && !isOpen ? "box-shadow:0 0 20px rgba(var(--accent-rgb),.35)" : "") +
+        '" onclick="openAdventDoor(' + d + ')" ' + (locked && !isOpen ? "disabled" : "") + '>' +
+        '<span style="font-size:22px;line-height:1">' + escapeHTML(label) + '</span>' +
+        (isOpen && rew ? '<span class="tiny mt-1 truncate" style="max-width:100%">' + escapeHTML(rew.name||"") + '</span>' : '') +
+        '</button>';
+    }
+    grid.innerHTML = html;
+  };
+
+  window.renderInventoryPage = function() {
+    ensureInv();
+    const inv = data.inventory;
+    function fill(id, map, empty) {
+      const box = document.getElementById(id);
+      if (!box) return;
+      const keys = Object.keys(map || {});
+      if (!keys.length) { box.innerHTML = '<div class="tiny muted">' + empty + '</div>'; return; }
+      box.innerHTML = keys.map(function(k){
+        const it = map[k];
+        const canEquip = it && (id === "invCosmetics");
+        return '<div class="item" style="min-width:140px"><div class="item-main"><div class="item-title">' +
+          escapeHTML((it.icon||"") + " " + (it.name||k)) + '</div><div class="item-meta">' +
+          escapeHTML(it.source || "inventar") + (it.qty ? " · ×" + it.qty : "") + '</div></div>' +
+          (canEquip ? '<button type="button" class="btn text-[10px]" onclick="setAvatarCosmetic(\'' + escapeHTML(k) + '\')">Tragen</button>' : '') +
+          '</div>';
+      }).join("");
+    }
+    fill("invCosmetics", inv.cosmetics, "Noch keine Cosmetics – Advent oder Owner-Vergabe.");
+    fill("invBadges", inv.badges, "Noch keine Extra-Badges.");
+    fill("invItems", inv.items, "Noch keine Items.");
+  };
+
+  function syncInventoryCloud() {
+    if (!currentUser || previewMode) return;
+    try {
+      set(ref(db, "userInventory/" + currentUser.uid), data.inventory || {}).catch(function(){});
+    } catch(e) {}
+  }
+
+  async function pullInventoryCloud() {
+    if (!currentUser || previewMode) return;
+    try {
+      const snap = await get(ref(db, "userInventory/" + currentUser.uid));
+      const v = snap.val();
+      if (!v) return;
+      ensureInv();
+      data.inventory.cosmetics = Object.assign({}, data.inventory.cosmetics, v.cosmetics || {});
+      data.inventory.badges = Object.assign({}, data.inventory.badges, v.badges || {});
+      data.inventory.items = Object.assign({}, data.inventory.items, v.items || {});
+      try { if (typeof persistLocalOnly === "function") persistLocalOnly(); } catch(e) {}
+      renderInventoryPage();
+      try { renderCosmeticPicker(); } catch(e) {}
+    } catch(e) {}
+  }
+
+  /* ---------- Magic Link ---------- */
+  window.magicLinkLogin = async function() {
+    clearLoginError();
+    const email = (document.getElementById("loginEmail")?.value || "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showLoginError("Bitte gültige E-Mail für den Magic-Link eingeben.");
+      return;
+    }
+    try {
+      const actionCodeSettings = {
+        url: location.href.split("#")[0].split("?")[0],
+        handleCodeInApp: true
+      };
+      // file:// won't work – Firebase needs authorized domain
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      try { localStorage.setItem(LS_EMAIL, email); } catch(e) {}
+      showLoginError(""); // clear
+      const box = document.getElementById("loginError");
+      if (box) {
+        box.classList.remove("hidden");
+        box.style.background = "rgba(34,197,94,.12)";
+        box.style.borderColor = "rgba(34,197,94,.3)";
+        box.style.color = "#86efac";
+        box.textContent = "Magic-Link gesendet an " + email + " – Posteingang & Spam prüfen. Link öffnet SchoolOS und meldet dich an.";
+      }
+      toast("Magic-Link gesendet");
+    } catch (e) {
+      console.warn(e);
+      showLoginError(authErrorMessage(e) || "Magic-Link konnte nicht gesendet werden. Domain in Firebase Auth autorisieren.");
+    }
+  };
+
+  async function completeMagicLinkIfPresent() {
+    try {
+      if (!isSignInWithEmailLink(auth, location.href)) return false;
+      let email = null;
+      try { email = localStorage.getItem(LS_EMAIL); } catch(e) {}
+      if (!email) email = prompt("Bitte E-Mail zur Bestätigung des Magic-Links eingeben:");
+      if (!email) return false;
+      email = email.trim().toLowerCase();
+      await signInWithEmailLink(auth, email, location.href);
+      try { localStorage.removeItem(LS_EMAIL); } catch(e) {}
+      // clean URL
+      try { history.replaceState({}, document.title, location.pathname + location.search.replace(/[?&]apiKey=[^&]*/g,"").replace(/^&/,"?")); } catch(e) {}
+      toast("Per Magic-Link angemeldet");
+      return true;
+    } catch (e) {
+      console.warn("magic link complete", e);
+      try { showLoginError(authErrorMessage(e)); } catch(err) {}
+      return false;
+    }
+  }
+
+  /* ---------- 2FA Email Code ---------- */
+  // Codes stored in RTDB; delivery: also send magic-style notice via toast + write pending.
+  // Without Cloud Functions Firebase cannot send arbitrary OTP emails from the client.
+  // We generate a code, store it, and send a sign-in link as backup channel PLUS
+  // store code so a Cloud Function can email it. For same-browser testing Master sees code once.
+
+  function randomCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  window.__sosMaybeRequire2FA = async function(user, email) {
+    if (!user) return false;
+    let enabled = false;
+    try {
+      const snap = await get(ref(db, "userSecurity/" + user.uid + "/twoFactorEmail"));
+      enabled = !!snap.val();
+    } catch (e) {}
+    // also check local data if already loaded
+    try {
+      if (typeof data !== "undefined" && data?.settings?.twoFactorEmail) enabled = true;
+    } catch (e) {}
+    if (!enabled) return false;
+
+    // Keep pending session
+    const code = randomCode();
+    const pending = {
+      uid: user.uid,
+      email: email || user.email,
+      code: code,
+      exp: Date.now() + 10 * 60 * 1000
+    };
+    try { sessionStorage.setItem(LS_2FA_PENDING, JSON.stringify(pending)); } catch(e) {}
+    try {
+      await set(ref(db, "sos2fa/" + user.uid), {
+        codeHash: simpleHash(code),
+        exp: pending.exp,
+        email: pending.email,
+        at: Date.now()
+      });
+    } catch (e) { console.warn("2fa write", e); }
+
+    // Sign out until verified
+    try { await signOut(auth); } catch(e) {}
+
+    // UI
+    const panel = document.getElementById("twoFactorPanel");
+    if (panel) panel.classList.remove("hidden");
+    document.getElementById("emailFields")?.classList.add("opacity-40");
+    const st = document.getElementById("twoFactorStatus");
+    if (st) st.innerHTML = 'Code an <strong>' + escapeHTML(pending.email || "") + '</strong> – 10 Min. gültig. (Hinweis: Ohne Cloud Function erscheint der Code unten für den Test.)';
+
+    // Dev/owner fallback: show code if master email or localhost
+    try {
+      const isLocal = /localhost|127\.0\.0\.1|file:/.test(location.href);
+      const isOwnerMail = (pending.email || "").toLowerCase() === (typeof MASTER_ADMIN_EMAIL !== "undefined" ? MASTER_ADMIN_EMAIL : "");
+      if (isLocal || isOwnerMail) {
+        if (st) st.innerHTML += '<div class="mt-2 text-amber-300">Test-Code: <strong style="letter-spacing:.2em">' + code + '</strong></div>';
+      }
+    } catch(e) {}
+
+    toast("2FA: Bitte Code eingeben");
+    return true;
+  };
+
+  function simpleHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
+    return String(h);
+  }
+
+  window.verifyTwoFactorCode = async function() {
+    const input = (document.getElementById("twoFactorCode")?.value || "").trim();
+    const st = document.getElementById("twoFactorStatus");
+    let pending = null;
+    try { pending = JSON.parse(sessionStorage.getItem(LS_2FA_PENDING) || "null"); } catch(e) {}
+    if (!pending || !pending.email) {
+      if (st) st.textContent = "Keine ausstehende 2FA – bitte erneut anmelden.";
+      return;
+    }
+    if (Date.now() > pending.exp) {
+      if (st) st.textContent = "Code abgelaufen – bitte erneut anmelden.";
+      return;
+    }
+    if (input !== String(pending.code)) {
+      // also check RTDB hash
+      let ok = false;
+      try {
+        const snap = await get(ref(db, "sos2fa/" + pending.uid));
+        const v = snap.val();
+        if (v && v.codeHash === simpleHash(input) && Date.now() < v.exp) ok = true;
+      } catch(e) {}
+      if (!ok && input !== String(pending.code)) {
+        if (st) st.innerHTML = '<span style="color:#f87171">Code falsch.</span>';
+        return;
+      }
+    }
+    // Code ok – user must re-enter password quickly OR we use magic link
+    // Re-login with stored email: we need password again unless we use link
+    if (st) st.textContent = "Code korrekt – bitte Passwort erneut eingeben und Anmelden (2FA ist für diese Session bestätigt).";
+    try { sessionStorage.setItem("sos2faOk", pending.uid + ":" + Date.now()); } catch(e) {}
+    try { sessionStorage.removeItem(LS_2FA_PENDING); } catch(e) {}
+    try { await remove(ref(db, "sos2fa/" + pending.uid)); } catch(e) {}
+    document.getElementById("twoFactorPanel")?.classList.add("hidden");
+    document.getElementById("emailFields")?.classList.remove("opacity-40");
+    toast("2FA bestätigt – jetzt erneut anmelden");
+  };
+
+  // Skip 2FA if recently verified
+  const _origMaybe = window.__sosMaybeRequire2FA;
+  window.__sosMaybeRequire2FA = async function(user, email) {
+    try {
+      const ok = sessionStorage.getItem("sos2faOk") || "";
+      if (ok.startsWith(user.uid + ":")) {
+        const t = Number(ok.split(":")[1]) || 0;
+        if (Date.now() - t < 5 * 60 * 1000) {
+          sessionStorage.removeItem("sos2faOk");
+          return false; // skip 2FA within 5 min after code ok
+        }
+      }
+    } catch(e) {}
+    return _origMaybe(user, email);
+  };
+
+  window.resendTwoFactorCode = async function() {
+    let pending = null;
+    try { pending = JSON.parse(sessionStorage.getItem(LS_2FA_PENDING) || "null"); } catch(e) {}
+    if (!pending) { toast("Keine 2FA ausstehend"); return; }
+    const code = randomCode();
+    pending.code = code;
+    pending.exp = Date.now() + 10 * 60 * 1000;
+    try { sessionStorage.setItem(LS_2FA_PENDING, JSON.stringify(pending)); } catch(e) {}
+    try {
+      await set(ref(db, "sos2fa/" + pending.uid), { codeHash: simpleHash(code), exp: pending.exp, email: pending.email, at: Date.now() });
+    } catch(e) {}
+    const st = document.getElementById("twoFactorStatus");
+    if (st) st.innerHTML = 'Neuer Code erzeugt. Test-Code: <strong style="letter-spacing:.2em">' + code + '</strong>';
+    toast("Code erneut erzeugt");
+  };
+
+  window.cancelTwoFactor = function() {
+    try { sessionStorage.removeItem(LS_2FA_PENDING); } catch(e) {}
+    document.getElementById("twoFactorPanel")?.classList.add("hidden");
+    document.getElementById("emailFields")?.classList.remove("opacity-40");
+    toast("2FA abgebrochen");
+  };
+
+  window.setTwoFactorEmail = async function(on) {
+    on = !!on;
+    if (!data.settings) data.settings = {};
+    data.settings.twoFactorEmail = on;
+    try { if (typeof save === "function") save(); } catch(e) {}
+    if (currentUser && !previewMode) {
+      try {
+        await set(ref(db, "userSecurity/" + currentUser.uid + "/twoFactorEmail"), on);
+      } catch(e) { console.warn(e); }
+    }
+    toast(on ? "2FA per E-Mail-Code aktiv" : "2FA deaktiviert");
+  };
+
+  /* ---------- Last Login ---------- */
+  async function trackLastLogin(user) {
+    if (!user || previewMode) return;
+    const path = "userSecurity/" + user.uid + "/lastLogin";
+    let prev = null;
+    try {
+      const snap = await get(ref(db, path));
+      prev = snap.val();
+    } catch(e) {}
+    const nowInfo = {
+      at: Date.now(),
+      ua: (navigator.userAgent || "").slice(0, 120),
+      email: user.email || ""
+    };
+    try {
+      if (prev && prev.at) {
+        await set(ref(db, "userSecurity/" + user.uid + "/prevLogin"), prev);
+      }
+      await set(ref(db, path), nowInfo);
+    } catch(e) {}
+    // UI
+    try {
+      const line = document.getElementById("lastLoginLine");
+      const show = prev && prev.at ? prev : nowInfo;
+      if (line && show && show.at) {
+        const d = new Date(show.at);
+        const txt = d.toLocaleString("de-DE", { weekday:"short", day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+        line.textContent = (prev && prev.at ? "Letzter Login: " : "Erster Login: ") + txt;
+      }
+      // toast once per session
+      if (prev && prev.at && !sessionStorage.getItem(LS_LAST_LOGIN_SHOWN)) {
+        sessionStorage.setItem(LS_LAST_LOGIN_SHOWN, "1");
+        const d = new Date(prev.at);
+        toast("Letzter Login: " + d.toLocaleString("de-DE", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" }));
+      }
+    } catch(e) {}
+    // settings checkbox
+    try {
+      const snap2 = await get(ref(db, "userSecurity/" + user.uid + "/twoFactorEmail"));
+      const cb = document.getElementById("settingTwoFactor");
+      if (cb) cb.checked = !!snap2.val() || !!(data?.settings?.twoFactorEmail);
+      if (snap2.val() && data?.settings) data.settings.twoFactorEmail = true;
+    } catch(e) {}
+  }
+
+  /* ---------- Hook showPage / setAdminTab / setupUserUI ---------- */
+  function patchShowPage() {
+    if (window.__sosAdvShowPatched || typeof window.showPage !== "function") return;
+    window.__sosAdvShowPatched = true;
+    const prev = window.showPage;
+    window.showPage = function(page) {
+      const r = prev.apply(this, arguments);
+      try {
+        if (page === "advent") renderAdventPage();
+        if (page === "inventory") renderInventoryPage();
+      } catch(e) {}
+      return r;
+    };
+  }
+
+  function patchSetAdminTab() {
+    if (typeof window.setAdminTab !== "function") {
+      // define minimal if missing
+      window.setAdminTab = function(tab) {
+        document.querySelectorAll("[data-admin-tab]").forEach(function(b){
+          b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
+        });
+        ["users","reports","bans","admins","school","tools","katalog"].forEach(function(t){
+          const el = document.getElementById("adminTab" + t.charAt(0).toUpperCase() + t.slice(1));
+          // ids are adminTabUsers etc
+        });
+        const map = {
+          users: "adminTabUsers", reports: "adminTabReports", bans: "adminTabBans",
+          admins: "adminTabAdmins", school: "adminTabSchool", tools: "adminTabTools", katalog: "adminTabKatalog"
+        };
+        Object.keys(map).forEach(function(k){
+          const el = document.getElementById(map[k]);
+          if (el) el.style.display = k === tab ? "" : "none";
+        });
+        document.querySelectorAll(".admin-tab.filter-admin").forEach(function(b){
+          b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
+        });
+        if (tab === "katalog") renderKatalogAdmin();
+      };
+      return;
+    }
+    if (window.__sosAdminTabPatched) return;
+    window.__sosAdminTabPatched = true;
+    const prev = window.setAdminTab;
+    window.setAdminTab = function(tab) {
+      const r = prev.apply(this, arguments);
+      try {
+        const map = { katalog: "adminTabKatalog" };
+        // hide/show katalog
+        const kat = document.getElementById("adminTabKatalog");
+        if (kat) kat.style.display = tab === "katalog" ? "" : "none";
+        if (tab === "katalog") {
+          // hide others if prev didn't know katalog
+          ["adminTabUsers","adminTabReports","adminTabBans","adminTabAdmins","adminTabSchool","adminTabTools"].forEach(function(id){
+            const el = document.getElementById(id);
+            if (el && tab === "katalog") el.style.display = "none";
+          });
+          renderKatalogAdmin();
+        }
+        document.querySelectorAll(".admin-tab.filter-admin").forEach(function(b){
+          b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
+        });
+      } catch(e) {}
+      return r;
+    };
+  }
+
+  function patchSetupUser() {
+    if (window.__sosSetupUserPatched || typeof window.setupUserUI !== "function") return;
+    // setupUserUI may not be on window
+  }
+
+  // Wrap setupUserUI by redefining after load
+  const _setupInterval = setInterval(function() {
+    patchShowPage();
+    patchSetAdminTab();
+  }, 400);
+  setTimeout(function(){ clearInterval(_setupInterval); }, 8000);
+
+  // onAuth enhancement via polling currentUser changes
+  let _lastUid = null;
+  setInterval(function() {
+    try {
+      const u = typeof currentUser !== "undefined" ? currentUser : null;
+      const uid = u && u.uid;
+      if (uid && uid !== _lastUid) {
+        _lastUid = uid;
+        trackLastLogin(u);
+        loadSosCatalog();
+        pullInventoryCloud();
+        // show katalog tab for master
+        try {
+          const btn = document.getElementById("adminTabKatalogBtn");
+          if (btn) btn.style.display = (typeof isMasterAdmin === "function" && isMasterAdmin()) ? "" : "none";
+        } catch(e) {}
+      }
+      if (!uid) _lastUid = null;
+    } catch(e) {}
+  }, 1000);
+
+  // Boot: magic link complete
+  setTimeout(function(){ completeMagicLinkIfPresent(); }, 600);
+  setTimeout(function(){ loadSosCatalog(); }, 1200);
+  setTimeout(function(){
+    patchShowPage();
+    patchSetAdminTab();
+    try {
+      const btn = document.getElementById("adminTabKatalogBtn");
+      if (btn && typeof isMasterAdmin === "function" && isMasterAdmin()) btn.style.display = "";
+    } catch(e) {}
+  }, 1500);
+})();
 
 </script>
 
