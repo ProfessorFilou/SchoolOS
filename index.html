@@ -6010,7 +6010,151 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
       margin-right: 5px; vertical-align: middle;
     }
 
-</style>
+
+    /* FIX: Modal & Toast über Login */
+    #modalBg.modal-bg, .modal-bg { z-index: 6000 !important; }
+    #modalBg.modal-bg.open { display: grid !important; }
+    .avatar-frame .cosmetic-ring { border-radius: 50% !important; }
+
+    /* ===== Season Events: Advent / Ostern (echtes Page-CSS) ===== */
+    .season-event-page { position: relative; }
+    .season-hero {
+      border-radius: 24px;
+      padding: 22px 22px 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      overflow: hidden;
+      position: relative;
+    }
+    .xmas-hero {
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(34,197,94,.4), transparent 50%),
+        radial-gradient(ellipse 70% 50% at 95% 20%, rgba(239,68,68,.32), transparent 45%),
+        radial-gradient(circle at 50% 120%, rgba(250,204,21,.18), transparent 40%),
+        linear-gradient(145deg, #0c1a12 0%, #1a0a0c 50%, #0a1218 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 70px rgba(34,197,94,.15), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .xmas-hero::before {
+      content: "";
+      position: absolute; inset: -1px;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: conic-gradient(from 0deg, transparent 0 30%, rgba(34,197,94,.7), rgba(239,68,68,.6), rgba(250,204,21,.5), transparent 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      animation: selSpin 12s linear infinite;
+      pointer-events: none;
+      opacity: .7;
+    }
+    .easter-hero {
+      background:
+        radial-gradient(ellipse 80% 60% at 12% -10%, rgba(244,114,182,.4), transparent 50%),
+        radial-gradient(ellipse 60% 50% at 90% 30%, rgba(167,139,250,.35), transparent 45%),
+        radial-gradient(circle at 40% 110%, rgba(52,211,153,.22), transparent 40%),
+        linear-gradient(145deg, #1a1020 0%, #121a18 55%, #1a1428 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 60px rgba(244,114,182,.15);
+    }
+    .season-hero-inner { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+    .season-hero-emoji { font-size: 42px; filter: drop-shadow(0 8px 20px rgba(0,0,0,.4)); animation: cosEmojiBob 2.8s ease-in-out infinite; }
+    .season-hero-title {
+      background: linear-gradient(180deg, #fff 25%, #fde68a 80%);
+      -webkit-background-clip: text; background-clip: text; color: transparent !important;
+      filter: drop-shadow(0 0 16px rgba(250,204,21,.25));
+    }
+    .season-easter .season-hero-title {
+      background: linear-gradient(180deg, #fff 20%, #f9a8d4 70%, #c4b5fd);
+      -webkit-background-clip: text; background-clip: text; color: transparent !important;
+    }
+    .season-hero-sub { color: rgba(255,255,255,.7); }
+    .season-meta { margin-top: 12px; font-size: 12px; color: rgba(255,255,255,.6); position: relative; z-index: 1; }
+    .xmas-panel {
+      background: linear-gradient(165deg, rgba(20,40,28,.82), rgba(30,12,14,.78)) !important;
+      border-color: rgba(34,197,94,.3) !important;
+      box-shadow: 0 16px 40px rgba(0,0,0,.3), 0 0 40px rgba(34,197,94,.08) !important;
+    }
+    .easter-panel {
+      background: linear-gradient(165deg, rgba(40,20,40,.82), rgba(20,35,30,.78)) !important;
+      border-color: rgba(244,114,182,.3) !important;
+    }
+    .season-door-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+      gap: 12px;
+    }
+    .season-door {
+      min-height: 92px;
+      border-radius: 18px !important;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(0,0,0,.2)) !important;
+      border: 1px solid rgba(255,255,255,.12) !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      transition: transform .25s cubic-bezier(.34,1.4,.64,1), box-shadow .25s, border-color .2s !important;
+      padding: 10px 6px !important;
+    }
+    .season-xmas .season-door:hover:not(:disabled) {
+      border-color: rgba(34,197,94,.5) !important;
+      box-shadow: 0 12px 28px rgba(0,0,0,.3), 0 0 24px rgba(34,197,94,.2);
+      transform: translateY(-4px) scale(1.04);
+    }
+    .season-easter .season-door:hover:not(:disabled) {
+      border-color: rgba(244,114,182,.5) !important;
+      box-shadow: 0 12px 28px rgba(0,0,0,.3), 0 0 24px rgba(244,114,182,.2);
+      transform: translateY(-4px) scale(1.04);
+    }
+    .season-door:disabled { opacity: .38; cursor: not-allowed; filter: grayscale(.3); }
+    .season-door.today {
+      border-color: rgba(250,204,21,.65) !important;
+      box-shadow: 0 0 0 2px rgba(250,204,21,.35), 0 0 28px rgba(250,204,21,.25) !important;
+      animation: cosPulseGreen 2.4s ease-in-out infinite;
+    }
+    .season-door.opened {
+      background: linear-gradient(160deg, rgba(34,197,94,.25), rgba(239,68,68,.12)) !important;
+      border-color: rgba(34,197,94,.45) !important;
+    }
+    .season-easter .season-door.opened {
+      background: linear-gradient(160deg, rgba(244,114,182,.25), rgba(167,139,250,.15)) !important;
+      border-color: rgba(244,114,182,.45) !important;
+    }
+    .season-door .door-num { font-size: 22px; font-weight: 800; font-family: "Space Grotesk", sans-serif; }
+    .season-door .door-icon { font-size: 24px; line-height: 1; }
+    .season-door .door-name { font-size: 9px; font-weight: 600; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .xmas-reward {
+      border: 1px solid rgba(34,197,94,.35) !important;
+      background: linear-gradient(145deg, rgba(20,50,30,.9), rgba(40,15,15,.85)) !important;
+      box-shadow: 0 0 40px rgba(34,197,94,.15);
+    }
+    .easter-reward {
+      border: 1px solid rgba(244,114,182,.35) !important;
+      background: linear-gradient(145deg, rgba(50,20,45,.9), rgba(20,40,35,.85)) !important;
+    }
+    /* App-wide event backgrounds */
+    body.event-xmas-bg {
+      background:
+        radial-gradient(ellipse 95% 60% at 5% -15%, rgba(34,197,94,.28), transparent 42%),
+        radial-gradient(ellipse 75% 50% at 98% 0%, rgba(239,68,68,.22), transparent 38%),
+        radial-gradient(ellipse 55% 40% at 50% 105%, rgba(250,204,21,.12), transparent 45%),
+        radial-gradient(circle at 70% 40%, rgba(34,197,94,.06), transparent 30%),
+        var(--bg) !important;
+    }
+    body.event-xmas-bg .topbar {
+      border-bottom-color: rgba(34,197,94,.2) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,.25), 0 0 40px rgba(34,197,94,.08) !important;
+    }
+    body.event-xmas-bg .sidebar {
+      border-right-color: rgba(34,197,94,.15) !important;
+    }
+    body.event-easter-bg {
+      background:
+        radial-gradient(ellipse 95% 60% at 8% -12%, rgba(244,114,182,.26), transparent 42%),
+        radial-gradient(ellipse 75% 50% at 95% 5%, rgba(167,139,250,.2), transparent 38%),
+        radial-gradient(ellipse 55% 40% at 50% 105%, rgba(52,211,153,.12), transparent 45%),
+        var(--bg) !important;
+    }
+    #sos-xmas-snow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 3; opacity: .75;
+    }
+
+  </style>
 </head>
 
 <body>
@@ -6359,9 +6503,14 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
       <div class="nav-group">
         <div class="nav-label">Organisation</div>
 
-        <button class="nav-btn" data-page="advent" onclick="showPage('advent')" id="navAdventBtn">
+        <button class="nav-btn" data-page="advent" onclick="showPage('advent')" id="navAdventBtn" style="display:none">
           <span class="nav-icon">🎄</span>
           <span>Advent</span>
+        </button>
+
+        <button class="nav-btn" data-page="easter" onclick="showPage('easter')" id="navEasterBtn" style="display:none">
+          <span class="nav-icon">🐰</span>
+          <span>Ostern</span>
         </button>
 
         <button class="nav-btn" data-page="inventory" onclick="showPage('inventory')">
@@ -7592,25 +7741,50 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
       ======================================================== -->
 
       
-      <section id="page-advent" class="page">
-        <div class="mb-4">
-          <h2 class="text-2xl font-extrabold font-display">Adventskalender</h2>
-          <p class="text-sm text-slate-500 mt-1">Jeden Tag im Dezember eine Überraschung – Cosmetics, Badges & Items.</p>
+      <section id="page-advent" class="page season-event-page season-xmas">
+        <div class="season-hero xmas-hero mb-4">
+          <div class="season-hero-inner">
+            <div class="season-hero-emoji">🎄</div>
+            <div>
+              <h2 class="text-2xl font-extrabold font-display season-hero-title">Adventskalender</h2>
+              <p class="text-sm season-hero-sub mt-1">24 Türchen · Cosmetics, Badges & Überraschungen</p>
+            </div>
+          </div>
+          <div id="adventMeta" class="season-meta"></div>
         </div>
-        <div class="panel panel-pad mb-4">
-          <div id="adventMeta" class="text-sm text-slate-400 mb-3"></div>
-          <div id="adventGrid" class="grid gap-2" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))"></div>
+        <div class="panel panel-pad mb-4 season-panel xmas-panel">
+          <div id="adventGrid" class="season-door-grid"></div>
         </div>
-        <div id="adventRewardToast" class="panel panel-pad" style="display:none">
-          <div class="panel-title mb-1">Heute freigeschaltet</div>
+        <div id="adventRewardToast" class="panel panel-pad season-reward xmas-reward" style="display:none">
+          <div class="panel-title mb-1">🎁 Heute freigeschaltet</div>
           <div id="adventRewardBody" class="text-sm"></div>
+        </div>
+      </section>
+
+      <section id="page-easter" class="page season-event-page season-easter">
+        <div class="season-hero easter-hero mb-4">
+          <div class="season-hero-inner">
+            <div class="season-hero-emoji">🐰</div>
+            <div>
+              <h2 class="text-2xl font-extrabold font-display season-hero-title">Osterkalender</h2>
+              <p class="text-sm season-hero-sub mt-1">12 Nest-Türchen · Eier, Badges & Frühlings-Cosmetics</p>
+            </div>
+          </div>
+          <div id="easterMeta" class="season-meta"></div>
+        </div>
+        <div class="panel panel-pad mb-4 season-panel easter-panel">
+          <div id="easterGrid" class="season-door-grid"></div>
+        </div>
+        <div id="easterRewardToast" class="panel panel-pad season-reward easter-reward" style="display:none">
+          <div class="panel-title mb-1">🥚 Heute gefunden</div>
+          <div id="easterRewardBody" class="text-sm"></div>
         </div>
       </section>
 
       <section id="page-inventory" class="page">
         <div class="mb-4">
           <h2 class="text-2xl font-extrabold font-display">Inventar</h2>
-          <p class="text-sm text-slate-500 mt-1">Gesammelte Cosmetics, Badges und Items.</p>
+          <p class="text-sm text-slate-500 mt-1">Gesammelte Cosmetics, Badges und Items aus Events & Geschenken.</p>
         </div>
         <div class="panel panel-pad mb-4">
           <div class="panel-title mb-2">Cosmetics / Rahmen</div>
@@ -7844,15 +8018,30 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
         
         <div id="adminTabKatalog" style="display:none">
           <div class="panel panel-pad mb-4">
+            <div class="panel-title mb-2">Events steuern (Owner)</div>
+            <p class="text-xs text-slate-400 mb-3">Advent & Ostern jederzeit aktivieren – unabhängig vom Kalenderdatum. Nav erscheint dann für alle.</p>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn" id="btnToggleAdvent" onclick="window.toggleEventForce && window.toggleEventForce('advent')">🎄 Advent umschalten</button>
+              <button type="button" class="btn" id="btnToggleEaster" onclick="window.toggleEventForce && window.toggleEventForce('easter')">🐰 Ostern umschalten</button>
+            </div>
+            <div id="eventForceStatus" class="text-xs text-slate-400 mb-2"></div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn btn-primary" onclick="window.seedCatalog100 && window.seedCatalog100()">📦 100 Katalog-Items einspielen</button>
+              <button type="button" class="btn" onclick="window.seedDefaultEventDays && window.seedDefaultEventDays()">Türchen-Defaults setzen</button>
+            </div>
+          </div>
+          <div class="panel panel-pad mb-4">
             <div class="panel-title mb-2">Katalog · Items anlegen (Owner)</div>
-            <p class="text-xs text-slate-400 mb-3">Badges, Cosmetics und Inventar-Items. Schüler sammeln sie im Adventskalender oder du vergibst sie manuell.</p>
+            <p class="text-xs text-slate-400 mb-3">Badges, Cosmetics, Sticker, Titel, Themes. Schüler sammeln sie in Events oder du vergibst sie.</p>
             <div class="form-grid">
               <div class="field"><label>Name</label><input id="katItemName" class="input" maxlength="40" placeholder="z. B. Schneeflocken-Rahmen"></div>
               <div class="field"><label>Typ</label>
                 <select id="katItemType" class="select">
                   <option value="cosmetic">Cosmetic / Rahmen</option>
                   <option value="badge">Badge</option>
-                  <option value="item">Inventar-Item</option>
+                  <option value="item">Inventar-Item / Sticker</option>
+                  <option value="title">Titel (Profil)</option>
+                  <option value="theme">Theme-Unlock</option>
                 </select>
               </div>
               <div class="field"><label>Icon / Emoji</label><input id="katItemIcon" class="input" maxlength="8" placeholder="🎄"></div>
@@ -7868,15 +8057,18 @@ body.sidebar-collapsed .sidebar-scroll .nav-btn{width:100%;min-width:0;}
             <div id="katItemsList" class="mt-4 space-y-2"></div>
           </div>
           <div class="panel panel-pad mb-4">
-            <div class="panel-title mb-2">Adventskalender · Türchen belohnen</div>
-            <p class="text-xs text-slate-400 mb-3">Tag 1–24 mit einem Katalog-Item verknüpfen. Leer = Standard-Überraschung.</p>
+            <div class="panel-title mb-2">Event-Türchen belohnen</div>
+            <p class="text-xs text-slate-400 mb-3">Advent 1–24 oder Ostern 1–12 mit Katalog-Item verknüpfen.</p>
             <div class="form-grid">
-              <div class="field"><label>Tag (1–24)</label><input id="advDay" class="input" type="number" min="1" max="24" value="1"></div>
-              <div class="field"><label>Item-ID</label><select id="advItemSelect" class="select"></select></div>
+              <div class="field"><label>Event</label>
+                <select id="advEventKind" class="select"><option value="advent">Advent (1–24)</option><option value="easter">Ostern (1–12)</option></select>
+              </div>
+              <div class="field"><label>Tag</label><input id="advDay" class="input" type="number" min="1" max="24" value="1"></div>
+              <div class="field"><label>Item</label><select id="advItemSelect" class="select"></select></div>
               <div class="field"><label>Extra-Text</label><input id="advDayText" class="input" maxlength="80" placeholder="Frohe Überraschung!"></div>
             </div>
             <button type="button" class="btn btn-primary mt-2" onclick="window.advSaveDay && window.advSaveDay()">Türchen speichern</button>
-            <div id="advDaysList" class="mt-4 space-y-1 text-sm"></div>
+            <div id="advDaysList" class="mt-4 space-y-1 text-sm max-h-48 overflow-y-auto"></div>
           </div>
           <div class="panel panel-pad mb-4">
             <div class="panel-title mb-2">Item an Nutzer vergeben</div>
@@ -11242,10 +11434,19 @@ function authErrorMessage(error) {
       "Firebase akzeptiert diese E-Mail nicht. Bitte ohne Leerzeichen prüfen (name@domain.de).",
 
     "auth/unauthorized-continue-uri":
-      "Domain nicht in Firebase freigeschaltet (Authorized domains).",
+      "Domain nicht in Firebase freigeschaltet. Authentication → Settings → Authorized domains: nur den Host eintragen (ohne https://).",
 
     "auth/invalid-continue-uri":
-      "Ungültige Weiterleitungs-URL – Reset wird ohne Continue-URL versucht.",
+      "Ungültige Weiterleitungs-URL. Seite über https://… öffnen (nicht file://).",
+
+    "auth/operation-not-allowed":
+      "Diese Anmeldemethode ist in Firebase deaktiviert (Sign-in method prüfen).",
+
+    "auth/missing-continue-uri":
+      "Continue-URL fehlt – Seite bitte über eine echte Domain öffnen.",
+
+    "auth/invalid-action-code":
+      "Link ungültig oder abgelaufen – bitte neu anfordern.",
 
     "auth/weak-password":
       "Passwort zu schwach – mindestens 8 Zeichen, besser mit Zahl und Buchstaben.",
@@ -16476,22 +16677,7 @@ window.exportBoardPdf = function() {
     <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111;max-width:800px;margin:auto}
     h1{font-size:20px} h2{font-size:14px;margin-top:24px;border-bottom:1px solid #ddd;padding-bottom:4px}
     li{font-size:12px;margin:4px 0} .muted{color:#666;font-size:11px}
-    /* FIX: Modal & Toast immer über Login (z-index 500) */
-    #modalBg.modal-bg,
-    .modal-bg {
-      z-index: 6000 !important;
-    }
-    #modalBg.modal-bg.open {
-      display: grid !important;
-    }
-    /* Avatar-Rahmen: immer runder Ring sichtbar */
-    .avatar-frame .cosmetic-ring {
-      border-radius: 50% !important;
-    }
-    body.sos-xmas-active .brand-title {
-      filter: drop-shadow(0 0 12px rgba(34,197,94,.35));
-    }
-</style></head><body>
+    </style></head><body>
     <h1>SchoolOS – ${escapeHTML(data.settings.name || "Übersicht")}</h1>
     <p class="muted">${escapeHTML(data.settings.className || "")} · ${new Date().toLocaleString("de-DE")}</p>
     <h2>Offene Aufgaben</h2><ul>${tasks.map(t => `<li>${escapeHTML(t.title)} <span class="muted">${escapeHTML(t.subject || "")} ${escapeHTML(t.date || "")}</span></li>`).join("") || "<li>–</li>"}</ul>
@@ -28390,7 +28576,8 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
   }
 
   /* ---------- Catalog (RTDB + local cache) ---------- */
-  window.__sosCatalog = window.__sosCatalog || { items: {}, advent: {} };
+
+  window.__sosCatalog = window.__sosCatalog || { items: {}, advent: {}, easter: {}, events: { advent: { force: false }, easter: { force: false } } };
 
   function catalogRef(path) {
     return ref(db, "sosCatalog" + (path ? "/" + path : ""));
@@ -28402,12 +28589,161 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       const v = snap.val() || {};
       window.__sosCatalog.items = v.items || {};
       window.__sosCatalog.advent = v.advent || {};
-      // merge custom cosmetics into AVATAR_COSMETICS runtime
+      window.__sosCatalog.easter = v.easter || {};
+      window.__sosCatalog.events = v.events || { advent: { force: false }, easter: { force: false } };
       try { mergeCatalogCosmetics(); } catch(e) {}
+      try { updateEventNavVisibility(); } catch(e) {}
       try { if (typeof renderKatalogAdmin === "function") renderKatalogAdmin(); } catch(e) {}
       try { if (typeof renderAdventPage === "function") renderAdventPage(); } catch(e) {}
+      try { if (typeof renderEasterPage === "function") renderEasterPage(); } catch(e) {}
       try { if (typeof renderInventoryPage === "function") renderInventoryPage(); } catch(e) {}
+      try { updateEventForceStatus(); } catch(e) {}
     } catch (e) { console.warn("catalog load", e); }
+  };
+
+  function isEventActive(kind) {
+    const ev = (window.__sosCatalog.events || {})[kind] || {};
+    if (ev.force) return true;
+    const d = new Date();
+    const m = d.getMonth();
+    const day = d.getDate();
+    if (kind === "advent") {
+      // Dec 1–24 natural, or force
+      return m === 11 && day >= 1 && day <= 24;
+    }
+    if (kind === "easter") {
+      // rough: March 15 – April 20
+      if (m === 2 && day >= 15) return true;
+      if (m === 3 && day <= 20) return true;
+      return false;
+    }
+    return false;
+  }
+
+  function eventProgressDay(kind) {
+    // When forced: unlock days progressively by day-of-month or all up to "virtual today"
+    const d = new Date();
+    if (kind === "advent") {
+      if ((window.__sosCatalog.events || {}).advent?.force) {
+        // forced: use day of month capped 24, min 1 — OR if outside Dec use full unlock mode via forceDay
+        const fd = Number((window.__sosCatalog.events || {}).advent?.forceDay);
+        if (fd > 0) return Math.min(24, fd);
+        if (d.getMonth() === 11) return Math.min(24, d.getDate());
+        return Math.min(24, d.getDate()); // outside Dec still open by calendar day number
+      }
+      if (d.getMonth() !== 11) return 0;
+      return Math.min(24, d.getDate());
+    }
+    if (kind === "easter") {
+      if ((window.__sosCatalog.events || {}).easter?.force) {
+        const fd = Number((window.__sosCatalog.events || {}).easter?.forceDay);
+        if (fd > 0) return Math.min(12, fd);
+        return Math.min(12, d.getDate());
+      }
+      if (!isEventActive("easter")) return 0;
+      // map date roughly into 1-12
+      return Math.min(12, ((d.getDate() - 1) % 12) + 1);
+    }
+    return 0;
+  }
+
+  window.updateEventNavVisibility = function() {
+    const a = document.getElementById("navAdventBtn");
+    const e = document.getElementById("navEasterBtn");
+    if (a) a.style.display = isEventActive("advent") ? "" : "none";
+    if (e) e.style.display = isEventActive("easter") ? "" : "none";
+    try {
+      const xmas = isEventActive("advent");
+      const easter = isEventActive("easter");
+      document.body.classList.toggle("event-xmas-bg", !!xmas);
+      document.body.classList.toggle("event-easter-bg", !!easter && !xmas);
+      if (xmas) ensureXmasSnow();
+      else {
+        const s = document.getElementById("sos-xmas-snow");
+        if (s) s.remove();
+      }
+    } catch (err) {}
+  };
+
+  function ensureXmasSnow() {
+    if (document.getElementById("sos-xmas-snow")) return;
+    try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch(e) {}
+    const c = document.createElement("canvas");
+    c.id = "sos-xmas-snow";
+    document.body.appendChild(c);
+    const ctx = c.getContext("2d");
+    let W, H, flakes = [];
+    function resize() {
+      W = innerWidth; H = innerHeight;
+      c.width = W; c.height = H;
+      const n = Math.min(80, Math.round(W / 22));
+      flakes = Array.from({ length: n }, function() {
+        return {
+          x: Math.random() * W, y: Math.random() * H,
+          r: 1 + Math.random() * 3, vy: 20 + Math.random() * 40,
+          vx: -12 + Math.random() * 24, a: 0.4 + Math.random() * 0.5, ph: Math.random() * 6
+        };
+      });
+    }
+    resize();
+    addEventListener("resize", resize);
+    let last = performance.now();
+    (function loop(now) {
+      if (!document.getElementById("sos-xmas-snow")) return;
+      requestAnimationFrame(loop);
+      if (document.hidden) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      ctx.clearRect(0, 0, W, H);
+      for (const f of flakes) {
+        f.y += f.vy * dt;
+        f.x += (f.vx + Math.sin(now / 800 + f.ph) * 10) * dt;
+        if (f.y > H + 10) { f.y = -10; f.x = Math.random() * W; }
+        if (f.x < -10) f.x = W + 10;
+        if (f.x > W + 10) f.x = -10;
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(230,240,255," + f.a + ")";
+        ctx.arc(f.x, f.y, f.r, 0, 6.28);
+        ctx.fill();
+      }
+    })(last);
+  }
+
+  window.updateEventForceStatus = function() {
+    const el = document.getElementById("eventForceStatus");
+    if (!el) return;
+    const ev = window.__sosCatalog.events || {};
+    el.innerHTML = "Advent: <strong>" + (ev.advent?.force ? "FORCIERT AN" : (isEventActive("advent") ? "saisonal an" : "aus")) +
+      "</strong> · Ostern: <strong>" + (ev.easter?.force ? "FORCIERT AN" : (isEventActive("easter") ? "saisonal an" : "aus")) + "</strong>" +
+      (ev.advent?.force ? " · Advent-Tag-Cap: " + eventProgressDay("advent") : "") +
+      (ev.easter?.force ? " · Ostern-Tag-Cap: " + eventProgressDay("easter") : "");
+  };
+
+  window.toggleEventForce = async function(kind) {
+    if (typeof isMasterAdmin !== "function" || !isMasterAdmin()) { toast("Nur Owner"); return; }
+    window.__sosCatalog.events = window.__sosCatalog.events || {};
+    window.__sosCatalog.events[kind] = window.__sosCatalog.events[kind] || {};
+    const cur = !!window.__sosCatalog.events[kind].force;
+    window.__sosCatalog.events[kind].force = !cur;
+    if (!cur) {
+      // when enabling force, set forceDay high so testing is useful
+      const max = kind === "advent" ? 24 : 12;
+      const ans = prompt("Bis zu welchem Tag freischalten? (1–" + max + ")\nTipp: " + max + " = alle Türchen offen", String(max));
+      const n = Math.min(max, Math.max(1, Number(ans) || new Date().getDate()));
+      window.__sosCatalog.events[kind].forceDay = n;
+    } else {
+      delete window.__sosCatalog.events[kind].forceDay;
+    }
+    try {
+      await set(catalogRef("events/" + kind), window.__sosCatalog.events[kind]);
+      toast(kind + (window.__sosCatalog.events[kind].force ? " AKTIV (Force)" : " aus"));
+      updateEventNavVisibility();
+      updateEventForceStatus();
+      renderAdventPage();
+      renderEasterPage();
+    } catch (e) {
+      console.warn(e);
+      toast("Speichern fehlgeschlagen – Firebase-Regeln für sosCatalog prüfen");
+    }
   };
 
   window.mergeCatalogCosmetics = function mergeCatalogCosmetics() {
@@ -28424,13 +28760,98 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       AVATAR_COSMETICS.push({
         id: id,
         name: it.name || id,
-        unlock: function(){ return true; }, // gated by inventory via isCosmeticUnlocked
+        unlock: function(){ return true; },
         emojis: emojis.length ? emojis : [{ ch: it.icon || "✨", pos: "tr" }],
         _fromCatalog: true,
         _color: it.color || ""
       });
     });
-  }
+  };
+
+  /* ----- Seed 100 catalog items ----- */
+  window.seedCatalog100 = async function() {
+    if (!isMasterAdmin()) { toast("Nur Owner"); return; }
+    if (!confirm("100 Katalog-Items einspielen? Bestehende mit gleicher ID werden überschrieben.")) return;
+    const pool = [];
+    const cosmetics = [
+      ["🎄","Tannen-Rahmen","#22c55e","🎄|❄️"],["🎅","Nikolaus-Rahmen","#ef4444","🎅|🎁"],["❄️","Eis-Rahmen","#38bdf8","❄️|✨"],
+      ["🦌","Rentier-Rahmen","#a78bfa","🦌|⭐"],["⭐","Sternen-Rahmen","#fbbf24","⭐|✨"],["🕯️","Kerzen-Rahmen","#f59e0b","🕯️|✨"],
+      ["🐰","Hasen-Rahmen","#f472b6","🐰|🥚"],["🌷","Tulpen-Rahmen","#fb7185","🌷|🌸"],["🥚","Ei-Rahmen","#a3e635","🥚|✨"],
+      ["👑","König-Rahmen","#fbbf24","👑|✨"],["💎","Diamant-Rahmen","#22d3ee","💎|✨"],["🌙","Mond-Rahmen","#818cf8","🌙|⭐"],
+      ["🔥","Feuer-Rahmen","#f97316","🔥|✨"],["🌊","Wellen-Rahmen","#06b6d4","🌊|💙"],["🍀","Glücks-Rahmen","#22c55e","🍀|✨"],
+      ["🎭","Masken-Rahmen","#c084fc","🎭|✨"],["🦄","Einhorn-Rahmen","#e879f9","🦄|💜"],["🚀","Raketen-Rahmen","#60a5fa","🚀|⭐"],
+      ["📚","Bücher-Rahmen","#818cf8","📚|✏️"],["🎓","Abi-Rahmen","#fbbf24","🎓|📜"],["⚽","Sport-Rahmen","#4ade80","⚽|🏆"],
+      ["🎨","Kunst-Rahmen","#f472b6","🎨|✨"],["🧪","Labor-Rahmen","#2dd4bf","🧪|🔬"],["🎸","Musik-Rahmen","#a78bfa","🎸|🎵"]
+    ];
+    cosmetics.forEach(function(c, i) {
+      pool.push({ id: "cos_" + (i+1), name: c[1], type: "cosmetic", icon: c[0], color: c[2], emojis: c[3], desc: "Cosmetic aus dem Katalog" });
+    });
+    const badges = ["🏆 Champion","🌟 Superstar","💪 Durchhalter","🧠 Genie","⚡ Blitz","🎯 Treffer","🔥 Hot Streak",
+      "🌈 Regenbogen","🕊️ Frieden","🧩 Puzzle-Profi","📎 Organisiert","🕒 Pünktlich","📝 Notiz-König","🎒 Rucksack-Held",
+      "📖 Leseratte","🧪 Forscher","🎨 Kreativ","🎵 Musiker","🏃 Sportlich","💻 Coder","🗣️ Redner","🤝 Teamplayer",
+      "🌱 Neo","🛡️ Beschützer","✨ Magier","🎂 Geburtstag","🎃 Halloween","🎄 Weihnacht","🐰 Ostern","☀️ Sommer"];
+    badges.forEach(function(b, i) {
+      const parts = b.split(" ");
+      pool.push({ id: "bdg_" + (i+1), name: parts.slice(1).join(" ") || b, type: "badge", icon: parts[0], desc: "Badge: " + b });
+    });
+    const items = ["🎁 Geschenk","🍪 Plätzchen","🧣 Schal","🧤 Handschuhe","⛄ Schneemann","🔔 Glocke","🕯️ Kerze",
+      "⭐ Stern","❄️ Flocke","🎀 Schleife","🪄 Zauberstab","📖 Märchen","🫖 Tee","🧩 Puzzle-Teil","🎯 Dart",
+      "💎 Kristall","🧸 Teddy","🚂 Zug","🎠 Karussell","🍦 Eis","🎈 Ballon","🧁 Cupcake","🍓 Beere","🍊 Orange",
+      "🌻 Sonnenblume","🌸 Blüte","🌿 Blatt","🪴 Pflanze","🔑 Schlüssel","🗝️ Altschlüssel","📦 Paket","✉️ Brief",
+      "🪄 Stab","🛡️ Schild","⚔️ Schwert","🏹 Bogen","🔮 Kugel","🧿 Amulett","📿 Kette","💍 Ring","👑 Mini-Krone",
+      "🎩 Hut","🕶️ Sonnenbrille","🧢 Cap","👟 Sneaker","🎒 Mini-Rucksack","📱 Handy-Skin","🕹️ Stick","🎲 Würfel",
+      "🃏 Karte"];
+    items.forEach(function(it, i) {
+      const parts = it.split(" ");
+      pool.push({ id: "itm_" + (i+1), name: parts.slice(1).join(" ") || it, type: "item", icon: parts[0], desc: "Sammel-Item" });
+    });
+    // pad to 100
+    let n = pool.length;
+    while (pool.length < 100) {
+      n++;
+      pool.push({ id: "extra_" + n, name: "Überraschung #" + n, type: "item", icon: "✨", desc: "Extra Katalog-Item" });
+    }
+    pool.length = 100;
+    const updates = {};
+    pool.forEach(function(it) {
+      it.at = Date.now();
+      it.by = currentUser?.uid || "owner";
+      window.__sosCatalog.items[it.id] = it;
+      updates[it.id] = it;
+    });
+    try {
+      await update(catalogRef("items"), updates);
+      mergeCatalogCosmetics();
+      renderKatalogAdmin();
+      toast("100 Items im Katalog ✓");
+    } catch (e) {
+      console.warn(e);
+      toast("Fehler – ggf. Rules für sosCatalog/items");
+    }
+  };
+
+  window.seedDefaultEventDays = async function() {
+    if (!isMasterAdmin()) return;
+    const items = Object.keys(window.__sosCatalog.items || {});
+    if (items.length < 12) { toast("Zuerst Katalog befüllen (100 Items)"); return; }
+    const adv = {}, eas = {};
+    for (let d = 1; d <= 24; d++) {
+      const id = items[(d - 1) % items.length];
+      adv[String(d)] = { day: d, itemId: id, text: "Advent Türchen " + d, at: Date.now() };
+    }
+    for (let d = 1; d <= 12; d++) {
+      const id = items[(d + 10) % items.length];
+      eas[String(d)] = { day: d, itemId: id, text: "Osternest " + d, at: Date.now() };
+    }
+    window.__sosCatalog.advent = adv;
+    window.__sosCatalog.easter = eas;
+    try {
+      await set(catalogRef("advent"), adv);
+      await set(catalogRef("easter"), eas);
+      renderKatalogAdmin();
+      toast("Türchen Advent+Ostern gesetzt");
+    } catch (e) { toast("Fehler beim Speichern"); }
+  };
 
   window.katResetForm = function() {
     ["katItemName","katItemIcon","katItemId","katItemDesc","katItemEmojis","katItemColor"].forEach(function(id){
@@ -28475,16 +28896,21 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
 
   window.advSaveDay = async function() {
     if (!isMasterAdmin()) { toast("Nur Owner"); return; }
-    const day = Math.min(24, Math.max(1, Number(document.getElementById("advDay")?.value) || 1));
+    const kind = document.getElementById("advEventKind")?.value || "advent";
+    const max = kind === "easter" ? 12 : 24;
+    const day = Math.min(max, Math.max(1, Number(document.getElementById("advDay")?.value) || 1));
     const itemId = document.getElementById("advItemSelect")?.value || "";
     const text = (document.getElementById("advDayText")?.value || "").trim().slice(0, 80);
     const entry = { day, itemId, text, at: Date.now() };
-    window.__sosCatalog.advent[String(day)] = entry;
-    try {
+    if (kind === "easter") {
+      window.__sosCatalog.easter[String(day)] = entry;
+      await set(catalogRef("easter/" + day), entry);
+    } else {
+      window.__sosCatalog.advent[String(day)] = entry;
       await set(catalogRef("advent/" + day), entry);
-      toast("Türchen " + day + " gespeichert");
-      renderKatalogAdmin();
-    } catch (e) { toast("Fehler"); }
+    }
+    toast((kind === "easter" ? "Ostern" : "Advent") + " Tag " + day + " gespeichert");
+    renderKatalogAdmin();
   };
 
   window.katGrantToUser = async function() {
@@ -28495,13 +28921,13 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     const it = window.__sosCatalog.items[itemId];
     if (!it) { toast("Item unbekannt"); return; }
     try {
-      const path = "userInventory/" + uid + "/" + it.type + "s/" + itemId;
-      // normalize type folder
       let folder = "items";
       if (it.type === "cosmetic") folder = "cosmetics";
       else if (it.type === "badge") folder = "badges";
+      else if (it.type === "title") folder = "titles";
+      else if (it.type === "theme") folder = "themes";
       await set(ref(db, "userInventory/" + uid + "/" + folder + "/" + itemId), {
-        id: itemId, name: it.name, icon: it.icon, at: Date.now(), by: currentUser?.uid || "owner"
+        id: itemId, name: it.name, icon: it.icon, type: it.type, at: Date.now(), by: currentUser?.uid || "owner"
       });
       toast("Vergeben an " + uid.slice(0, 8) + "…");
     } catch (e) { console.warn(e); toast("Vergabe fehlgeschlagen"); }
@@ -28512,15 +28938,15 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     const items = window.__sosCatalog.items || {};
     const ids = Object.keys(items).sort();
     if (list) {
-      if (!ids.length) list.innerHTML = '<div class="empty">Noch keine Items – oben anlegen.</div>';
-      else list.innerHTML = ids.map(function(id) {
+      if (!ids.length) list.innerHTML = '<div class="empty">Noch keine Items – „100 Katalog-Items“ oder manuell anlegen.</div>';
+      else list.innerHTML = '<div class="tiny muted mb-2">' + ids.length + " Items</div>" + ids.slice(0, 80).map(function(id) {
         const it = items[id];
         return '<div class="item"><div class="item-main"><div class="item-title">' +
           escapeHTML((it.icon||"") + " " + (it.name||id)) + '</div><div class="item-meta">' +
           escapeHTML(it.type + " · " + id) + (it.desc ? " · " + escapeHTML(it.desc) : "") +
           '</div></div><button type="button" class="btn text-[10px] btn-danger" onclick="katDeleteItem(\'' +
           escapeHTML(id) + '\')">✕</button></div>';
-      }).join("");
+      }).join("") + (ids.length > 80 ? '<div class="tiny muted">… und ' + (ids.length-80) + ' weitere</div>' : "");
     }
     const sel = document.getElementById("advItemSelect");
     const gsel = document.getElementById("katGrantItem");
@@ -28533,128 +28959,162 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
     const advBox = document.getElementById("advDaysList");
     if (advBox) {
       const adv = window.__sosCatalog.advent || {};
-      const days = Object.keys(adv).map(Number).sort((a,b)=>a-b);
-      if (!days.length) advBox.innerHTML = '<div class="tiny muted">Keine Türchen konfiguriert – Defaults greifen.</div>';
-      else advBox.innerHTML = days.map(function(d){
-        const e = adv[String(d)];
-        const it = items[e.itemId] || {};
-        return '<div class="tiny">Tag ' + d + ': ' + escapeHTML((it.icon||"🎁") + " " + (it.name||e.itemId||"—")) +
-          (e.text ? " · " + escapeHTML(e.text) : "") + '</div>';
-      }).join("");
+      const eas = window.__sosCatalog.easter || {};
+      let html = "";
+      Object.keys(adv).map(Number).sort((a,b)=>a-b).forEach(function(d){
+        const e = adv[String(d)]; const it = items[e.itemId] || {};
+        html += '<div class="tiny">🎄 ' + d + ': ' + escapeHTML((it.icon||"🎁") + " " + (it.name||e.itemId||"—")) + '</div>';
+      });
+      Object.keys(eas).map(Number).sort((a,b)=>a-b).forEach(function(d){
+        const e = eas[String(d)]; const it = items[e.itemId] || {};
+        html += '<div class="tiny">🐰 ' + d + ': ' + escapeHTML((it.icon||"🥚") + " " + (it.name||e.itemId||"—")) + '</div>';
+      });
+      advBox.innerHTML = html || '<div class="tiny muted">Keine Türchen konfiguriert.</div>';
     }
+    updateEventForceStatus();
   };
 
-  /* ---------- Advent ---------- */
   const DEFAULT_ADV_REWARDS = [
-    { icon:"🎄", name:"Tannenbaum-Sticker", type:"item" },
-    { icon:"❄️", name:"Schneeflocke", type:"item" },
-    { icon:"🎁", name:"Geschenk", type:"item" },
-    { icon:"⭐", name:"Stern", type:"item" },
-    { icon:"🕯️", name:"Kerze", type:"item" },
-    { icon:"🍪", name:"Plätzchen", type:"item" },
-    { icon:"🦌", name:"Rentier", type:"item" },
-    { icon:"🎅", name:"Nikolaus-Badge", type:"badge" },
-    { icon:"✨", name:"Glitzer", type:"item" },
-    { icon:"🔔", name:"Glocke", type:"item" },
-    { icon:"🧤", name:"Handschuhe", type:"item" },
-    { icon:"🧣", name:"Schal", type:"item" },
-    { icon:"🎿", name:"Ski", type:"item" },
-    { icon:"⛄", name:"Schneemann", type:"item" },
-    { icon:"🎀", name:"Schleife", type:"item" },
-    { icon:"🪄", name:"Zauberstab", type:"item" },
-    { icon:"🌟", name:"Goldstern", type:"item" },
-    { icon:"🎵", name:"Carol", type:"item" },
-    { icon:"🫖", name:"Tee", type:"item" },
-    { icon:"📖", name:"Wintergeschichte", type:"item" },
-    { icon:"🧩", name:"Puzzle", type:"item" },
-    { icon:"🎯", name:"Ziel", type:"item" },
-    { icon:"💎", name:"Kristall", type:"item" },
-    { icon:"👑", name:"Kronen-Rahmen", type:"cosmetic" }
+    { icon:"🎄", name:"Tannenbaum", type:"item" },{ icon:"❄️", name:"Schneeflocke", type:"item" },
+    { icon:"🎁", name:"Geschenk", type:"item" },{ icon:"⭐", name:"Stern", type:"item" },
+    { icon:"🕯️", name:"Kerze", type:"item" },{ icon:"🍪", name:"Plätzchen", type:"item" },
+    { icon:"🦌", name:"Rentier", type:"item" },{ icon:"🎅", name:"Nikolaus-Badge", type:"badge" },
+    { icon:"✨", name:"Glitzer", type:"item" },{ icon:"🔔", name:"Glocke", type:"item" },
+    { icon:"🧤", name:"Handschuhe", type:"item" },{ icon:"🧣", name:"Schal", type:"item" },
+    { icon:"🎿", name:"Ski", type:"item" },{ icon:"⛄", name:"Schneemann", type:"item" },
+    { icon:"🎀", name:"Schleife", type:"item" },{ icon:"🪄", name:"Zauberstab", type:"item" },
+    { icon:"🌟", name:"Goldstern", type:"item" },{ icon:"🎵", name:"Carol", type:"item" },
+    { icon:"🫖", name:"Tee", type:"item" },{ icon:"📖", name:"Wintergeschichte", type:"item" },
+    { icon:"🧩", name:"Puzzle", type:"item" },{ icon:"🎯", name:"Ziel", type:"item" },
+    { icon:"💎", name:"Kristall", type:"item" },{ icon:"👑", name:"Kronen-Rahmen", type:"cosmetic" }
+  ];
+  const DEFAULT_EASTER_REWARDS = [
+    { icon:"🥚", name:"Osterei", type:"item" },{ icon:"🐰", name:"Hase", type:"badge" },
+    { icon:"🌷", name:"Tulpe", type:"item" },{ icon:"🐣", name:"Küken", type:"item" },
+    { icon:"🌸", name:"Blüte", type:"item" },{ icon:"🧺", name:"Korb", type:"item" },
+    { icon:"🍬", name:"Bonbon", type:"item" },{ icon:"🦋", name:"Schmetterling", type:"item" },
+    { icon:"🌿", name:"Grün", type:"item" },{ icon:"🎀", name:"Schleife", type:"item" },
+    { icon:"✨", name:"Frühling", type:"item" },{ icon:"👑", name:"Osterkrone", type:"cosmetic" }
   ];
 
-  function adventYear() { return new Date().getFullYear(); }
-  function todayAdventDay() {
-    const d = new Date();
-    if (d.getMonth() !== 11) return 0; // only December
-    return Math.min(24, d.getDate());
-  }
-
-  window.openAdventDoor = async function(day) {
+  function giveReward(reward, source) {
     ensureInv();
-    const y = adventYear();
-    if (data.advent.year !== y) { data.advent = { opened:{}, year: y }; }
-    const maxDay = todayAdventDay();
-    if (!maxDay) { toast("Adventskalender nur im Dezember"); return; }
-    if (day > maxDay) { toast("Noch nicht so weit – Tag " + day + " ist noch verschlossen"); return; }
-    if (data.advent.opened[day]) { toast("Bereits geöffnet"); return; }
-
-    const cfg = (window.__sosCatalog.advent || {})[String(day)];
-    let reward;
-    if (cfg && cfg.itemId && window.__sosCatalog.items[cfg.itemId]) {
-      const it = window.__sosCatalog.items[cfg.itemId];
-      reward = { id: it.id, name: it.name, icon: it.icon || "🎁", type: it.type || "item", text: cfg.text || "" };
-    } else {
-      const def = DEFAULT_ADV_REWARDS[(day - 1) % DEFAULT_ADV_REWARDS.length];
-      reward = { id: "adv_" + y + "_" + day, name: def.name, icon: def.icon, type: def.type, text: "" };
-    }
-
-    data.advent.opened[day] = { at: Date.now(), reward: reward };
-    const inv = ensureInv();
+    const inv = data.inventory;
     if (reward.type === "cosmetic") {
-      inv.cosmetics[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: "advent" };
-      // register cosmetic if catalog
+      inv.cosmetics[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
       mergeCatalogCosmetics();
     } else if (reward.type === "badge") {
-      inv.badges[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: "advent" };
+      inv.badges[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
       data.badges = data.badges || { earned:{}, seen:{} };
       data.badges.earned = data.badges.earned || {};
       data.badges.earned[reward.id] = { at: Date.now(), title: reward.name, icon: reward.icon };
+    } else if (reward.type === "title") {
+      inv.titles = inv.titles || {};
+      inv.titles[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
+    } else if (reward.type === "theme") {
+      inv.themes = inv.themes || {};
+      inv.themes[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source };
     } else {
-      inv.items[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: "advent", qty: (inv.items[reward.id]?.qty || 0) + 1 };
+      inv.items[reward.id] = { id: reward.id, name: reward.name, icon: reward.icon, at: Date.now(), source: source, qty: (inv.items[reward.id]?.qty || 0) + 1 };
     }
+  }
+
+  function resolveDoorReward(kind, day, defaults) {
+    const map = kind === "easter" ? (window.__sosCatalog.easter || {}) : (window.__sosCatalog.advent || {});
+    const cfg = map[String(day)];
+    if (cfg && cfg.itemId && window.__sosCatalog.items[cfg.itemId]) {
+      const it = window.__sosCatalog.items[cfg.itemId];
+      return { id: it.id, name: it.name, icon: it.icon || "🎁", type: it.type || "item", text: cfg.text || "" };
+    }
+    const def = defaults[(day - 1) % defaults.length];
+    return { id: kind + "_" + day + "_" + (data.advent?.year || new Date().getFullYear()), name: def.name, icon: def.icon, type: def.type, text: "" };
+  }
+
+  window.openAdventDoor = async function(day) {
+    if (!isEventActive("advent")) { toast("Advent ist nicht aktiv – Owner kann es forcen"); return; }
+    ensureInv();
+    data.advent = data.advent || { opened:{}, year: new Date().getFullYear() };
+    const y = new Date().getFullYear();
+    if (data.advent.year !== y) data.advent = { opened:{}, year: y };
+    const maxDay = eventProgressDay("advent");
+    if (day > maxDay) { toast("Türchen " + day + " noch verschlossen (frei bis Tag " + maxDay + ")"); return; }
+    if (data.advent.opened[day]) { toast("Bereits geöffnet"); return; }
+    const reward = resolveDoorReward("advent", day, DEFAULT_ADV_REWARDS);
+    data.advent.opened[day] = { at: Date.now(), reward: reward };
+    giveReward(reward, "advent");
     try { if (typeof save === "function") save(); else persistLocalOnly(); } catch(e) {}
     try { syncInventoryCloud(); } catch(e) {}
-    toast((reward.icon || "🎁") + " " + reward.name + " freigeschaltet!");
+    toast((reward.icon || "🎁") + " " + reward.name);
     const rb = document.getElementById("adventRewardBody");
     const rt = document.getElementById("adventRewardToast");
-    if (rb) rb.innerHTML = '<span style="font-size:28px">' + escapeHTML(reward.icon||"🎁") + '</span> <strong>' +
-      escapeHTML(reward.name) + '</strong>' + (reward.text ? '<div class="text-slate-400 mt-1">' + escapeHTML(reward.text) + '</div>' : '');
+    if (rb) rb.innerHTML = '<span style="font-size:32px">' + escapeHTML(reward.icon||"🎁") + '</span> <strong>' + escapeHTML(reward.name) + '</strong>' + (reward.text ? '<div class="text-slate-400 mt-1">' + escapeHTML(reward.text) + '</div>' : '');
     if (rt) rt.style.display = "";
-    renderAdventPage();
-    renderInventoryPage();
+    renderAdventPage(); renderInventoryPage();
     try { renderCosmeticPicker(); } catch(e) {}
     try { renderBadgesGrid(); } catch(e) {}
   };
 
-  window.renderAdventPage = function() {
-    const grid = document.getElementById("adventGrid");
-    const meta = document.getElementById("adventMeta");
-    if (!grid) return;
+  window.openEasterDoor = async function(day) {
+    if (!isEventActive("easter")) { toast("Ostern ist nicht aktiv – Owner kann es forcen"); return; }
     ensureInv();
-    const y = adventYear();
-    if (data.advent.year !== y) data.advent = { opened:{}, year: y };
-    const maxDay = todayAdventDay();
-    const opened = Object.keys(data.advent.opened || {}).length;
+    data.easter = data.easter || { opened:{}, year: new Date().getFullYear() };
+    const y = new Date().getFullYear();
+    if (data.easter.year !== y) data.easter = { opened:{}, year: y };
+    const maxDay = eventProgressDay("easter");
+    if (day > maxDay) { toast("Nest " + day + " noch versteckt (frei bis " + maxDay + ")"); return; }
+    if (data.easter.opened[day]) { toast("Bereits gefunden"); return; }
+    const reward = resolveDoorReward("easter", day, DEFAULT_EASTER_REWARDS);
+    data.easter.opened[day] = { at: Date.now(), reward: reward };
+    giveReward(reward, "easter");
+    try { if (typeof save === "function") save(); else persistLocalOnly(); } catch(e) {}
+    try { syncInventoryCloud(); } catch(e) {}
+    toast((reward.icon || "🥚") + " " + reward.name);
+    const rb = document.getElementById("easterRewardBody");
+    const rt = document.getElementById("easterRewardToast");
+    if (rb) rb.innerHTML = '<span style="font-size:32px">' + escapeHTML(reward.icon||"🥚") + '</span> <strong>' + escapeHTML(reward.name) + '</strong>';
+    if (rt) rt.style.display = "";
+    renderEasterPage(); renderInventoryPage();
+  };
+
+  function renderDoorGrid(gridId, metaId, kind, total, defaults, openFnName, openedMap) {
+    const grid = document.getElementById(gridId);
+    const meta = document.getElementById(metaId);
+    if (!grid) return;
+    const active = isEventActive(kind);
+    const maxDay = eventProgressDay(kind);
+    const opened = openedMap || {};
+    const nOpen = Object.keys(opened).length;
     if (meta) {
-      if (!maxDay) meta.textContent = "Adventskalender ist im Dezember aktiv (1.–24.). Du kannst deine bisherigen Sammelstücke unter Inventar sehen.";
-      else meta.textContent = "Dezember " + y + " · Heute Tag " + maxDay + " · " + opened + "/24 geöffnet";
+      if (!active) meta.textContent = "Event inaktiv – Owner: Admin → Katalog → Event forcen.";
+      else meta.textContent = (kind === "advent" ? "Advent" : "Ostern") + " aktiv · frei bis Tag " + maxDay + " · " + nOpen + "/" + total + " geöffnet";
     }
     let html = "";
-    for (let d = 1; d <= 24; d++) {
-      const isOpen = !!(data.advent.opened && data.advent.opened[d]);
-      const locked = !maxDay || d > maxDay;
-      const rew = isOpen ? data.advent.opened[d].reward : null;
-      const label = isOpen ? (rew?.icon || "✓") : String(d);
-      const cls = isOpen ? "opacity-90" : locked ? "opacity-40" : "";
-      html += '<button type="button" class="btn ' + cls + '" style="min-height:72px;flex-direction:column;border-radius:16px;' +
-        (isOpen ? "border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)" : "") +
-        (d === maxDay && !isOpen ? "box-shadow:0 0 20px rgba(var(--accent-rgb),.35)" : "") +
-        '" onclick="openAdventDoor(' + d + ')" ' + (locked && !isOpen ? "disabled" : "") + '>' +
-        '<span style="font-size:22px;line-height:1">' + escapeHTML(label) + '</span>' +
-        (isOpen && rew ? '<span class="tiny mt-1 truncate" style="max-width:100%">' + escapeHTML(rew.name||"") + '</span>' : '') +
+    for (let d = 1; d <= total; d++) {
+      const isOpen = !!opened[d];
+      const locked = !active || d > maxDay;
+      const rew = isOpen ? opened[d].reward : null;
+      const cls = ["season-door"];
+      if (isOpen) cls.push("opened");
+      if (d === maxDay && !isOpen && active) cls.push("today");
+      html += '<button type="button" class="' + cls.join(" ") + '" onclick="' + openFnName + '(' + d + ')" ' +
+        (locked && !isOpen ? "disabled" : "") + '>' +
+        (isOpen
+          ? '<span class="door-icon">' + escapeHTML(rew?.icon || "✓") + '</span><span class="door-name">' + escapeHTML(rew?.name || "") + '</span>'
+          : '<span class="door-num">' + d + '</span>') +
         '</button>';
     }
     grid.innerHTML = html;
+  }
+
+  window.renderAdventPage = function() {
+    ensureInv();
+    data.advent = data.advent || { opened:{}, year: new Date().getFullYear() };
+    renderDoorGrid("adventGrid", "adventMeta", "advent", 24, DEFAULT_ADV_REWARDS, "openAdventDoor", data.advent.opened);
+  };
+  window.renderEasterPage = function() {
+    ensureInv();
+    data.easter = data.easter || { opened:{}, year: new Date().getFullYear() };
+    renderDoorGrid("easterGrid", "easterMeta", "easter", 12, DEFAULT_EASTER_REWARDS, "openEasterDoor", data.easter.opened);
   };
 
   window.renderInventoryPage = function() {
@@ -28667,7 +29127,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       if (!keys.length) { box.innerHTML = '<div class="tiny muted">' + empty + '</div>'; return; }
       box.innerHTML = keys.map(function(k){
         const it = map[k];
-        const canEquip = it && (id === "invCosmetics");
+        const canEquip = id === "invCosmetics";
         return '<div class="item" style="min-width:140px"><div class="item-main"><div class="item-title">' +
           escapeHTML((it.icon||"") + " " + (it.name||k)) + '</div><div class="item-meta">' +
           escapeHTML(it.source || "inventar") + (it.qty ? " · ×" + it.qty : "") + '</div></div>' +
@@ -28675,16 +29135,14 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
           '</div>';
       }).join("");
     }
-    fill("invCosmetics", inv.cosmetics, "Noch keine Cosmetics – Advent oder Owner-Vergabe.");
+    fill("invCosmetics", inv.cosmetics, "Noch keine Cosmetics.");
     fill("invBadges", inv.badges, "Noch keine Extra-Badges.");
     fill("invItems", inv.items, "Noch keine Items.");
   };
 
   function syncInventoryCloud() {
     if (!currentUser || previewMode) return;
-    try {
-      set(ref(db, "userInventory/" + currentUser.uid), data.inventory || {}).catch(function(){});
-    } catch(e) {}
+    try { set(ref(db, "userInventory/" + currentUser.uid), data.inventory || {}).catch(function(){}); } catch(e) {}
   }
 
   async function pullInventoryCloud() {
@@ -28711,50 +29169,120 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       showLoginError("Bitte gültige E-Mail für den Magic-Link eingeben.");
       return;
     }
-    try {
-      const actionCodeSettings = {
-        url: location.href.split("#")[0].split("?")[0],
-        handleCodeInApp: true
-      };
-      // file:// won't work – Firebase needs authorized domain
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      try { localStorage.setItem(LS_EMAIL, email); } catch(e) {}
-      showLoginError(""); // clear
-      const box = document.getElementById("loginError");
-      if (box) {
-        box.classList.remove("hidden");
-        box.style.background = "rgba(34,197,94,.12)";
-        box.style.borderColor = "rgba(34,197,94,.3)";
-        box.style.color = "#86efac";
-        box.textContent = "Magic-Link gesendet an " + email + " – Posteingang & Spam prüfen. Link öffnet SchoolOS und meldet dich an.";
-      }
-      toast("Magic-Link gesendet");
-    } catch (e) {
-      console.warn(e);
-      showLoginError(authErrorMessage(e) || "Magic-Link konnte nicht gesendet werden. Domain in Firebase Auth autorisieren.");
+
+    function getAuthDomain() {
+      try {
+        if (typeof firebaseConfig !== "undefined" && firebaseConfig.authDomain) return firebaseConfig.authDomain;
+      } catch (e) {}
+      return "livespiel-c0973.firebaseapp.com";
     }
+
+    function candidates() {
+      const list = [];
+      try {
+        const o = location.origin || "";
+        const path = location.pathname || "/";
+        if (/^https:\/\//i.test(o)) {
+          list.push(o + path);
+          list.push(o + "/");
+        } else if (/^http:\/\/(localhost|127\.0\.0\.1)/i.test(o)) {
+          list.push(o + path);
+          list.push(o + "/");
+        }
+      } catch (e) {}
+      const ad = getAuthDomain();
+      list.push("https://" + ad + "/");
+      list.push("https://" + ad + "/index.html");
+      return list.filter(function(u, i, a){ return u && a.indexOf(u) === i; });
+    }
+
+    const urls = candidates();
+    let lastErr = null;
+    let usedUrl = "";
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        await sendSignInLinkToEmail(auth, email, {
+          url: urls[i],
+          handleCodeInApp: false
+        });
+        usedUrl = urls[i];
+        lastErr = null;
+        break;
+      } catch (e) {
+        lastErr = e;
+        console.warn("magic try", urls[i], e?.code);
+        if (e?.code !== "auth/unauthorized-continue-uri" && e?.code !== "auth/invalid-continue-uri") break;
+      }
+    }
+
+    if (lastErr) {
+      const e = lastErr;
+      let msg = (typeof authErrorMessage === "function" ? authErrorMessage(e) : null) || e.message || "Fehler";
+      if (e?.code === "auth/unauthorized-continue-uri" || e?.code === "auth/invalid-continue-uri") {
+        const host = (location.hostname || "").replace(/^www\./, "");
+        msg = "Domain nicht freigeschaltet. Firebase → Authentication → Settings → Authorized domains: \"" +
+          (host || "deine-domain.de") + "\" und \"" + getAuthDomain() + "\" und localhost – nur Host, ohne https://. Außerdem Sign-in method → E-Mail-Link (passwordless) aktivieren.";
+      }
+      if (e?.code === "auth/operation-not-allowed") {
+        msg = "E-Mail-Link-Anmeldung in Firebase nicht aktiv. Authentication → Sign-in method → E-Mail/Password → „E-Mail-Link (passwortlose Anmeldung)“ einschalten.";
+      }
+      showLoginError(msg);
+      return;
+    }
+
+    try {
+      localStorage.setItem("sosMagicEmail", email);
+      localStorage.setItem("sosMagicLinkSentAt", String(Date.now()));
+    } catch (e) {}
+
+    const box = document.getElementById("loginError");
+    if (box) {
+      box.classList.remove("hidden");
+      box.style.background = "rgba(34,197,94,.12)";
+      box.style.borderColor = "rgba(34,197,94,.3)";
+      box.style.color = "#86efac";
+      box.innerHTML = "Magic-Link gesendet an <strong>" + email.replace(/</g,"") +
+        "</strong>.<br>Posteingang & Spam prüfen – Link öffnen meldet dich an." +
+        "<br><span style=\"opacity:.65;font-size:10px\">Continue-URL: " + usedUrl.replace(/</g,"") + "</span>";
+    }
+    toast("Magic-Link gesendet ✓");
   };
 
   async function completeMagicLinkIfPresent() {
     try {
-      if (!isSignInWithEmailLink(auth, location.href)) return false;
+      const href = location.href;
+      if (!isSignInWithEmailLink(auth, href)) return false;
       let email = null;
-      try { email = localStorage.getItem(LS_EMAIL); } catch(e) {}
-      if (!email) email = prompt("Bitte E-Mail zur Bestätigung des Magic-Links eingeben:");
+      try { email = localStorage.getItem("sosMagicEmail"); } catch(e) {}
+      if (!email) {
+        email = prompt("Magic-Link erkannt – bitte dieselbe E-Mail eingeben, an die der Link ging:");
+      }
       if (!email) return false;
-      email = email.trim().toLowerCase();
-      await signInWithEmailLink(auth, email, location.href);
-      try { localStorage.removeItem(LS_EMAIL); } catch(e) {}
-      // clean URL
-      try { history.replaceState({}, document.title, location.pathname + location.search.replace(/[?&]apiKey=[^&]*/g,"").replace(/^&/,"?")); } catch(e) {}
-      toast("Per Magic-Link angemeldet");
+      email = String(email).trim().toLowerCase();
+      await signInWithEmailLink(auth, email, href);
+      try {
+        localStorage.removeItem("sosMagicEmail");
+        localStorage.removeItem("sosMagicLinkSentAt");
+      } catch(e) {}
+      try {
+        const u = new URL(location.href);
+        ["apiKey","oobCode","mode","lang","continueUrl"].forEach(function(k){ u.searchParams.delete(k); });
+        history.replaceState({}, document.title, u.pathname + (u.search || ""));
+      } catch(e) {
+        try { history.replaceState({}, document.title, location.pathname); } catch(e2) {}
+      }
+      toast("Per Magic-Link angemeldet ✓");
       return true;
     } catch (e) {
-      console.warn("magic link complete", e);
-      try { showLoginError(authErrorMessage(e)); } catch(err) {}
+      console.warn("magic link complete", e?.code, e);
+      let msg = (typeof authErrorMessage === "function" ? authErrorMessage(e) : "") || "Magic-Link fehlgeschlagen";
+      if (e?.code === "auth/invalid-action-code") msg = "Link ungültig oder abgelaufen – bitte neu anfordern.";
+      if (e?.code === "auth/invalid-email") msg = "E-Mail stimmt nicht mit dem Link überein.";
+      try { showLoginError(msg); } catch(err) {}
       return false;
     }
   }
+
 
   /* ---------- 2FA Email Code ---------- */
   // Codes stored in RTDB; delivery: also send magic-style notice via toast + write pending.
@@ -28969,7 +29497,9 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
       const r = prev.apply(this, arguments);
       try {
         if (page === "advent") renderAdventPage();
+        if (page === "easter") renderEasterPage();
         if (page === "inventory") renderInventoryPage();
+        try { updateEventNavVisibility(); } catch(e) {}
       } catch(e) {}
       return r;
     };
@@ -29062,7 +29592,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')exit(true)});
 
   // Boot: magic link complete
   setTimeout(function(){ completeMagicLinkIfPresent(); }, 600);
-  setTimeout(function(){ loadSosCatalog(); }, 1200);
+  setTimeout(function(){ loadSosCatalog(); updateEventNavVisibility(); }, 1200);
   setTimeout(function(){
     patchShowPage();
     patchSetAdminTab();
